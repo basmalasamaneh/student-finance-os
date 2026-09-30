@@ -81,6 +81,19 @@ export function multiplyMoney(value: Money, quantity: number): Money {
   return money(toSafeMinor(BigInt(value.minor) * BigInt(quantity)), value.currency);
 }
 
+// Trips are outbound one-way journeys per week. A round trip doubles their
+// cost; 52 weeks / 12 months, rounded half-up in integral minor units.
+export function estimateMonthlyCommute(tripsPerWeek: number, costPerTrip: Money, roundTrip: boolean): Money {
+  assertMoney(costPerTrip);
+  if (!Number.isSafeInteger(tripsPerWeek) || tripsPerWeek < 0 || tripsPerWeek > 100 ||
+      costPerTrip.minor < 0 || typeof roundTrip !== "boolean") {
+    throw new RangeError("Invalid commute values");
+  }
+  const total = (BigInt(tripsPerWeek) * BigInt(costPerTrip.minor) *
+    (roundTrip ? 2n : 1n) * 52n + 6n) / 12n;
+  return money(toSafeMinor(total), costPerTrip.currency);
+}
+
 // Formatting only: Intl receives integral BigInts; fractional digits are inserted
 // from the minor-unit string, never from a floating-point monetary value.
 export function formatMoney(value: Money, locale = "ar"): string {

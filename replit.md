@@ -1,6 +1,6 @@
 # Student Financial OS
 
-Student finance workspace with a shared exact-money foundation and an API skeleton; Prompt 1 contains no financial data routes or DB schema.
+Student finance workspace with a shared exact-money foundation and app-owned email/password authentication plus persisted Prompt 2 onboarding. Prompts 3–15 remain excluded; no simulated balances or income postings are created by onboarding.
 
 ## Run & Operate
 
@@ -8,19 +8,22 @@ Student finance workspace with a shared exact-money foundation and an API skelet
 - `pnpm run typecheck` — libs first, then artifact checks; `pnpm run build` — checks and builds.
 - `pnpm --filter @workspace/finance-core run test` and `pnpm --filter @workspace/api-server run test` — foundation tests.
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate clients/Zod from OpenAPI.
-- `pnpm --filter @workspace/db run push` — apply DB schema changes in dev only (none in Prompt 1).
-- `DATABASE_URL` is required by the DB package when imported; API runtime requires workflow-provided `PORT`.
+- `pnpm --filter @workspace/db run push` — apply schema changes in development only, after reviewing changes; never use push-force for Prompt 2.
+- `DATABASE_URL` is required by the DB package when imported; API runtime requires workflow-provided `PORT` and `SESSION_SECRET` (at least 32 characters).
 
 ## Map & decisions
 
 - `lib/finance-core` owns Money parsing, integer-minor-unit arithmetic, and Arabic/western-digit formatting; ILS/USD use 2 decimals, JOD uses 3. Use its exported `money`, `parseMoney`, `assertMoney`, `addMoney`, `subtractMoney`, `multiplyMoney`, `formatMoney`, `formatNumber`, `formatPercent`, `formatDate`. Never use floating-point arithmetic for financial amounts.
-- `artifacts/api-server/src/lib/authorization.ts` holds deny-by-default helpers for a **trusted server-side** principal. Client roles and navigation previews are not identities. No auth provider is installed yet.
+- App-owned auth was explicitly selected instead of Auth0. `users`, hashed opaque `sessions`, and `login_attempts` are persisted in PostgreSQL. Scrypt hashes use random 32-byte salts, N=32768/r=8/p=1, 64-byte keys. Session tokens are HMAC-SHA256 hashed with `SESSION_SECRET` at rest, seven-day `httpOnly`, SameSite=Lax, Secure-in-production cookie; sign-in rotates and logout revokes the session. `authorization.ts` receives only the verified server-side session principal. Specimen role previews never authorize requests.
+- Every non-GET `/api` request requires a matching same-origin `Origin` header and `X-CSRF-Intent: 1` header; `customFetch` automatically supplies the CSRF header. API requests are same-origin with `/api` base URL. Generic invalid-credential errors, DB-backed attempt limits, no public admin signup/provisioning endpoint. Trusted operators can provision a new administrator with `pnpm --filter @workspace/api-server exec node scripts/provision-admin.mjs <email> '<display-name>'` in a private interactive terminal with DATABASE_URL configured; it prompts for a hidden password, refuses existing accounts, and never seeds credentials. Restrict command/database access to authorized operators.
+- Contract: `POST /api/auth/signup` `{name,email,password,role:"student"|"parent"}`, `POST /api/auth/login` `{email,password}`, `GET /api/auth/me`, `POST /api/auth/logout`; account `{id,name,email,role,onboardingCompleted}`. `GET /api/profile` returns `{name,email,role,onboardingCompleted,education?,residence?,commute?,incomes:[],scholarships:[]}`. `PUT /api/profile` merges supplied `{name?,education?,residence?,commute?}` and `POST /api/profile/complete` validates student requirements. `POST/PUT/DELETE /api/profile/incomes[/:id]` and `/api/profile/scholarships[/:id]` create/update/delete owner-scoped records. GET profile is the canonical list for both. Full types and allowed enums are in `lib/api-spec/openapi.yaml`; generated clients and Zod validators live in `lib/api-client-react` and `lib/api-zod`.
+- Profile money is **nonnegative integer minor units** `{minor,currency}` using finance-core ILS/USD (2 decimals), JOD (3 decimals). Commute estimate convention: trips/week × cost/trip × (2 if roundTrip) × 52 / 12, half-up rounding in minor units; overflow fails validation instead of losing precision. `manualEstimate=true` allows override; university/campus are only required for university students. Signup IP buckets count successes and failures (10 attempts per 15 minutes, 10th blocked), with old DB buckets pruned periodically. No money or income is posted to any account. Email verification/password reset are not operational until a mail provider is configured; UI must state this honestly and not claim mail was sent.
 - `artifacts/api-server/src/middlewares/errors.ts` emits sanitized consistent errors after the existing health router. Unknown errors must not leak internals.
 - `lib/db` is the DB source, `lib/api-spec/openapi.yaml` the contract, `lib/api-zod` and `lib/api-client-react` generated libraries. Preserve them until a feature explicitly changes them.
 - Implement future features contract-first, validate inputs and outputs, and authorize per resource; see `docs/architecture.md` for boundaries and suggested feature-module structure.
 
 ## Constraints
 
-Prompt 1 only: no DB tables, seeds, finance endpoints, real login, or role-based client authorization. Maintain strict integer-money validation and sanitized error messages. Node 24, pnpm workspaces, TypeScript, Express 5, PostgreSQL/Drizzle, Zod and Orval are the existing stack.
+Prompt 2 only: no bank/wallet/finance endpoints, seeded credentials, or family relationship features. Maintain strict integer-money validation and sanitized error messages. Node 24, pnpm workspaces, TypeScript, Express 5, PostgreSQL/Drizzle, Zod and Orval are the existing stack.
 
 Approved UI direction: calm, spacious, premium student fintech rather than a generic dashboard. The gold redesign supersedes the original indigo palette: signature gold `#D4A72C`, deep navy `#111827`, warm canvas `#FAF9F5`, white, primary text `#172033`, slate `#64748B`, calm green `#22A06B`, and red `#EF4444` for errors/critical or destructive states. Use semantic tokens and accessible derived shades; gold is a restrained interaction accent, not a universal fill. Inter + Noto Sans Arabic, 4px spacing, English/Arabic LTR/RTL, Light/Dark/System, WCAG 2.2 AA focus and reduced motion remain foundational constraints. Prefer open hierarchy/dividers over nested cards, gratuitous gradients, and decorative charts. A financial-home reference is permitted only as explicitly labeled design specimens with centralized static fixtures; never represent it as real financial activity or enable financial actions.

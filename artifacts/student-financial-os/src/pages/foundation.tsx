@@ -96,7 +96,7 @@ const GROUPS: { id: string; key: TranslationKey; body: TranslationKey }[] = [
 /* ---------- Gallery layout primitives (page-local composition, not new design-system components) ---------- */
 
 function Group({ index, children }: { index: number; children: ReactNode }) {
-  const { t, locale } = useI18n();
+  const { t, locale, lang } = useI18n();
   const g = GROUPS[index];
   return (
     <section id={g.id} aria-labelledby={`${g.id}-title`} className="scroll-mt-20 pb-6 pt-14 first:pt-2 md:pt-20">
@@ -624,7 +624,7 @@ function CrumbsSpecimen() {
 /* ---------- Page ---------- */
 
 export default function FoundationPage() {
-  const { t, locale } = useI18n();
+  const { t, locale, lang } = useI18n();
   const [hidden, setHidden] = useState(false);
   const [progress, setProgress] = useState(64);
   const p = progress / 100;
@@ -639,6 +639,7 @@ export default function FoundationPage() {
   return (
     <Page className="max-w-6xl">
       <PageHeader eyebrow={t('fd.eyebrow')} title={t('fd.title')} lede={t('fd.lede')} />
+      <Link href="/foundation/home" className="mb-8 inline-flex min-h-11 items-center rounded-lg border border-divider px-4 text-sm font-semibold text-gold-ink hover:bg-primary-soft">{lang === 'ar' ? 'عرض نموذج الواجهة المالية (أمثلة فقط)' : 'View financial home specimen (examples only)'}</Link>
 
       <div className="grid-cols-[minmax(0,1fr)] grid gap-10 xl:grid-cols-[10rem_minmax(0,1fr)] xl:gap-14">
         <nav aria-label={t('fd.toc')} className="min-w-0 xl:sticky xl:top-10 xl:self-start">

@@ -1,20 +1,22 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useI18n } from '@/features/i18n/i18n-provider';
-import { usePreview } from '@/features/preferences/preview-provider';
+import { useAccount, AccountMenu } from '@/features/auth/account';
+import { getGetProfileQueryKey, useGetProfile } from '@workspace/api-client-react';
 import { useTheme, type ThemePreference } from '@/features/theme/theme-provider';
 import { Menu } from 'lucide-react';
-import { GROUP_LABEL, groupedForRole, isActive, itemsForRole, mobileItemsForRole, type NavItem, type NavRole } from '@/features/navigation/nav-config';
+import { GROUP_LABEL, groupedForRole, isActive, itemsForRole, mobileItemsForRole, type NavItem } from '@/features/navigation/nav-config';
 import type { TranslationKey } from '@/features/i18n/dictionary';
-import { LanguageToggle, RolePreviewMenu, ThemeMenu } from './shell-controls';
+import { LanguageToggle, ThemeMenu } from './shell-controls';
 import { cn } from '@/lib/utils';
 
 function useLabel() {
   const { t } = useI18n();
-  const { mode } = usePreview();
+  const { data } = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), staleTime: 30_000 } });
+  const mode = data?.education?.studentType;
   return (item: NavItem) => t((mode === 'school' && item.schoolLabelKey ? item.schoolLabelKey : item.labelKey) as TranslationKey);
 }
 
@@ -53,7 +55,7 @@ function PendingDot({ item }: { item: NavItem }) {
 /** Desktop (≥1024px): light sidebar — brand, grouped nav with gold selection bar, preview profile + controls. */
 function Sidebar() {
   const { t } = useI18n();
-  const { role } = usePreview();
+  const { role } = useAccount();
   const [location] = useLocation();
   const label = useLabel();
   return (
@@ -93,7 +95,7 @@ function Sidebar() {
         ))}
       </nav>
       <div className="flex flex-col gap-2 border-t border-sidebar-border p-3">
-        <RolePreviewMenu appearance="profile" />
+        <AccountMenu />
         <div className="flex items-center justify-between gap-1 px-1">
           <span className="text-xs text-muted-foreground">{t('shell.build')}</span>
           <div className="flex items-center">
@@ -109,7 +111,7 @@ function Sidebar() {
 /** Tablet (768–1023px): icon rail with tooltips — its own layout, not a squeezed sidebar. */
 function Rail() {
   const { t, dir } = useI18n();
-  const { role } = usePreview();
+  const { role } = useAccount();
   const [location] = useLocation();
   const label = useLabel();
   return (
@@ -145,7 +147,7 @@ function Rail() {
 /** Resolves the current destination title for the mobile header. */
 function usePageTitle() {
   const { t } = useI18n();
-  const { role } = usePreview();
+  const { role } = useAccount();
   const [location] = useLocation();
   const label = useLabel();
   const match = itemsForRole(role).find((i) => isActive(i, location));
@@ -168,7 +170,7 @@ function TopBar() {
           {title}
         </p>
         <div className="ms-auto hidden items-center gap-1 md:flex">
-          <RolePreviewMenu />
+          <AccountMenu compact />
           <LanguageToggle />
           <ThemeMenu />
         </div>
@@ -205,30 +207,54 @@ function Segmented({ label, value, options, onChange, testId }: { label: string;
   );
 }
 
-/** Mobile "More": secondary destinations + preferences (language, theme, role preview). */
+/** Mobile "More": secondary destinations, verified account and preferences. */
 function MoreSheet() {
   const { t, lang, setLang } = useI18n();
-  const { role, setRole } = usePreview();
+  const { role } = useAccount();
   const { theme, setTheme } = useTheme();
   const [location] = useLocation();
   const label = useLabel();
   const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setOpen(false), [location]);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButton.current?.focus();
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener('keydown', escape);
+      trigger.current?.focus();
+    };
+  }, [open]);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground md:hidden" aria-label={t('a11y.openMenu')} data-testid="button-header-more">
-          <Menu aria-hidden />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-[88dvh] overflow-y-auto rounded-t-2xl px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3">
+    <>
+      <Button ref={trigger} type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground md:hidden" aria-label={t('a11y.openMenu')} aria-controls="sfos-mobile-more" aria-expanded={open} onClick={() => setOpen(value => !value)} data-testid="button-header-more">
+        <Menu aria-hidden />
+      </Button>
+      {open && createPortal(<>
+        <div className="fixed inset-0 z-[70] bg-black/60 md:hidden" aria-hidden onClick={() => setOpen(false)} />
+        <div id="sfos-mobile-more" role="dialog" aria-modal="true" aria-labelledby="sfos-mobile-more-title" onKeyDown={(event) => {
+          if (event.key !== 'Tab') return;
+          const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select'));
+          const first = focusable[0], last = focusable.at(-1);
+          if (!first || !last) return;
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }} className="fixed inset-x-0 bottom-0 z-[71] max-h-[88dvh] overflow-y-auto rounded-t-2xl border-t border-divider bg-background px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 shadow-xl md:hidden">
         <span aria-hidden className="mx-auto mb-3 block h-1 w-10 rounded-full bg-input" />
-        <SheetHeader className="text-start">
-          <SheetTitle className="type-title">{t('nav.more')}</SheetTitle>
-          <SheetDescription className="type-caption">{t('a11y.moreNav')}</SheetDescription>
-        </SheetHeader>
+        <div className="text-start">
+          <h2 id="sfos-mobile-more-title" className="type-title">{t('nav.more')}</h2>
+          <p className="type-caption">{t('a11y.moreNav')}</p>
+        </div>
         <nav aria-label={t('a11y.moreNav')} className="mt-2">
           {groupedForRole(role).map(([group, items]) => (
             <div key={group} className="border-t border-divider py-2 first:border-t-0">
@@ -272,31 +298,23 @@ function MoreSheet() {
             options={(['light', 'dark', 'system'] as const).map((o) => ({ value: o, label: t(`theme.${o}`) }))}
             testId="option-sheet-theme"
           />
-          <div className="flex flex-col gap-1">
-            <Segmented
-              label={t('preview.label')}
-              value={role}
-              onChange={(v) => setRole(v as NavRole)}
-              options={(['student', 'parent', 'admin'] as const).map((r) => ({ value: r, label: t(`role.${r}`) }))}
-              testId="option-sheet-role"
-            />
-            <p className="type-caption text-muted-foreground">{t('preview.hint')}</p>
-          </div>
+          <AccountMenu />
         </section>
         <div className="mt-4">
-          <Button variant="secondary" size="lg" className="w-full" onClick={() => setOpen(false)} data-testid="button-close-more">
+          <Button ref={closeButton} type="button" variant="secondary" size="lg" className="w-full" onClick={() => setOpen(false)} data-testid="button-close-more">
             {t('a11y.close')}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </>, document.body)}
+    </>
   );
 }
 
 /** Mobile (<768px): five primary destinations. Active = gold pill behind icon + bold label + aria-current. */
 function BottomNav() {
   const { t } = useI18n();
-  const { role } = usePreview();
+  const { role } = useAccount();
   const [location] = useLocation();
   const label = useLabel();
   const primary = mobileItemsForRole(role);

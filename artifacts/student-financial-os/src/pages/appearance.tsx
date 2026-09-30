@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useTheme } from '@/features/theme/theme-provider';
-import { usePreview } from '@/features/preferences/preview-provider';
 import { cn } from '@/lib/utils';
 
 /** Accessible segmented radio group — reused for every preference. */
@@ -37,7 +36,6 @@ function Choice<T extends string>({ name, value, options, onChange }: { name: st
 export default function AppearancePage() {
   const { t, lang, setLang, resetLang } = useI18n();
   const { theme, setTheme, resolved, motion, setMotion, reset: resetTheme } = useTheme();
-  const { role, setRole, mode, setMode, reset: resetPreview } = usePreview();
   const { toast } = useToast();
 
   return (
@@ -83,31 +81,6 @@ export default function AppearancePage() {
         />
       </Section>
 
-      <Section id="preview" title={t('ap.preview')} description={t('ap.previewBody')}>
-        <Choice
-          name={t('ap.preview')}
-          value={role}
-          onChange={setRole}
-          options={[
-            { value: 'student', label: t('role.student') },
-            { value: 'parent', label: t('role.parent') },
-            { value: 'admin', label: t('role.admin') },
-          ]}
-        />
-      </Section>
-
-      <Section id="mode" title={t('ap.mode')} description={t('ap.modeBody')}>
-        <Choice
-          name={t('ap.mode')}
-          value={mode}
-          onChange={setMode}
-          options={[
-            { value: 'university', label: t('mode.university') },
-            { value: 'school', label: t('mode.school') },
-          ]}
-        />
-      </Section>
-
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-divider pt-8">
         <p className="inline-flex items-center gap-2 type-label font-normal text-muted-foreground">
           <Check className="size-4 text-success" aria-hidden />
@@ -118,7 +91,6 @@ export default function AppearancePage() {
           onClick={() => {
             resetLang();
             resetTheme();
-            resetPreview();
             toast({ title: t('ap.resetDone'), description: t('ap.resetDoneBody') });
           }}
           data-testid="button-reset-preferences"

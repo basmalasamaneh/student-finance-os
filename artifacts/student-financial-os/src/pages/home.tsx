@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useTheme } from '@/features/theme/theme-provider';
 import { usePreview } from '@/features/preferences/preview-provider';
+import { RolePreviewMenu } from '@/components/shell/shell-controls';
 import { HOME_SPECIMEN as S } from '@/features/specimens/home-specimen';
 import { formatDate, formatMoney } from '@/lib/money';
 
@@ -48,6 +49,9 @@ export default function HomePage() {
           <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
         </Link>
       </aside>
+      <div className="mb-5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <span>{t('preview.hint')}</span><RolePreviewMenu />
+      </div>
 
       {/* Greeting + dominant balance */}
       <header className="stagger flex flex-col gap-5 pb-8 md:gap-8 md:pb-14">

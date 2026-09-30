@@ -12,7 +12,7 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, req, res, _nex
   const result = toPublicError(error, requestId);
   if (result.status >= 500) {
     req.log.error({ err: error }, "Unhandled request error");
-  } else {
+  } else if (!(result.status === 401 && req.originalUrl?.split("?")[0] === "/api/auth/me")) {
     req.log.warn({ code: result.body.error.code }, "Request rejected");
   }
   if (res.headersSent) return;

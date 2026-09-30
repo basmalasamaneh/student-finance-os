@@ -1,3 +1,4 @@
 - [Preview JSX instrumentation](preview-jsx.md) — explicit generic JSX arguments can break development preview despite a passing production build.
 - [Visual token verification](visual-token-verification.md) — a passing CSS build does not prove Tailwind semantic tokens reach the browser.
 - [Nested responsive layouts](nested-responsive.md) — use available container width, not viewport breakpoints, inside the shell and gallery.
+- [Onboarding completion navigation](completion-navigation.md) — update verified-session cache before navigating after completion.

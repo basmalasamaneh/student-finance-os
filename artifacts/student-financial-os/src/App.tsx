@@ -11,6 +11,10 @@ import { ThemeProvider } from '@/features/theme/theme-provider';
 import { PreviewProvider } from '@/features/preferences/preview-provider';
 import { NAV_ITEMS } from '@/features/navigation/nav-config';
 import HomePage from '@/pages/home';
+import AccountHome from '@/pages/account-home';
+import AuthPage from '@/pages/auth';
+import OnboardingPage from '@/pages/onboarding';
+import { SessionGate } from '@/features/auth/account';
 import FoundationPage from '@/pages/foundation';
 import AppearancePage from '@/pages/appearance';
 import NotImplementedPage from '@/pages/not-implemented';
@@ -26,7 +30,10 @@ function Router() {
   return (
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/" component={HomePage} />
+        <Route path="/" component={AccountHome} />
+        <Route path="/onboarding"><OnboardingPage /></Route>
+        <Route path="/profile"><OnboardingPage editing /></Route>
+        <Route path="/foundation/home" component={HomePage} />
         <Route path="/foundation" component={FoundationPage} />
         <Route path="/appearance" component={AppearancePage} />
         {FUTURE_ROUTES.map((item) => (
@@ -58,10 +65,15 @@ function App() {
             <QueryClientProvider client={queryClient}>
               <TooltipProvider>
                 <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-                  {/* Shell sits outside the routed boundary so it survives a page crash. */}
-                  <AppShell>
-                    <Router />
-                  </AppShell>
+                  <SessionGate>
+                    <Switch>
+                      <Route path="/login"><AuthPage signup={false} /></Route>
+                      <Route path="/signup"><AuthPage signup /></Route>
+                      <Route>
+                        <AppShell><Router /></AppShell>
+                      </Route>
+                    </Switch>
+                  </SessionGate>
                 </WouterRouter>
                 <Toaster />
               </TooltipProvider>

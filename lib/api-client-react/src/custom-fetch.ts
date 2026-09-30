@@ -336,6 +336,9 @@ export async function customFetch<T = unknown>(
   }
 
   const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    headers.set("X-CSRF-Intent", "1");
+  }
 
   if (
     typeof init.body === "string" &&

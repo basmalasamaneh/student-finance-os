@@ -1,4 +1,4 @@
-export type ErrorCode = "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "INTERNAL_ERROR";
+export type ErrorCode = "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "INTERNAL_ERROR" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "RATE_LIMITED";
 
 const publicErrors: Record<ErrorCode, { status: number; message: string }> = {
   BAD_REQUEST: { status: 400, message: "Invalid request" },
@@ -6,6 +6,9 @@ const publicErrors: Record<ErrorCode, { status: number; message: string }> = {
   FORBIDDEN: { status: 403, message: "Access denied" },
   NOT_FOUND: { status: 404, message: "Resource not found" },
   INTERNAL_ERROR: { status: 500, message: "Internal server error" },
+  INVALID_CREDENTIALS: { status: 401, message: "Invalid email or password" },
+  EMAIL_TAKEN: { status: 409, message: "Email already registered" },
+  RATE_LIMITED: { status: 429, message: "Too many attempts. Try again later" },
 };
 
 export class ApiError extends Error {
