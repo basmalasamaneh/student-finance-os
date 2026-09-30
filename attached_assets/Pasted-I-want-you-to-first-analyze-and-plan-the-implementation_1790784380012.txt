@@ -1,0 +1,63 @@
+I want you to first analyze and plan the implementation of the Student Financial OS based on the complete product specification below.
+
+IMPORTANT: This is a PLANNING STEP ONLY.
+
+Do NOT start implementing, coding, deleting, replacing, or modifying anything yet.
+
+First inspect the existing Replit project and understand its current structure, technologies, components, routes, database/data layer, and existing functionality.
+
+Then create a detailed implementation plan covering:
+
+1. Overall architecture
+2. Existing project structure and what can be reused
+3. Recommended frontend structure
+4. Backend/API structure
+5. Database/data model and relationships
+6. Authentication and role-based authorization
+7. Student, parent, and admin flows
+8. University, campus, and campus-service data structure
+9. Wallet and transaction system
+10. Budget, income, housing, transportation, scholarship, and financial planning logic
+11. Savings goals
+12. Parent/student family features and privacy permissions
+13. Upcoming payments and financial forecasting
+14. Simulated campus payment flow
+15. AI assistant and "Can I Afford This?" logic
+16. English/Arabic localization and RTL/LTR support
+17. Light/Dark/System themes
+18. Responsive mobile/tablet/desktop structure
+19. Notifications
+20. Admin management
+21. Feature dependencies and implementation order
+22. Potential technical risks and edge cases
+23. Testing and QA strategy
+
+The most important requirement is that this must become a FUNCTIONAL prototype backed by a REAL PERSISTENT APPLICATION DATA LAYER / DATABASE.
+
+Seeded demo data is allowed, but major features must be dynamic and interconnected. Do NOT implement the product as static mock screens.
+
+For example:
+
+* A parent allowance must actually update the student's balance, transaction history, income, forecast, and dashboard.
+* A campus purchase must actually deduct money, create a transaction, update the relevant budget, monthly spending, forecast, and dashboard.
+* A savings contribution must update the balance, transaction, goal progress, and financial plan.
+* University/campus/service data must come from the application's data layer.
+* Permissions must actually be enforced.
+
+External real-world financial integrations such as banks, digital wallets, QR payments, and real university payment systems should remain clearly marked as "Coming soon" or simulated.
+
+Do not assume real-world tuition, transportation, cafeteria, or scholarship prices. These should be configurable demo data.
+
+At the end, give me:
+
+* the proposed architecture
+* database schema/entities and relationships
+* route/page structure
+* API structure
+* implementation dependencies
+* recommended implementation order
+* what already exists and can be reused
+* what needs to be created
+* any conflicts between the current project and this specification
+
+Do not make changes yet. I want to review the plan first.
