@@ -1,15 +1,34 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Landmark, Loader2, PiggyBank, Trash2 } from 'lucide-react';
-import { Page, PageHeader, Section, SpecimenTag } from '@/components/layout/page';
+import {
+  ArrowLeftRight,
+  Bell,
+  CalendarClock,
+  Eye,
+  Goal,
+  Home,
+  Landmark,
+  Loader2,
+  MoreHorizontal,
+  PiggyBank,
+  Search,
+  Settings,
+  Trash2,
+  Wallet,
+  Map as MapIcon,
+} from 'lucide-react';
+import { Link } from 'wouter';
+import { Page, PageHeader, SpecimenTag } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
@@ -24,17 +43,23 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
+import { Notice, RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { ProgressMeter } from '@/components/finance/progress-meter';
 import { AccountSurface } from '@/components/finance/account-surface';
 import { TransactionRow } from '@/components/finance/transaction-row';
 import { StatusBadge } from '@/components/finance/status-badge';
+import { BalanceDisplay } from '@/components/finance/balance-display';
+import { FinancialSummary } from '@/components/finance/financial-summary';
+import { UpcomingPayment } from '@/components/finance/upcoming-payment';
 import { useI18n } from '@/features/i18n/i18n-provider';
-import { CURRENCIES, formatDate, formatNumber, money, parseMoney, type Currency } from '@/lib/money';
+import { CURRENCIES, formatDate, formatMoney, formatNumber, money, parseMoney, type Currency } from '@/lib/money';
 import type { TranslationKey } from '@/features/i18n/dictionary';
+import { cn } from '@/lib/utils';
 
 /*
  * SPECIMEN VALUES — fixed constants used only to verify component formatting.
@@ -45,40 +70,85 @@ const SPECIMEN = {
   inflow: money(25000),
   outflow: money(-1875),
   pending: money(-4200),
+  planned: money(60000),
+  projected: money(41530),
+  neutral: money(0),
   account: money(64210),
   account2: money(31980, 'USD'),
+  upcoming: money(-4990),
+  savedOf: { saved: money(186000), target: money(420000) },
+  budgetOf: { spent: money(131240), plan: money(210000) },
   perCurrency: { ILS: money(123456, 'ILS'), USD: money(123456, 'USD'), JOD: money(123456, 'JOD') },
   date: new Date(Date.UTC(2025, 2, 14, 9, 30)),
+  due: new Date(Date.UTC(2025, 2, 30, 9, 0)),
 } as const;
 
-const TOC: { id: string; key: TranslationKey }[] = [
-  { id: 'type', key: 'fd.type' },
-  { id: 'color', key: 'fd.color' },
-  { id: 'spacing', key: 'fd.spacing' },
-  { id: 'actions', key: 'fd.actions' },
-  { id: 'forms', key: 'fd.forms' },
-  { id: 'states', key: 'fd.states' },
-  { id: 'badges', key: 'fd.badges' },
-  { id: 'money', key: 'fd.money' },
-  { id: 'progress', key: 'fd.progress' },
-  { id: 'account', key: 'fd.account' },
-  { id: 'txn', key: 'fd.txn' },
-  { id: 'overlays', key: 'fd.overlays' },
+const GROUPS: { id: string; key: TranslationKey; body: TranslationKey }[] = [
+  { id: 'foundations', key: 'g.foundations', body: 'g.foundationsBody' },
+  { id: 'actions', key: 'g.actions', body: 'g.actionsBody' },
+  { id: 'inputs', key: 'g.inputs', body: 'g.inputsBody' },
+  { id: 'financial', key: 'g.financial', body: 'g.financialBody' },
+  { id: 'feedback', key: 'g.feedback', body: 'g.feedbackBody' },
+  { id: 'overlays', key: 'g.overlays', body: 'g.overlaysBody' },
+  { id: 'navigation', key: 'g.navigation', body: 'g.navigationBody' },
 ];
 
-function Swatch({ token, label, fg }: { token: string; label: string; fg?: string }) {
+/* ---------- Gallery layout primitives (page-local composition, not new design-system components) ---------- */
+
+function Group({ index, children }: { index: number; children: ReactNode }) {
+  const { t, locale } = useI18n();
+  const g = GROUPS[index];
   return (
-    <li className="flex items-center gap-3 py-2.5">
-      <span className="size-10 shrink-0 rounded-lg border border-divider" style={{ background: `hsl(var(${token}))` }} aria-hidden>
-        {fg ? <span className="grid size-full place-items-center text-xs font-semibold" style={{ color: `hsl(var(${fg}))` }}>Aa</span> : null}
+    <section id={g.id} aria-labelledby={`${g.id}-title`} className="scroll-mt-20 pb-6 pt-14 first:pt-2 md:pt-20">
+      <header className="flex flex-col gap-2 pb-4">
+        <span className="tabular text-[13px] font-medium text-gold-ink" aria-hidden>
+          <bdi>{formatNumber(index + 1, locale).padStart(2, '0')}</bdi>
+        </span>
+        <h2 id={`${g.id}-title`} className="text-2xl font-semibold tracking-[-0.02em] md:text-[28px]">{t(g.key)}</h2>
+        <p className="max-w-xl text-[15px] leading-7 text-muted-foreground">{t(g.body)}</p>
+      </header>
+      <div>{children}</div>
+    </section>
+  );
+}
+
+function Specimen({ id, title, description, aside, children }: { id?: string; title: string; description?: string; aside?: ReactNode; children: ReactNode }) {
+  return (
+    <div id={id} className="grid scroll-mt-20 gap-5 border-t border-divider py-8 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] md:gap-10">
+      <div className="flex flex-col gap-1.5">
+        <h3 className="text-[15px] font-semibold">{title}</h3>
+        {description ? <p className="text-[13px] leading-5 text-muted-foreground">{description}</p> : null}
+        {aside}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="grid items-center gap-2 py-3 sm:grid-cols-[7rem_1fr] sm:gap-6">
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <div className="flex flex-wrap items-center gap-3">{children}</div>
+    </div>
+  );
+}
+
+function Swatch({ token, label, ink }: { token: string; label: string; ink?: boolean }) {
+  return (
+    <li className="flex items-center gap-3 py-2">
+      <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-divider" style={{ background: ink ? 'transparent' : `hsl(var(${token}))` }} aria-hidden>
+        {ink ? <span className="text-base font-semibold" style={{ color: `hsl(var(${token}))` }}>Aa</span> : null}
       </span>
-      <div className="flex flex-col">
+      <div className="flex min-w-0 flex-col">
         <span className="text-sm font-medium">{label}</span>
         <code dir="ltr" className="text-start font-mono text-xs text-muted-foreground">{token}</code>
       </div>
     </li>
   );
 }
+
+/* ---------- Actions ---------- */
 
 function ActionsSpecimen() {
   const { t } = useI18n();
@@ -94,24 +164,56 @@ function ActionsSpecimen() {
     }, 2000);
   };
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col divide-y divide-divider">
+      <Row label={t('a.row.primary')}>
         <Button onClick={run} disabled={busy} aria-busy={busy} data-testid="button-specimen-primary">
           {busy ? <Loader2 className="animate-spin" aria-hidden /> : null}
           {busy ? t('fd.act.loading') : t('fd.act.primary')}
         </Button>
+      </Row>
+      <Row label={t('a.row.secondary')}>
         <Button variant="secondary" onClick={() => toast({ title: t('fd.act.secondary'), description: t('spec.note') })} data-testid="button-specimen-secondary">
           {t('fd.act.secondary')}
         </Button>
+        <Button variant="outline" onClick={() => toast({ title: t('fd.act.secondary'), description: t('spec.note') })} data-testid="button-specimen-outline">
+          {t('fd.act.secondary')}
+        </Button>
+      </Row>
+      <Row label={t('a.row.tertiary')}>
         <Button variant="ghost" onClick={() => toast({ title: t('fd.act.tertiary'), description: t('spec.note') })} data-testid="button-specimen-tertiary">
           {t('fd.act.tertiary')}
         </Button>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="link" className="px-0" onClick={() => toast({ title: t('fd.act.tertiary'), description: t('spec.note') })} data-testid="button-specimen-link">
+          {t('fd.act.tertiary')}
+        </Button>
+      </Row>
+      <Row label={t('a.row.destructive')}>
         <DestructiveConfirm />
+      </Row>
+      <Row label={t('a.row.icon')}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="secondary" size="icon" aria-label={t('a.iconLabel')} onClick={() => toast({ title: t('a.iconLabel'), description: t('spec.note') })} data-testid="button-specimen-icon">
+              <Eye aria-hidden />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('a.iconLabel')}</TooltipContent>
+        </Tooltip>
+        <Button variant="ghost" size="icon" aria-label={t('ov.menuOpen')} onClick={() => toast({ title: t('ov.menuOpen'), description: t('spec.note') })} data-testid="button-specimen-icon-ghost">
+          <MoreHorizontal aria-hidden />
+        </Button>
+      </Row>
+      <Row label={t('a.row.loading')}>
+        <Button disabled aria-busy data-testid="button-specimen-loading">
+          <Loader2 className="animate-spin" aria-hidden />
+          {t('fd.act.loading')}
+        </Button>
+      </Row>
+      <Row label={t('a.row.disabled')}>
         <Button disabled data-testid="button-specimen-disabled">{t('fd.act.disabled')}</Button>
-      </div>
-      <p className="text-xs text-muted-foreground">{t('fd.act.simulate')}</p>
+        <Button variant="secondary" disabled>{t('fd.act.disabled')}</Button>
+      </Row>
+      <p className="pt-4 text-[13px] text-muted-foreground">{t('fd.act.simulate')}</p>
     </div>
   );
 }
@@ -124,8 +226,8 @@ function DestructiveConfirm({ label }: { label?: string }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button ref={triggerRef} variant="destructive" data-testid="button-specimen-destructive">
-          <Trash2 aria-hidden />
+        <Button ref={triggerRef} variant={label ? 'secondary' : 'destructive'} data-testid={label ? 'button-open-dialog' : 'button-specimen-destructive'}>
+          {label ? null : <Trash2 aria-hidden />}
           {label ?? t('fd.act.destructive')}
         </Button>
       </AlertDialogTrigger>
@@ -154,6 +256,8 @@ function DestructiveConfirm({ label }: { label?: string }) {
     </AlertDialog>
   );
 }
+
+/* ---------- Inputs ---------- */
 
 const AMOUNT_RE = /^\d{1,9}(\.\d{1,2})?$/;
 
@@ -185,7 +289,7 @@ function FormSpecimen() {
             <FormItem>
               <FormLabel>{t('fd.form.name')}</FormLabel>
               <FormControl>
-                <Input {...field} className="h-11" data-testid="input-specimen-label" />
+                <Input {...field} data-testid="input-specimen-label" />
               </FormControl>
               <FormDescription>{t('fd.form.nameHint')}</FormDescription>
               <FormMessage />
@@ -200,7 +304,7 @@ function FormSpecimen() {
               <FormItem>
                 <FormLabel>{t('fd.form.amount')}</FormLabel>
                 <FormControl>
-                  <Input {...field} inputMode="decimal" dir="ltr" className="tabular h-11 text-start" placeholder="0.00" data-testid="input-specimen-amount" />
+                  <Input {...field} inputMode="decimal" dir="ltr" className="tabular text-start text-[17px] font-medium" placeholder="0.00" data-testid="input-specimen-amount" />
                 </FormControl>
                 <FormDescription>{t('fd.form.amountHint')}</FormDescription>
                 <FormMessage />
@@ -215,7 +319,7 @@ function FormSpecimen() {
                 <FormLabel>{t('fd.form.currency')}</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
-                    <SelectTrigger className="h-11" data-testid="select-specimen-currency">
+                    <SelectTrigger className="h-11 rounded-[10px] bg-surface" data-testid="select-specimen-currency">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
@@ -235,16 +339,12 @@ function FormSpecimen() {
           </span>
           {parsed ? (
             <span className="flex flex-col items-end">
-              <MoneyDisplay value={parsed} size="sm" testId="text-parsed-amount" />
+              <MoneyDisplay value={parsed} size="md" testId="text-parsed-amount" />
               <span className="tabular text-xs text-muted-foreground">{t('fd.form.minor', { minor: formatNumber(parsed.minor, 'en-US') })}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="specimen-disabled" className="text-muted-foreground">{t('fd.form.disabled')}</Label>
-          <Input id="specimen-disabled" disabled value={t('fd.act.disabled')} readOnly className="h-11" />
         </div>
         <div>
           <Button type="submit" data-testid="button-specimen-validate">{t('fd.form.submit')}</Button>
@@ -253,6 +353,55 @@ function FormSpecimen() {
     </Form>
   );
 }
+
+function ChoiceSpecimen() {
+  const { t } = useI18n();
+  const [remind, setRemind] = useState(true);
+  const [roundUp, setRoundUp] = useState(false);
+  return (
+    <div className="flex max-w-lg flex-col divide-y divide-divider border-y border-divider">
+      <div className="flex min-h-14 items-start gap-3 py-3">
+        <Checkbox id="spec-remind" checked={remind} onCheckedChange={(v) => setRemind(v === true)} className="mt-0.5" data-testid="checkbox-specimen-remind" />
+        <div className="flex flex-col gap-0.5">
+          <Label htmlFor="spec-remind" className="text-[15px] font-medium leading-6">{t('i.check')}</Label>
+          <span className="text-[13px] text-muted-foreground">{t('i.checkHint')}</span>
+        </div>
+      </div>
+      <div className="flex min-h-14 items-center justify-between gap-4 py-3">
+        <Label htmlFor="spec-roundup" className="text-[15px] font-medium">{t('i.switch')}</Label>
+        <Switch id="spec-roundup" checked={roundUp} onCheckedChange={setRoundUp} data-testid="switch-specimen-roundup" />
+      </div>
+      <div className="flex min-h-14 items-center justify-between gap-4 py-3 opacity-100">
+        <Label htmlFor="spec-disabled-switch" className="text-[15px] text-muted-foreground">{t('fd.act.disabled')}</Label>
+        <Switch id="spec-disabled-switch" disabled checked />
+      </div>
+    </div>
+  );
+}
+
+function ValidationSpecimen() {
+  const { t } = useI18n();
+  return (
+    <div className="grid max-w-2xl gap-6 sm:grid-cols-3">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="spec-invalid" className="text-destructive">{t('fd.form.amount')}</Label>
+        <Input id="spec-invalid" aria-invalid="true" aria-describedby="spec-invalid-msg" defaultValue="0" dir="ltr" inputMode="decimal" className="tabular text-start" data-testid="input-specimen-invalid" />
+        <p id="spec-invalid-msg" className="text-[13px] font-medium text-destructive">{t('i.invalidMsg')}</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="spec-valid">{t('fd.form.name')}</Label>
+        <Input id="spec-valid" aria-describedby="spec-valid-msg" defaultValue={t('hs.sv.laptop')} className="border-success/60" data-testid="input-specimen-valid" />
+        <p id="spec-valid-msg" className="text-[13px] text-success">{t('i.valid')}</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="specimen-disabled" className="text-muted-foreground">{t('fd.form.disabled')}</Label>
+        <Input id="specimen-disabled" disabled value={t('fd.act.disabled')} readOnly />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Feedback ---------- */
 
 function StatesSpecimen() {
   const { t } = useI18n();
@@ -269,12 +418,12 @@ function StatesSpecimen() {
   };
   return (
     <Tabs value={tab} onValueChange={setTab}>
-      <TabsList className="h-auto flex-wrap justify-start">
-        {(['loading', 'empty', 'error', 'success'] as const).map((s) => (
-          <TabsTrigger key={s} value={s} className="min-h-9" data-testid={`tab-state-${s}`}>{t(`fd.state.${s}`)}</TabsTrigger>
+      <TabsList className="w-full flex-wrap">
+        {(['loading', 'empty', 'error', 'success', 'permission'] as const).map((s) => (
+          <TabsTrigger key={s} value={s} data-testid={`tab-state-${s}`}>{t(`fd.state.${s}`)}</TabsTrigger>
         ))}
       </TabsList>
-      <div className="mt-2 min-h-[16rem]">
+      <div className="mt-2 min-h-[15rem]">
         <TabsContent value="loading"><SkeletonRows rows={3} label={t('fd.state.loadingLabel')} /></TabsContent>
         <TabsContent value="empty">
           <StatePanel tone="empty" title={t('fd.state.emptyTitle')} body={t('fd.state.emptyBody')} action={<Button variant="link" className="h-auto px-0" onClick={() => setTab('success')} data-testid="button-empty-learn">{t('fd.state.emptyAction')}</Button>} />
@@ -283,39 +432,194 @@ function StatesSpecimen() {
           <StatePanel tone="error" title={t('fd.state.errorTitle')} body={t('fd.state.errorBody')} action={<RetryButton label={t('err.retry')} busyLabel={t('fd.state.retrying')} busy={retrying} onClick={retry} />} />
         </TabsContent>
         <TabsContent value="success"><StatePanel tone="success" title={t('fd.state.successTitle')} body={t('fd.state.successBody')} /></TabsContent>
+        <TabsContent value="permission"><StatePanel tone="permission" title={t('fd.state.permTitle')} body={t('fd.state.permBody')} /></TabsContent>
       </div>
     </Tabs>
   );
 }
 
-function OverlaysSpecimen() {
+/* ---------- Overlays ---------- */
+
+function SheetSpecimen() {
   const { t, dir } = useI18n();
   const isMobile = useIsMobile();
   const side = isMobile ? 'bottom' : dir === 'rtl' ? 'left' : 'right';
   return (
-    <div className="flex flex-wrap gap-3">
-      <DestructiveConfirm label={t('fd.dlg.open')} />
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" data-testid="button-open-sheet">{t('fd.sheet.open')}</Button>
-        </SheetTrigger>
-        <SheetContent side={side} className={isMobile ? 'rounded-t-2xl' : 'w-full sm:max-w-md'}>
-          <SheetHeader className="text-start">
-            <SheetTitle>{t('fd.sheet.title')}</SheetTitle>
-            <SheetDescription className="leading-6">{t('fd.sheet.body')}</SheetDescription>
-          </SheetHeader>
-          <dl className="my-6 divide-y divide-divider border-y border-divider text-sm">
-            <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row1')}</dt><dd className="font-medium">{t('fd.sheet.row1v')}</dd></div>
-            <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row2')}</dt><dd className="font-medium">{t('fd.sheet.row2v')}</dd></div>
-          </dl>
-          <SheetFooter>
-            <SheetClose asChild><Button data-testid="button-sheet-done">{t('fd.sheet.done')}</Button></SheetClose>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="secondary" data-testid="button-open-sheet">{t('fd.sheet.open')}</Button>
+      </SheetTrigger>
+      <SheetContent side={side} className={isMobile ? 'rounded-t-2xl' : 'w-full sm:max-w-md'}>
+        <SheetHeader className="text-start">
+          <SheetTitle>{t('fd.sheet.title')}</SheetTitle>
+          <SheetDescription className="leading-6">{t('fd.sheet.body')}</SheetDescription>
+        </SheetHeader>
+        <dl className="my-6 divide-y divide-divider border-y border-divider text-sm">
+          <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row1')}</dt><dd className="font-medium">{t('fd.sheet.row1v')}</dd></div>
+          <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row2')}</dt><dd className="font-medium">{t('fd.sheet.row2v')}</dd></div>
+        </dl>
+        <SheetFooter>
+          <SheetClose asChild><Button data-testid="button-sheet-done">{t('fd.sheet.done')}</Button></SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function ReviewSpecimen() {
+  const { t } = useI18n();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button ref={triggerRef} variant="secondary" data-testid="button-open-review">{t('ov.reviewOpen')}</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent
+        onEscapeKeyDown={() => setOpen(false)}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          triggerRef.current?.focus();
+        }}
+      >
+        <AlertDialogHeader className="text-start sm:text-start">
+          <div><SpecimenTag label={t('spec.tag')} /></div>
+          <AlertDialogTitle>{t('ov.reviewTitle')}</AlertDialogTitle>
+          <AlertDialogDescription className="leading-6">{t('ov.reviewBody')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex flex-col items-start gap-1 border-t border-divider pt-4">
+          <span className="text-[13px] text-muted-foreground">{t('ov.amount')}</span>
+          <MoneyDisplay value={SPECIMEN.planned} size="xl" testId="text-review-amount" />
+        </div>
+        <dl className="divide-y divide-divider border-y border-divider text-sm">
+          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.from')}</dt><dd className="font-medium">{t('ov.fromV')}</dd></div>
+          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.to')}</dt><dd className="font-medium">{t('ov.toV')}</dd></div>
+        </dl>
+        <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogCancel data-testid="button-review-back">{t('ov.back')}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => toast({ title: t('ov.done'), description: t('ov.doneBody') })} data-testid="button-review-confirm">
+            {t('ov.confirm')}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+function MenuSpecimen() {
+  const { t } = useI18n();
+  const { toast } = useToast();
+  const pick = (label: string) => toast({ title: t('ov.menuToast'), description: `${label} — ${t('spec.note')}` });
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary" data-testid="button-open-menu">
+          <MoreHorizontal aria-hidden />
+          {t('ov.menuOpen')}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-52">
+        <DropdownMenuItem onSelect={() => pick(t('ov.menu.rename'))} data-testid="menu-item-rename">{t('ov.menu.rename')}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => pick(t('ov.menu.export'))} data-testid="menu-item-export">{t('ov.menu.export')}</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => pick(t('ov.menu.remove'))} data-testid="menu-item-remove">{t('ov.menu.remove')}</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/* ---------- Navigation ---------- */
+
+const NAV_SPEC: { icon: typeof Home; key: TranslationKey }[] = [
+  { icon: Home, key: 'nav.home' },
+  { icon: Wallet, key: 'nav.money' },
+  { icon: ArrowLeftRight, key: 'nav.transactions' },
+  { icon: MapIcon, key: 'nav.plan' },
+  { icon: Goal, key: 'nav.goals' },
+];
+
+function SidebarSpecimen() {
+  const { t } = useI18n();
+  return (
+    <div aria-hidden className="w-full max-w-[16rem] border-s border-divider ps-2">
+      {NAV_SPEC.slice(0, 4).map((n, i) => {
+        const Icon = n.icon;
+        const active = i === 1;
+        return (
+          <div key={n.key} className={cn('relative flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm', active ? 'bg-sidebar-accent font-medium' : 'text-foreground/75')}>
+            {active ? <span className="absolute inset-y-2.5 start-0 w-[3px] rounded-full bg-primary" /> : null}
+            <Icon className={cn('size-[18px]', active ? 'text-gold-ink' : 'text-muted-foreground')} strokeWidth={1.75} />
+            {t(n.key)}
+          </div>
+        );
+      })}
     </div>
   );
 }
+
+function BottomNavSpecimen() {
+  const { t } = useI18n();
+  return (
+    <div aria-hidden className="grid w-full max-w-sm grid-cols-5 border-y border-divider bg-background">
+      {NAV_SPEC.map((n, i) => {
+        const Icon = n.icon;
+        const active = i === 0;
+        return (
+          <div key={n.key} className={cn('relative flex min-h-[60px] flex-col items-center justify-center gap-1 text-[11px]', active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground')}>
+            {active ? <span className="absolute inset-x-[30%] top-0 h-0.5 rounded-b-full bg-primary" /> : null}
+            <Icon className={cn('size-[22px]', active && 'text-gold-ink')} strokeWidth={active ? 2 : 1.75} />
+            <span className="max-w-full truncate px-0.5">{t(n.key)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TabsSpecimen() {
+  const { t } = useI18n();
+  const views = ['week', 'month', 'semester'] as const;
+  return (
+    <Tabs defaultValue="month" className="max-w-lg">
+      <TabsList>
+        {views.map((v) => (
+          <TabsTrigger key={v} value={v} data-testid={`tab-specimen-${v}`}>{t(`nv.tab.${v}`)}</TabsTrigger>
+        ))}
+      </TabsList>
+      {views.map((v) => (
+        <TabsContent key={v} value={v} className="pt-3 text-sm text-muted-foreground">{t('nv.tabPanel', { view: t(`nv.tab.${v}`) })}</TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function CrumbsSpecimen() {
+  const { t } = useI18n();
+  return (
+    <Breadcrumb>
+      <BreadcrumbList className="text-sm">
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link href="/" className="inline-flex min-h-11 items-center" data-testid="link-crumb-home">{t('nav.home')}</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator className="rtl:[&>svg]:-scale-x-100" />
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <a href="#foundations" className="inline-flex min-h-11 items-center" data-testid="link-crumb-foundation">{t('nav.foundation')}</a>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator className="rtl:[&>svg]:-scale-x-100" />
+        <BreadcrumbItem>
+          <BreadcrumbPage className="font-medium">{t('g.navigation')}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  );
+}
+
+/* ---------- Page ---------- */
 
 export default function FoundationPage() {
   const { t, locale } = useI18n();
@@ -326,181 +630,292 @@ export default function FoundationPage() {
   const statusLabel = t(status === 'done' ? 'fd.progress.done' : status === 'near' ? 'fd.progress.near' : 'fd.progress.on');
   const hiddenLabel = t('fd.money.hiddenLabel');
   const specimenDate = formatDate(SPECIMEN.date, locale);
+  const tag = <SpecimenTag label={t('spec.tag')} className="w-fit" />;
+
+  const ICONS = [Home, Wallet, ArrowLeftRight, CalendarClock, PiggyBank, Landmark, Bell, Search, Settings, Eye];
 
   return (
     <Page className="max-w-6xl">
       <PageHeader eyebrow={t('fd.eyebrow')} title={t('fd.title')} lede={t('fd.lede')} />
 
-      <nav aria-label={t('fd.toc')} className="mb-2 pb-4">
-        <ul className="flex flex-wrap gap-1.5">
-          {TOC.map((s) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`} className="inline-flex min-h-8 items-center rounded-full border border-divider px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-input hover:text-foreground" data-testid={`link-toc-${s.id}`}>
-                {t(s.key)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <div className="grid gap-10 lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-14">
+        <nav aria-label={t('fd.toc')} className="lg:sticky lg:top-10 lg:self-start">
+          <p className="hidden pb-3 text-xs font-medium text-muted-foreground lg:block">{t('g.index')}</p>
+          <ol className="-mx-1 flex gap-1 overflow-x-auto pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:border-s lg:border-divider">
+            {GROUPS.map((g, i) => (
+              <li key={g.id} className="shrink-0">
+                <a
+                  href={`#${g.id}`}
+                  className="flex min-h-11 items-center gap-2.5 whitespace-nowrap rounded-md px-3 text-sm text-muted-foreground transition-colors duration-150 hover:bg-primary-soft/50 hover:text-foreground lg:-ms-px lg:min-h-9 lg:rounded-none lg:border-s-2 lg:border-transparent lg:hover:border-primary lg:hover:bg-transparent"
+                  data-testid={`link-toc-${g.id}`}
+                >
+                  <span className="tabular text-xs text-gold-ink" aria-hidden><bdi>{formatNumber(i + 1, locale).padStart(2, '0')}</bdi></span>
+                  {t(g.key)}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-      <Section id="type" title={t('fd.type')} description={t('fd.typeBody')}>
-        <dl className="divide-y divide-divider">
-          {[
-            { k: 'fd.type.display' as const, cls: 'text-[40px] md:text-5xl font-semibold tracking-tight leading-[1.1]', spec: '48 / 600', txt: t('fd.type.sample') },
-            { k: 'fd.type.title' as const, cls: 'text-[28px] font-semibold tracking-tight leading-tight', spec: '28 / 600', txt: t('fd.type.sample') },
-            { k: 'fd.type.heading' as const, cls: 'text-lg font-semibold', spec: '18 / 600', txt: t('fd.type.sample') },
-            { k: 'fd.type.body' as const, cls: 'text-base leading-7', spec: '16 / 400', txt: t('fd.type.bodySample') },
-            { k: 'fd.type.caption' as const, cls: 'text-xs text-muted-foreground', spec: '12 / 400', txt: t('fd.type.bodySample') },
-          ].map((r) => (
-            <div key={r.k} className="grid gap-2 py-4 sm:grid-cols-[7rem_1fr] sm:items-baseline">
-              <dt className="flex gap-2 text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">{t(r.k)}</span>
-                <span dir="ltr" className="tabular">{r.spec}</span>
-              </dt>
-              <dd className={r.cls}>{r.txt}</dd>
-            </div>
-          ))}
-        </dl>
-      </Section>
-
-      <Section id="color" title={t('fd.color')} description={t('fd.colorBody')}>
-        <ul className="grid gap-x-8 sm:grid-cols-2">
-          <Swatch token="--primary" fg="--primary-foreground" label={t('fd.color.primary')} />
-          <Swatch token="--success-soft" fg="--success" label={t('fd.color.success')} />
-          <Swatch token="--warning-soft" fg="--warning" label={t('fd.color.warning')} />
-          <Swatch token="--destructive-soft" fg="--destructive" label={t('fd.color.destructive')} />
-          <Swatch token="--foreground" label={t('fd.color.foreground')} />
-          <Swatch token="--muted-foreground" label={t('fd.color.muted')} />
-          <Swatch token="--surface" label={t('fd.color.surface')} />
-          <Swatch token="--background" label={t('fd.color.canvas')} />
-        </ul>
-      </Section>
-
-      <Section id="spacing" title={t('fd.spacing')} description={t('fd.spacingBody')}>
-        <div className="flex flex-col gap-8">
-          <div className="flex items-end gap-3" dir="ltr">
-            {[1, 2, 3, 4, 6, 8, 12, 16].map((n) => (
-              <div key={n} className="flex flex-col items-center gap-2">
-                <span className="rounded-sm bg-primary/80" style={{ width: n * 4, height: n * 4 }} aria-hidden />
-                <span className="tabular text-[11px] text-muted-foreground">{n * 4}</span>
+        <div className="min-w-0">
+          {/* 01 FOUNDATIONS */}
+          <Group index={0}>
+            <Specimen id="color" title={t('fd.color')} description={t('fd.colorBody')}>
+              <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                {[
+                  { k: 'f.color.brand' as const, items: [
+                    { token: '--primary', label: t('f.color.gold') },
+                    { token: '--gold-ink', label: t('f.color.goldInk'), ink: true },
+                    { token: '--navy', label: t('f.color.navy') },
+                  ] },
+                  { k: 'f.color.canvasGroup' as const, items: [
+                    { token: '--background', label: t('fd.color.canvas') },
+                    { token: '--surface', label: t('fd.color.surface') },
+                    { token: '--divider', label: t('f.color.divider') },
+                  ] },
+                  { k: 'f.color.text' as const, items: [
+                    { token: '--foreground', label: t('fd.color.foreground'), ink: true },
+                    { token: '--muted-foreground', label: t('fd.color.muted'), ink: true },
+                  ] },
+                  { k: 'f.color.semantic' as const, items: [
+                    { token: '--success', label: t('fd.color.success'), ink: true },
+                    { token: '--warning', label: t('fd.color.warning'), ink: true },
+                    { token: '--destructive', label: t('fd.color.destructive'), ink: true },
+                  ] },
+                ].map((grp) => (
+                  <div key={grp.k}>
+                    <p className="pb-1 text-xs font-medium text-muted-foreground">{t(grp.k)}</p>
+                    <ul className="divide-y divide-divider">
+                      {grp.items.map((s) => <Swatch key={s.token} {...s} />)}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-4" dir="ltr">
-            {[{ r: 'rounded-sm', l: '8' }, { r: 'rounded-md', l: '10' }, { r: 'rounded-lg', l: '12' }, { r: 'rounded-xl', l: '16' }].map((x) => (
-              <div key={x.r} className={`grid size-16 place-items-center border border-input bg-surface text-xs text-muted-foreground ${x.r}`}>{x.l}</div>
-            ))}
-            {['shadow-sm', 'shadow-md', 'shadow-lg'].map((s) => (
-              <div key={s} className={`grid size-16 place-items-center rounded-lg bg-surface text-[10px] text-muted-foreground ${s}`}>{s.replace('shadow-', '')}</div>
-            ))}
-          </div>
-        </div>
-      </Section>
+            </Specimen>
 
-      <Section id="actions" title={t('fd.actions')} description={t('fd.actionsBody')}><ActionsSpecimen /></Section>
-      <Section id="forms" title={t('fd.forms')} description={t('fd.formsBody')}><FormSpecimen /></Section>
-      <Section id="states" title={t('fd.states')} description={t('fd.statesBody')}><StatesSpecimen /></Section>
+            <Specimen id="type" title={t('fd.type')} description={t('fd.typeBody')}>
+              <dl className="divide-y divide-divider">
+                <div className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
+                  <dt className="flex flex-col text-xs text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.hero')}</span><span dir="ltr" className="tabular text-start">32–48 / 600 / tnum</span></dt>
+                  <dd><MoneyDisplay value={SPECIMEN.primary} size="hero" /></dd>
+                </div>
+                {[
+                  { k: 'fd.type.title' as const, cls: 'text-[28px] md:text-[32px] font-semibold tracking-[-0.02em] leading-tight', spec: '28–32 / 600', txt: t('fd.type.sample') },
+                  { k: 'fd.type.heading' as const, cls: 'text-lg md:text-[19px] font-semibold', spec: '18–20 / 600', txt: t('fd.type.sample') },
+                  { k: 'fd.type.body' as const, cls: 'text-base leading-7', spec: '16 / 400', txt: t('fd.type.bodySample') },
+                  { k: 'fd.type.caption' as const, cls: 'text-sm text-muted-foreground leading-6', spec: '14 / 400', txt: t('fd.type.bodySample') },
+                ].map((r) => (
+                  <div key={r.k} className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
+                    <dt className="flex flex-col text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">{t(r.k)}</span>
+                      <span dir="ltr" className="tabular text-start">{r.spec}</span>
+                    </dt>
+                    <dd className={r.cls}>{r.txt}</dd>
+                  </div>
+                ))}
+                <div className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
+                  <dt className="flex flex-col text-xs text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.arabic')}</span><span dir="ltr" className="text-start">Noto Sans Arabic · 1.7</span></dt>
+                  <dd lang="ar" dir="rtl" className="font-arabic text-lg leading-[1.8]">رصيدك المتاح يكفي حتى نهاية الشهر، ويبقى منه <bdi dir="ltr" className="tabular">₪415.30</bdi> تقريبًا.</dd>
+                </div>
+              </dl>
+            </Specimen>
 
-      <Section id="badges" title={t('fd.badges')} description={t('fd.badgesBody')}>
-        <div className="flex flex-wrap gap-2">
-          <StatusBadge tone="neutral" label={t('fd.badge.neutral')} />
-          <StatusBadge tone="info" label={t('fd.badge.info')} />
-          <StatusBadge tone="success" label={t('fd.badge.success')} />
-          <StatusBadge tone="warning" label={t('fd.badge.warning')} />
-          <StatusBadge tone="error" label={t('fd.badge.error')} />
-        </div>
-      </Section>
+            <Specimen id="spacing" title={t('fd.spacing')} description={t('fd.spacingBody')}>
+              <div className="flex items-end gap-3" dir="ltr">
+                {[1, 2, 3, 4, 6, 8, 12, 16].map((n) => (
+                  <div key={n} className="flex flex-col items-center gap-2">
+                    <span className="rounded-[3px] bg-foreground/15" style={{ width: n * 4, height: n * 4 }} aria-hidden />
+                    <span className="tabular text-[11px] text-muted-foreground">{n * 4}</span>
+                  </div>
+                ))}
+              </div>
+            </Specimen>
 
-      <Section
-        id="money"
-        title={t('fd.money')}
-        description={t('fd.moneyBody')}
-        aside={
-          <div className="flex items-center gap-3 pt-3">
-            <Switch id="hide-amounts" checked={hidden} onCheckedChange={setHidden} data-testid="switch-hide-amounts" />
-            <Label htmlFor="hide-amounts" className="text-sm">{t('fd.money.hidden')}</Label>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">{t('fd.money.primary')}</span>
-              <SpecimenTag label={t('spec.tag')} />
+            <Specimen id="radii" title={t('f.radii')} description={t('f.radiiBody')}>
+              <div className="flex flex-wrap items-end gap-5" dir="ltr">
+                {[{ r: 'rounded-sm', l: '8' }, { r: 'rounded-[10px]', l: '10' }, { r: 'rounded-lg', l: '12' }, { r: 'rounded-xl', l: '16' }, { r: 'rounded-full', l: 'pill' }].map((x) => (
+                  <div key={x.l} className="flex flex-col items-center gap-2">
+                    <div className={cn('size-14 border border-input bg-surface', x.r)} aria-hidden />
+                    <span className="tabular text-[11px] text-muted-foreground">{x.l}</span>
+                  </div>
+                ))}
+              </div>
+            </Specimen>
+
+            <Specimen id="elevation" title={t('f.elevation')} description={t('f.elevationBody')}>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="flex h-20 items-end rounded-lg bg-background p-3 text-xs text-muted-foreground ring-1 ring-inset ring-divider">{t('f.elev.canvas')}</div>
+                <div className="flex h-20 items-end border-t border-divider p-3 text-xs text-muted-foreground">{t('f.elev.section')}</div>
+                <div className="flex h-20 items-end rounded-lg border border-card-border bg-surface p-3 text-xs text-muted-foreground">{t('f.elev.raised')}</div>
+                <div className="flex h-20 items-end rounded-lg border border-popover-border bg-popover p-3 text-xs text-muted-foreground shadow-lg">{t('f.elev.overlay')}</div>
+              </div>
+            </Specimen>
+
+            <Specimen id="icons" title={t('f.icons')} description={t('f.iconsBody')}>
+              <ul className="flex flex-wrap gap-5 text-foreground/80" aria-hidden>
+                {ICONS.map((I, i) => <li key={i}><I className="size-5" strokeWidth={1.75} /></li>)}
+              </ul>
+            </Specimen>
+          </Group>
+
+          {/* 02 ACTIONS */}
+          <Group index={1}>
+            <Specimen title={t('fd.actions')} description={t('fd.actionsBody')}><ActionsSpecimen /></Specimen>
+          </Group>
+
+          {/* 03 INPUTS */}
+          <Group index={2}>
+            <Specimen id="forms" title={t('i.text')} description={t('fd.formsBody')}><FormSpecimen /></Specimen>
+            <Specimen title={t('i.choice')}><ChoiceSpecimen /></Specimen>
+            <Specimen title={t('i.validation')}><ValidationSpecimen /></Specimen>
+          </Group>
+
+          {/* 04 FINANCIAL */}
+          <Group index={3}>
+            <div className="flex items-center justify-between gap-4 border-t border-divider py-4">
+              <SpecimenTag label={t('spec.note')} />
+              <div className="flex items-center gap-3">
+                <Label htmlFor="hide-amounts" className="text-sm">{t('fd.money.hidden')}</Label>
+                <Switch id="hide-amounts" checked={hidden} onCheckedChange={setHidden} data-testid="switch-hide-amounts" />
+              </div>
             </div>
-            <MoneyDisplay value={SPECIMEN.primary} size="xl" hidden={hidden} hiddenLabel={hiddenLabel} testId="text-specimen-primary-amount" />
-          </div>
-          <dl className="grid divide-y divide-divider border-y border-divider sm:grid-cols-2 sm:divide-x sm:divide-y-0 rtl:sm:divide-x-reverse">
-            <div className="flex flex-col gap-1 py-4 sm:pe-6">
-              <dt className="text-sm text-muted-foreground">{t('fd.money.inflow')}</dt>
-              <dd><MoneyDisplay value={SPECIMEN.inflow} size="lg" tone="positive" showPlus hidden={hidden} hiddenLabel={hiddenLabel} /></dd>
-            </div>
-            <div className="flex flex-col gap-1 py-4 sm:ps-6">
-              <dt className="text-sm text-muted-foreground">{t('fd.money.outflow')}</dt>
-              <dd><MoneyDisplay value={SPECIMEN.outflow} size="lg" hidden={hidden} hiddenLabel={hiddenLabel} /></dd>
-            </div>
-          </dl>
-          <div className="flex flex-col gap-2">
-            <span className="text-sm text-muted-foreground">{t('fd.money.currencies')}</span>
-            <ul className="flex flex-wrap gap-x-8 gap-y-2">
-              {CURRENCIES.map((c) => (
-                <li key={c} className="flex items-baseline gap-2">
-                  <span className="font-mono text-xs text-muted-foreground">{c}</span>
-                  <MoneyDisplay value={SPECIMEN.perCurrency[c]} hidden={hidden} hiddenLabel={hiddenLabel} />
-                </li>
-              ))}
-            </ul>
-          </div>
+
+            <Specimen id="balance" title={t('fin.balance')}>
+              <BalanceDisplay
+                label={t('fin.balanceLabel')}
+                amount={SPECIMEN.primary}
+                tag={tag}
+                note={t('fin.balanceNote')}
+                hidden={hidden}
+                hiddenLabel={hiddenLabel}
+                testId="text-specimen-primary-amount"
+                actions={
+                  <>
+                    <Button data-testid="button-specimen-fin-primary" disabled>{t('hs.act.save')}</Button>
+                    <span className="text-[13px] text-muted-foreground">{t('hs.act.payNote')}</span>
+                  </>
+                }
+              />
+            </Specimen>
+
+            <Specimen id="money" title={t('fin.amounts')} description={t('fd.moneyBody')}>
+              <dl className="divide-y divide-divider border-y border-divider">
+                {[
+                  { k: 'fin.highlight' as const, v: SPECIMEN.account, tone: 'highlight' as const },
+                  { k: 'fin.positive' as const, v: SPECIMEN.inflow, tone: 'positive' as const, plus: true },
+                  { k: 'fin.negative' as const, v: SPECIMEN.outflow, tone: 'negative' as const },
+                  { k: 'fin.neutral' as const, v: SPECIMEN.neutral, tone: 'neutral' as const },
+                  { k: 'fin.planned' as const, v: SPECIMEN.planned, tone: 'planned' as const },
+                  { k: 'fin.projected' as const, v: SPECIMEN.projected, tone: 'projected' as const },
+                ].map((r) => (
+                  <div key={r.k} className="flex min-h-12 items-center justify-between gap-4 py-2.5">
+                    <dt className="text-sm text-muted-foreground">{t(r.k)}</dt>
+                    <dd><MoneyDisplay value={r.v} size="md" className="text-[17px]" tone={r.tone} showPlus={r.plus} hidden={hidden} hiddenLabel={hiddenLabel} /></dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="flex flex-col gap-2 pt-6">
+                <span className="text-[13px] text-muted-foreground">{t('fd.money.currencies')}</span>
+                <ul className="flex flex-wrap gap-x-8 gap-y-2">
+                  {CURRENCIES.map((c) => (
+                    <li key={c} className="flex items-baseline gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">{c}</span>
+                      <MoneyDisplay value={SPECIMEN.perCurrency[c]} hidden={hidden} hiddenLabel={hiddenLabel} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Specimen>
+
+            <Specimen id="summary" title={t('fin.summary')}>
+              <FinancialSummary
+                hidden={hidden}
+                hiddenLabel={hiddenLabel}
+                testId="summary-specimen"
+                items={[
+                  { id: 'in', label: t('fd.money.inflow'), value: SPECIMEN.inflow, tone: 'positive', showPlus: true },
+                  { id: 'out', label: t('fd.money.outflow'), value: SPECIMEN.outflow },
+                  { id: 'planned', label: t('fin.planned'), value: SPECIMEN.planned, tone: 'planned' },
+                  { id: 'projected', label: t('fin.projected'), value: SPECIMEN.projected, tone: 'projected' },
+                ]}
+              />
+            </Specimen>
+
+            <Specimen id="txn" title={t('fd.txn')} description={t('fd.txnBody')}>
+              <ul className="divide-y divide-divider border-y border-divider">
+                <TransactionRow title={t('fd.txn.a')} meta={t('fd.txn.aMeta')} amount={SPECIMEN.outflow} date={SPECIMEN.date} direction="out" directionLabel={t('fd.txn.out')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-1" />
+                <TransactionRow title={t('fd.txn.b')} meta={t('fd.txn.bMeta')} amount={SPECIMEN.inflow} date={SPECIMEN.date} direction="in" directionLabel={t('fd.txn.in')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-2" />
+                <TransactionRow title={t('fd.txn.c')} meta={t('fd.txn.cMeta')} amount={SPECIMEN.pending} date={SPECIMEN.date} direction="pending" directionLabel={t('fd.txn.cMeta')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-3" />
+              </ul>
+            </Specimen>
+
+            <Specimen id="upcoming" title={t('fin.upcoming')}>
+              <ul className="divide-y divide-divider border-y border-divider">
+                <UpcomingPayment title={t('hs.up.phone')} meta={t('hs.up.phoneMeta')} due={SPECIMEN.due} amount={SPECIMEN.upcoming} statusTone="info" statusLabel={t('hs.status.scheduled')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-upcoming" />
+              </ul>
+            </Specimen>
+
+            <Specimen id="progress" title={t('fd.progress')} description={t('fd.progressBody')}>
+              <div className="flex max-w-lg flex-col gap-8">
+                <ProgressMeter kind="savings" value={SPECIMEN.savedOf.saved.minor / SPECIMEN.savedOf.target.minor} label={t('fin.savings')} statusLabel={t('fd.progress.on')} detail={t('hs.sv.of', { saved: formatMoney(SPECIMEN.savedOf.saved, locale), target: formatMoney(SPECIMEN.savedOf.target, locale) })} />
+                <ProgressMeter kind="budget" value={SPECIMEN.budgetOf.spent.minor / SPECIMEN.budgetOf.plan.minor} label={t('fin.budget')} statusLabel={t('fd.progress.on')} detail={t('hs.sv.of', { saved: formatMoney(SPECIMEN.budgetOf.spent, locale), target: formatMoney(SPECIMEN.budgetOf.plan, locale) })} />
+                <ProgressMeter kind="budget" value={1.12} status="over" label={t('fin.budget')} statusLabel={t('fin.over')} />
+                <div className="flex flex-col gap-4 border-t border-divider pt-6">
+                  <ProgressMeter kind="savings" value={p} label={t('fd.progress.label')} status={status} statusLabel={statusLabel} />
+                  <Label id="progress-adjust" className="text-[13px] text-muted-foreground">{t('fd.progress.adjust')}</Label>
+                  <Slider aria-labelledby="progress-adjust" value={[progress]} min={0} max={100} step={1} onValueChange={([v]) => setProgress(v)} data-testid="slider-progress" />
+                </div>
+              </div>
+            </Specimen>
+
+            <Specimen id="account" title={t('fd.account')} description={t('fd.accountBody')}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <AccountSurface name={t('fd.account.name')} kind={t('fd.account.kind')} amount={SPECIMEN.account} meta={t('fd.account.meta', { date: specimenDate })} badge={<SpecimenTag label={t('spec.tag')} />} icon={<Landmark />} hidden={hidden} hiddenLabel={hiddenLabel} emphasis testId="surface-specimen-account-1" />
+                <AccountSurface name={t('fd.account.name')} kind={t('fd.account.kind2')} amount={SPECIMEN.account2} meta={t('fd.account.meta', { date: specimenDate })} badge={<SpecimenTag label={t('spec.tag')} />} icon={<PiggyBank />} hidden={hidden} hiddenLabel={hiddenLabel} testId="surface-specimen-account-2" />
+              </div>
+            </Specimen>
+
+            <Specimen id="badges" title={t('fin.status')} description={t('fd.badgesBody')}>
+              <div className="flex flex-wrap gap-2">
+                <StatusBadge tone="neutral" label={t('fd.badge.neutral')} />
+                <StatusBadge tone="info" label={t('fd.badge.info')} />
+                <StatusBadge tone="success" label={t('fd.badge.success')} />
+                <StatusBadge tone="warning" label={t('fd.badge.warning')} />
+                <StatusBadge tone="error" label={t('fd.badge.error')} />
+              </div>
+            </Specimen>
+          </Group>
+
+          {/* 05 FEEDBACK */}
+          <Group index={4}>
+            <Specimen title={t('fb.notices')}>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Notice tone="success" title={t('fb.success')} body={t('fb.successBody')} />
+                <Notice tone="warning" title={t('fb.warning')} body={t('fb.warningBody')} />
+                <Notice tone="error" title={t('fb.error')} body={t('fb.errorBody')} />
+                <Notice tone="info" title={t('fb.info')} body={t('fb.infoBody')} />
+              </div>
+            </Specimen>
+            <Specimen id="states" title={t('fb.states')} description={t('fd.statesBody')}><StatesSpecimen /></Specimen>
+          </Group>
+
+          {/* 06 OVERLAYS */}
+          <Group index={5}>
+            <Specimen title={t('ov.dialog')} description={t('fd.overlaysBody')}><DestructiveConfirm label={t('fd.dlg.open')} /></Specimen>
+            <Specimen title={t('ov.sheet')}><SheetSpecimen /></Specimen>
+            <Specimen title={t('ov.review')}><ReviewSpecimen /></Specimen>
+            <Specimen title={t('ov.menu')}><MenuSpecimen /></Specimen>
+          </Group>
+
+          {/* 07 NAVIGATION */}
+          <Group index={6}>
+            <Specimen title={t('nv.sidebar')} description={t('nv.sidebarBody')}><SidebarSpecimen /></Specimen>
+            <Specimen title={t('nv.bottom')}><BottomNavSpecimen /></Specimen>
+            <Specimen title={t('nv.tabs')}><TabsSpecimen /></Specimen>
+            <Specimen title={t('nv.crumbs')}><CrumbsSpecimen /></Specimen>
+          </Group>
         </div>
-      </Section>
-
-      <Section id="progress" title={t('fd.progress')} description={t('fd.progressBody')}>
-        <div className="flex max-w-lg flex-col gap-6">
-          <ProgressMeter value={p} label={t('fd.progress.label')} status={status} statusLabel={statusLabel} />
-          <div className="flex flex-col gap-3">
-            <Label id="progress-adjust" className="text-sm text-muted-foreground">{t('fd.progress.adjust')}</Label>
-            <Slider aria-labelledby="progress-adjust" value={[progress]} min={0} max={100} step={1} onValueChange={([v]) => setProgress(v)} data-testid="slider-progress" />
-          </div>
-        </div>
-      </Section>
-
-      <Section id="account" title={t('fd.account')} description={t('fd.accountBody')}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <AccountSurface
-            name={t('fd.account.name')}
-            kind={t('fd.account.kind')}
-            amount={SPECIMEN.account}
-            meta={t('fd.account.meta', { date: specimenDate })}
-            badge={<SpecimenTag label={t('spec.tag')} />}
-            icon={<Landmark />}
-            hidden={hidden}
-            hiddenLabel={hiddenLabel}
-            emphasis
-            testId="surface-specimen-account-1"
-          />
-          <AccountSurface
-            name={t('fd.account.name')}
-            kind={t('fd.account.kind2')}
-            amount={SPECIMEN.account2}
-            meta={t('fd.account.meta', { date: specimenDate })}
-            badge={<SpecimenTag label={t('spec.tag')} />}
-            icon={<PiggyBank />}
-            hidden={hidden}
-            hiddenLabel={hiddenLabel}
-            testId="surface-specimen-account-2"
-          />
-        </div>
-      </Section>
-
-      <Section id="txn" title={t('fd.txn')} description={t('fd.txnBody')} aside={<SpecimenTag label={t('spec.tag')} className="mt-2 w-fit" />}>
-        <ul className="divide-y divide-divider border-y border-divider">
-          <TransactionRow title={t('fd.txn.a')} meta={t('fd.txn.aMeta')} amount={SPECIMEN.outflow} date={SPECIMEN.date} direction="out" directionLabel={t('fd.txn.out')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-1" />
-          <TransactionRow title={t('fd.txn.b')} meta={t('fd.txn.bMeta')} amount={SPECIMEN.inflow} date={SPECIMEN.date} direction="in" directionLabel={t('fd.txn.in')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-2" />
-          <TransactionRow title={t('fd.txn.c')} meta={t('fd.txn.cMeta')} amount={SPECIMEN.pending} date={SPECIMEN.date} direction="pending" directionLabel={t('fd.txn.cMeta')} hidden={hidden} hiddenLabel={hiddenLabel} testId="row-specimen-3" />
-        </ul>
-      </Section>
-
-      <Section id="overlays" title={t('fd.overlays')} description={t('fd.overlaysBody')}><OverlaysSpecimen /></Section>
+      </div>
     </Page>
   );
 }

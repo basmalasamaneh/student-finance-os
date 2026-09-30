@@ -18,11 +18,13 @@ function useLabel() {
 }
 
 function BrandMark({ className }: { className?: string }) {
+  // Navy tile with a gold ledger arc — the signature detail, not a gold block.
   return (
-    <svg viewBox="0 0 32 32" className={cn('size-8', className)} aria-hidden>
-      <rect width="32" height="32" rx="9" className="fill-primary" />
-      <path d="M9 19.5c0 2.2 2.6 3.5 7 3.5s7-1.3 7-3.5-2.6-3-7-3.5-7-1.3-7-3.5S11.6 9 16 9s7 1.3 7 3.5" fill="none" strokeWidth="2.4" strokeLinecap="round" className="stroke-primary-foreground" />
-      <circle cx="23" cy="20" r="2.2" className="fill-[hsl(var(--mint-raw))]" />
+    <svg viewBox="0 0 32 32" className={cn('size-8 shrink-0', className)} aria-hidden>
+      <rect width="32" height="32" rx="8" className="fill-foreground" />
+      <path d="M10 21.5h12" strokeWidth="2" strokeLinecap="round" className="stroke-background" opacity="0.55" />
+      <path d="M10 17.5c2.2-4.6 4.8-7 12-7.5" fill="none" strokeWidth="2.4" strokeLinecap="round" className="stroke-primary" />
+      <circle cx="22" cy="10" r="1.9" className="fill-primary" />
     </svg>
   );
 }
@@ -30,11 +32,11 @@ function BrandMark({ className }: { className?: string }) {
 function Brand({ collapsed = false }: { collapsed?: boolean }) {
   const { t } = useI18n();
   return (
-    <Link href="/" className="flex items-center gap-3 rounded-lg" data-testid="link-brand" aria-label={t('app.name')}>
+    <Link href="/" className="flex min-h-11 items-center gap-3 rounded-lg" data-testid="link-brand" aria-label={t('app.name')}>
       <BrandMark />
       {collapsed ? null : (
         <span className="flex flex-col leading-tight">
-          <span className="text-[15px] font-semibold tracking-tight">{t('app.name')}</span>
+          <span className="text-[15px] font-semibold tracking-[-0.01em]">{t('app.name')}</span>
           <span className="text-xs text-muted-foreground">{t('app.tagline')}</span>
         </span>
       )}
@@ -44,25 +46,25 @@ function Brand({ collapsed = false }: { collapsed?: boolean }) {
 
 function PendingDot({ item }: { item: NavItem }) {
   if (item.implemented) return null;
-  return <span aria-hidden className="ms-auto size-1.5 rounded-full bg-input" />;
+  return <span aria-hidden className="ms-auto size-1 rounded-full bg-muted-foreground/40" />;
 }
 
-/** Desktop (≥1024px): full sidebar grouped by domain. */
+/** Desktop (≥1024px): light sidebar — brand, grouped nav with gold selection bar, preview profile + controls. */
 function Sidebar() {
   const { t } = useI18n();
   const { role } = usePreview();
   const [location] = useLocation();
   const label = useLabel();
   return (
-    <aside className="sticky top-0 hidden h-[100dvh] w-[268px] shrink-0 flex-col border-e border-sidebar-border bg-sidebar lg:flex">
-      <div className="px-6 pb-6 pt-7">
+    <aside className="sticky top-0 hidden h-[100dvh] w-[264px] shrink-0 flex-col border-e border-sidebar-border bg-sidebar lg:flex">
+      <div className="px-5 pb-5 pt-6">
         <Brand />
       </div>
-      <nav aria-label={t('a11y.mainNav')} className="flex-1 overflow-y-auto px-3 pb-6">
+      <nav aria-label={t('a11y.mainNav')} className="flex-1 overflow-y-auto border-t border-sidebar-border px-3 pb-6 pt-4">
         {groupedForRole(role).map(([group, items]) => (
-          <div key={group} className="mb-5">
-            <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/80">{t(GROUP_LABEL[group])}</p>
-            <ul className="flex flex-col gap-0.5">
+          <div key={group} className="mb-4">
+            <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">{t(GROUP_LABEL[group])}</p>
+            <ul className="flex flex-col">
               {items.map((item) => {
                 const active = isActive(item, location);
                 const Icon = item.icon;
@@ -73,12 +75,12 @@ function Sidebar() {
                       aria-current={active ? 'page' : undefined}
                       className={cn(
                         'group relative flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm transition-colors duration-150',
-                        active ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground' : 'text-foreground/75 hover:bg-muted hover:text-foreground',
+                        active ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground' : 'text-foreground/75 hover:bg-primary-soft/50 hover:text-foreground',
                       )}
                       data-testid={`link-nav-${item.id}`}
                     >
-                      {active ? <span aria-hidden className="absolute inset-y-2 start-0 w-[3px] rounded-full bg-primary" /> : null}
-                      <Icon className={cn('size-[18px] shrink-0', active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} aria-hidden />
+                      <span aria-hidden className={cn('absolute inset-y-2.5 start-0 w-[3px] rounded-full bg-primary transition-transform duration-150', active ? 'scale-y-100' : 'scale-y-0')} />
+                      <Icon className={cn('size-[18px] shrink-0', active ? 'text-gold-ink' : 'text-muted-foreground group-hover:text-foreground')} strokeWidth={1.75} aria-hidden />
                       <span className="truncate">{label(item)}</span>
                       <PendingDot item={item} />
                     </Link>
@@ -89,6 +91,16 @@ function Sidebar() {
           </div>
         ))}
       </nav>
+      <div className="flex flex-col gap-2 border-t border-sidebar-border p-3">
+        <RolePreviewMenu appearance="profile" />
+        <div className="flex items-center justify-between gap-1 px-1">
+          <span className="text-xs text-muted-foreground">{t('shell.build')}</span>
+          <div className="flex items-center">
+            <LanguageToggle iconOnly />
+            <ThemeMenu />
+          </div>
+        </div>
+      </div>
     </aside>
   );
 }
@@ -100,9 +112,9 @@ function Rail() {
   const [location] = useLocation();
   const label = useLabel();
   return (
-    <aside className="sticky top-0 hidden h-[100dvh] w-[76px] shrink-0 flex-col items-center border-e border-sidebar-border bg-sidebar py-5 md:flex lg:hidden">
+    <aside className="sticky top-0 hidden h-[100dvh] w-[76px] shrink-0 flex-col items-center border-e border-sidebar-border bg-sidebar py-4 md:flex lg:hidden">
       <Brand collapsed />
-      <nav aria-label={t('a11y.mainNav')} className="mt-6 flex flex-1 flex-col items-center gap-1 overflow-y-auto">
+      <nav aria-label={t('a11y.mainNav')} className="mt-4 flex flex-1 flex-col items-center gap-1 overflow-y-auto border-t border-sidebar-border pt-4">
         {itemsForRole(role).map((item) => {
           const active = isActive(item, location);
           const Icon = item.icon;
@@ -113,10 +125,11 @@ function Rail() {
                   href={item.path}
                   aria-current={active ? 'page' : undefined}
                   aria-label={label(item)}
-                  className={cn('grid size-11 place-items-center rounded-xl transition-colors', active ? 'bg-sidebar-accent text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}
+                  className={cn('relative grid size-11 place-items-center rounded-[10px] transition-colors duration-150', active ? 'bg-sidebar-accent text-gold-ink' : 'text-muted-foreground hover:bg-primary-soft/50 hover:text-foreground')}
                   data-testid={`link-rail-${item.id}`}
                 >
-                  <Icon className="size-5" aria-hidden />
+                  {active ? <span aria-hidden className="absolute inset-y-3 -start-[16px] w-[3px] rounded-full bg-primary" /> : null}
+                  <Icon className="size-5" strokeWidth={1.75} aria-hidden />
                 </Link>
               </TooltipTrigger>
               <TooltipContent side={dir === 'rtl' ? 'left' : 'right'}>{label(item)}</TooltipContent>
@@ -128,14 +141,15 @@ function Rail() {
   );
 }
 
+/** Top bar: mobile + tablet only. On desktop, controls live in the sidebar footer. */
 function TopBar() {
   return (
-    <header className="sticky top-0 z-30 border-b border-divider bg-background/85 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
-      <div className="flex h-16 items-center gap-2 px-4 sm:px-6 lg:px-10">
+    <header className="sticky top-0 z-30 border-b border-divider bg-background/90 backdrop-blur-md lg:hidden">
+      <div className="flex h-14 items-center gap-2 px-4 sm:px-6 md:h-16">
         <div className="md:hidden">
           <Brand collapsed />
         </div>
-        <div className="ms-auto flex items-center gap-1.5">
+        <div className="ms-auto flex items-center gap-1">
           <div className="hidden sm:block">
             <RolePreviewMenu />
           </div>
@@ -176,7 +190,7 @@ function MoreSheet() {
         <nav aria-label={t('a11y.moreNav')} className="mt-4">
           {groupedForRole(role).map(([group, items]) => (
             <div key={group} className="border-t border-divider py-3 first:border-t-0">
-              <p className="pb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{t(GROUP_LABEL[group])}</p>
+              <p className="pb-1 text-xs font-medium text-muted-foreground">{t(GROUP_LABEL[group])}</p>
               <ul>
                 {items.map((item) => {
                   const active = isActive(item, location);
@@ -186,7 +200,7 @@ function MoreSheet() {
                       <Link
                         href={item.path}
                         aria-current={active ? 'page' : undefined}
-                        className={cn('flex min-h-12 items-center gap-3 rounded-lg px-2 text-[15px]', active ? 'font-semibold text-primary' : 'text-foreground')}
+                        className={cn('flex min-h-12 items-center gap-3 rounded-lg px-2 text-[15px]', active ? 'font-semibold text-gold-ink' : 'text-foreground')}
                         data-testid={`link-more-${item.id}`}
                       >
                         <Icon className="size-5 text-muted-foreground" aria-hidden />
@@ -219,7 +233,7 @@ function BottomNav() {
   const primary = mobileItemsForRole(role);
 
   return (
-    <nav aria-label={t('a11y.mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-divider bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
+    <nav aria-label={t('a11y.mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-divider bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${primary.length}, minmax(0, 1fr))` }}>
         {primary.map((item) => {
           const active = isActive(item, location);
@@ -230,12 +244,11 @@ function BottomNav() {
                 href={item.path}
                 aria-current={active ? 'page' : undefined}
                 aria-label={label(item)}
-                className={cn('flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[11px] font-medium transition-colors', active ? 'text-primary' : 'text-muted-foreground')}
+                className={cn('relative flex min-h-[60px] flex-col items-center justify-center gap-1 px-1 text-[11px] transition-colors duration-150 active:bg-primary-soft/50', active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground')}
                 data-testid={`link-tab-${item.id}`}
               >
-                <span className={cn('grid h-7 w-12 place-items-center rounded-full transition-colors', active && 'bg-primary-soft')}>
-                  <Icon className="size-5" aria-hidden />
-                </span>
+                <span aria-hidden className={cn('absolute inset-x-[30%] top-0 h-0.5 rounded-b-full bg-primary transition-transform duration-150', active ? 'scale-x-100' : 'scale-x-0')} />
+                <Icon className={cn('size-[22px]', active ? 'text-gold-ink' : '')} strokeWidth={active ? 2 : 1.75} aria-hidden />
                 <span aria-hidden className="max-w-full truncate">{item.mobileLabelKey ? t(item.mobileLabelKey) : label(item)}</span>
               </Link>
             </li>

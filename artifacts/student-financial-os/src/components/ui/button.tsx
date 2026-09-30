@@ -3,35 +3,27 @@ import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 
+/*
+ * Canonical button. Gold is reserved for the single primary action per view.
+ * Restrained 10px radius (not pills). Controls animate 150ms; pressed = darker gold + 1px settle.
+ */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0' +
-    ' hover-elevate active-elevate-2',
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-medium transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default:
-          // @replit: no hover, and add primary border
-          'bg-primary text-primary-foreground border border-primary-border',
-        destructive:
-          'bg-destructive text-destructive-foreground shadow-sm border-destructive-border',
-        outline:
-          // @replit Shows the background color of whatever card / sidebar / accent background it is inside of.
-          // Inherits the current text color. Uses shadow-xs. no shadow on active
-          // No hover state
-          ' border [border-color:var(--button-outline)] shadow-xs active:shadow-none ',
-        secondary:
-          // @replit border, no hover, no shadow, secondary border.
-          'border bg-secondary text-secondary-foreground border border-secondary-border ',
-        // @replit no hover, transparent border
-        ghost: 'border border-transparent',
-        link: 'text-primary underline-offset-4 hover:underline',
+        default: 'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/85',
+        outline: 'border border-input bg-transparent text-foreground hover:border-gold-ink/45 hover:bg-primary-soft/50',
+        secondary: 'border border-border bg-surface text-foreground hover:border-input hover:bg-surface-sunken',
+        ghost: 'text-foreground hover:bg-primary-soft/60 active:bg-primary-soft',
+        link: 'text-gold-ink underline decoration-gold-ink/35 underline-offset-4 hover:decoration-gold-ink',
       },
       size: {
-        // @replit changed sizes
-        default: 'min-h-10 px-4 py-2',
-        sm: 'min-h-8 rounded-md px-3 text-xs',
-        lg: 'min-h-11 rounded-md px-6 text-[15px]',
-        icon: 'h-10 w-10',
+        default: 'min-h-11 px-4',
+        sm: 'min-h-11 px-3 text-[13px] md:min-h-9',
+        lg: 'min-h-12 px-6 text-[15px]',
+        icon: 'size-11 md:size-10',
       },
     },
     defaultVariants: {

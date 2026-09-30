@@ -65,6 +65,11 @@
   --color-destructive-soft: hsl(var(--destructive-soft));
   --color-primary-soft: hsl(var(--primary-soft));
   --color-surface: hsl(var(--surface));
+  --color-gold-ink: hsl(var(--gold-ink));
+  --color-navy: hsl(var(--navy));
+  --color-primary-hover: hsl(var(--primary-hover));
+  --color-primary-pressed: hsl(var(--primary-pressed));
+  --color-surface-sunken: hsl(var(--surface-sunken));
   --color-divider: hsl(var(--divider));
   --font-arabic: var(--app-font-arabic);
   --font-sans: var(--app-font-sans);
@@ -78,155 +83,166 @@
 }
 
 /*
- * Student Financial OS — semantic tokens.
- * Raw palette (V3): Indigo #4338CA, Mint #34D399, Amber #F59E0B, Off-white #F8FAFC,
- * White #FFFFFF, Navy #172033, Slate #64748B, Red #EF4444 (errors/destructive only).
- * Components consume ONLY semantic tokens below, never raw hex values.
+ * Student Financial OS — semantic tokens (Prompt 1.5 · Gold signature).
+ * Raw palette: Gold #D4A72C, Deep navy #111827, Warm off-white #FAF9F5, White #FFFFFF,
+ * Text #172033, Slate #64748B, Success #22A06B, Error #EF4444.
+ * Gold is a FILL colour (primary actions, selection bars, progress). For gold TEXT use
+ * --gold-ink, an accessible derived shade (≥4.5:1 on canvas). Components consume only these tokens.
  */
 :root {
-  --button-outline: hsl(221 38% 15% / 0.14);
-  --badge-outline: hsl(221 38% 15% / 0.08);
-  --opaque-button-border-intensity: -8;
-  --elevate-1: hsl(243 75% 51% / 0.04);
-  --elevate-2: hsl(243 75% 51% / 0.09);
+  --button-outline: hsl(40 14% 80%);
+  --badge-outline: hsl(220 38% 15% / 0.08);
+  --opaque-button-border-intensity: -6;
+  --elevate-1: hsl(44 66% 50% / 0.06);
+  --elevate-2: hsl(44 66% 50% / 0.12);
 
-  --background: 210 40% 98%;          /* off-white canvas */
-  --foreground: 221 38% 15%;          /* navy text */
-  --surface: 0 0% 100%;               /* white raised surface */
-  --divider: 216 30% 91%;
-  --border: 216 28% 88%;
+  --navy: 221 39% 11%;                /* #111827 */
+  --background: 45 33% 97%;           /* #FAF9F5 warm canvas */
+  --foreground: 221 39% 15%;          /* #172033 */
+  --surface: 0 0% 100%;               /* white — only where grouping is useful */
+  --surface-sunken: 43 24% 94%;
+  --divider: 40 18% 89%;
+  --border: 40 14% 86%;
   --card: 0 0% 100%;
-  --card-foreground: 221 38% 15%;
-  --card-border: 216 30% 90%;
-  --sidebar: 210 40% 98%;
-  --sidebar-foreground: 221 38% 15%;
-  --sidebar-border: 216 30% 91%;
-  --sidebar-primary: 243 75% 51%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 238 70% 96%;
-  --sidebar-accent-foreground: 243 70% 42%;
-  --sidebar-ring: 243 75% 51%;
+  --card-foreground: 221 39% 15%;
+  --card-border: 40 16% 88%;
+  --sidebar: 44 28% 95.5%;
+  --sidebar-foreground: 221 39% 15%;
+  --sidebar-border: 40 16% 88%;
+  --sidebar-primary: 44 66% 50%;
+  --sidebar-primary-foreground: 221 39% 11%;
+  --sidebar-accent: 44 60% 90%;
+  --sidebar-accent-foreground: 221 39% 13%;
+  --sidebar-ring: 38 80% 34%;
   --popover: 0 0% 100%;
-  --popover-foreground: 221 38% 15%;
-  --popover-border: 216 30% 89%;
-  --primary: 243 75% 51%;             /* indigo: action, focus, selection */
-  --primary-foreground: 0 0% 100%;
-  --primary-soft: 238 75% 96%;
-  --secondary: 238 60% 96%;
-  --secondary-foreground: 243 70% 40%;
-  --muted: 214 32% 95%;
-  --muted-foreground: 215 19% 42%;    /* slate, darkened for AA on off-white */
-  --accent: 238 60% 96%;
-  --accent-foreground: 243 70% 40%;
-  --success: 160 84% 27%;             /* mint family, text-safe */
+  --popover-foreground: 221 39% 15%;
+  --popover-border: 40 16% 86%;
+  --primary: 44 66% 50%;              /* #D4A72C signature gold (fill) */
+  --primary-hover: 43 68% 46%;
+  --primary-pressed: 42 70% 41%;
+  --primary-foreground: 221 39% 11%;  /* navy on gold ≈ 8.6:1 */
+  --primary-soft: 45 72% 93%;
+  --gold-ink: 38 80% 29%;             /* gold for text/icons ≈ 5.6:1 on canvas */
+  --secondary: 43 24% 94%;
+  --secondary-foreground: 221 39% 15%;
+  --muted: 43 22% 93%;
+  --muted-foreground: 216 20% 38%;    /* slate, deepened for AA on warm canvas */
+  --accent: 45 72% 93%;
+  --accent-foreground: 221 39% 13%;
+  --success: 155 70% 28%;             /* from #22A06B, text-safe */
   --success-foreground: 0 0% 100%;
-  --success-soft: 152 68% 93%;
-  --warning: 30 92% 33%;              /* amber family, text-safe */
+  --success-soft: 150 42% 92%;
+  --warning: 33 88% 31%;              /* deep amber, distinct from brand gold */
   --warning-foreground: 0 0% 100%;
-  --warning-soft: 45 96% 91%;
-  --destructive: 0 72% 50%;           /* red: errors + destructive only */
+  --warning-soft: 40 82% 91%;
+  --destructive: 0 72% 47%;           /* from #EF4444, text-safe */
   --destructive-foreground: 0 0% 100%;
-  --destructive-soft: 0 86% 96%;
-  --input: 216 26% 84%;
-  --ring: 243 75% 51%;
-  --chart-1: 243 75% 51%;
-  --chart-2: 158 64% 52%;
-  --chart-3: 38 92% 50%;
-  --chart-4: 215 16% 47%;
-  --chart-5: 221 38% 15%;
-  --mint-raw: 158 64% 52%;
-  --amber-raw: 38 92% 50%;
+  --destructive-soft: 0 80% 96%;
+  --input: 38 12% 76%;
+  --ring: 38 80% 34%;                 /* gold-derived focus ring ≥3:1 */
+  --chart-1: 44 66% 50%;
+  --chart-2: 155 60% 38%;
+  --chart-3: 221 39% 15%;
+  --chart-4: 216 20% 55%;
+  --chart-5: 33 88% 40%;
 
   --app-font-sans: 'Inter', 'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
   --app-font-arabic: 'Noto Sans Arabic', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --radius: 0.75rem; /* 12px — lg; sm 8, md 10, xl 16 */
-  --shadow-2xs: 0 1px 0 0 hsl(221 38% 15% / 0.03);
-  --shadow-xs: 0 1px 2px 0 hsl(221 38% 15% / 0.05);
-  --shadow-sm: 0 1px 2px 0 hsl(221 38% 15% / 0.05), 0 1px 3px 0 hsl(221 38% 15% / 0.04);
-  --shadow: 0 1px 3px 0 hsl(221 38% 15% / 0.06), 0 2px 8px -2px hsl(221 38% 15% / 0.05);
-  --shadow-md: 0 4px 12px -4px hsl(221 38% 15% / 0.08);
-  --shadow-lg: 0 12px 32px -12px hsl(221 38% 15% / 0.16);
-  --shadow-xl: 0 24px 48px -16px hsl(221 38% 15% / 0.2);
-  --shadow-2xl: 0 32px 64px -24px hsl(221 38% 15% / 0.24);
+  --shadow-2xs: 0 0 0 0 transparent;
+  --shadow-xs: 0 1px 0 0 hsl(221 39% 15% / 0.04);
+  --shadow-sm: 0 1px 2px 0 hsl(221 39% 15% / 0.05);
+  --shadow: 0 1px 2px 0 hsl(221 39% 15% / 0.05);
+  --shadow-md: 0 6px 16px -8px hsl(221 39% 15% / 0.12);
+  --shadow-lg: 0 18px 40px -16px hsl(221 39% 15% / 0.2);
+  --shadow-xl: 0 24px 56px -20px hsl(221 39% 15% / 0.24);
+  --shadow-2xl: 0 32px 64px -24px hsl(221 39% 15% / 0.26);
   --tracking-normal: 0em;
   --spacing: 0.25rem; /* 4px rhythm */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 140ms;
-  --duration-base: 220ms;
-  --duration-slow: 420ms;
+  --duration-fast: 150ms;   /* controls 120–180 */
+  --duration-base: 210ms;   /* overlays 180–240 */
+  --duration-slow: 240ms;
 
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(var(--border));
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
+/* Dark — "premium financial app at night": deep navy canvas, warm off-white text, controlled gold. */
 .dark {
-  --button-outline: hsl(210 40% 96% / 0.14);
-  --badge-outline: hsl(210 40% 96% / 0.08);
-  --opaque-button-border-intensity: 8;
-  --elevate-1: hsl(210 40% 96% / 0.04);
-  --elevate-2: hsl(210 40% 96% / 0.08);
+  --button-outline: hsl(222 18% 26%);
+  --badge-outline: hsl(42 30% 94% / 0.08);
+  --opaque-button-border-intensity: 6;
+  --elevate-1: hsl(43 70% 58% / 0.06);
+  --elevate-2: hsl(43 70% 58% / 0.12);
 
-  --background: 223 40% 8%;           /* deep navy, not black */
-  --foreground: 213 36% 94%;
-  --surface: 223 34% 11%;
-  --divider: 222 26% 17%;
-  --border: 222 24% 20%;
-  --card: 223 34% 11%;
-  --card-foreground: 213 36% 94%;
-  --card-border: 222 26% 17%;
-  --sidebar: 223 40% 8%;
-  --sidebar-foreground: 213 36% 94%;
-  --sidebar-border: 222 26% 15%;
-  --sidebar-primary: 236 84% 74%;
-  --sidebar-primary-foreground: 223 40% 10%;
-  --sidebar-accent: 238 40% 18%;
-  --sidebar-accent-foreground: 234 90% 84%;
-  --sidebar-ring: 236 84% 72%;
-  --popover: 223 32% 13%;
-  --popover-foreground: 213 36% 94%;
-  --popover-border: 222 24% 21%;
-  --primary: 236 84% 72%;             /* indigo lifted for dark contrast */
-  --primary-foreground: 223 40% 10%;
-  --primary-soft: 238 40% 18%;
-  --secondary: 238 34% 18%;
-  --secondary-foreground: 234 90% 86%;
-  --muted: 222 28% 15%;
-  --muted-foreground: 215 20% 67%;
-  --accent: 238 34% 18%;
-  --accent-foreground: 234 90% 86%;
-  --success: 156 62% 58%;
-  --success-foreground: 223 40% 10%;
-  --success-soft: 160 50% 14%;
-  --warning: 40 94% 62%;
-  --warning-foreground: 223 40% 10%;
-  --warning-soft: 36 60% 14%;
-  --destructive: 0 84% 66%;
-  --destructive-foreground: 223 40% 10%;
-  --destructive-soft: 0 50% 16%;
-  --input: 222 22% 27%;
-  --ring: 236 84% 72%;
-  --chart-1: 236 84% 72%;
-  --chart-2: 156 62% 58%;
-  --chart-3: 40 94% 62%;
-  --chart-4: 215 20% 60%;
-  --chart-5: 213 36% 94%;
+  --navy: 221 39% 11%;
+  --background: 223 38% 7%;
+  --foreground: 42 30% 94%;
+  --surface: 223 30% 10.5%;
+  --surface-sunken: 223 36% 6%;
+  --divider: 223 22% 15.5%;
+  --border: 223 20% 19%;
+  --card: 223 30% 10.5%;
+  --card-foreground: 42 30% 94%;
+  --card-border: 223 22% 16%;
+  --sidebar: 223 36% 8.5%;
+  --sidebar-foreground: 42 30% 94%;
+  --sidebar-border: 223 22% 14%;
+  --sidebar-primary: 43 70% 57%;
+  --sidebar-primary-foreground: 223 40% 8%;
+  --sidebar-accent: 42 32% 14%;
+  --sidebar-accent-foreground: 42 30% 96%;
+  --sidebar-ring: 43 78% 62%;
+  --popover: 223 28% 12%;
+  --popover-foreground: 42 30% 94%;
+  --popover-border: 223 20% 20%;
+  --primary: 43 70% 57%;
+  --primary-hover: 43 74% 63%;
+  --primary-pressed: 42 64% 50%;
+  --primary-foreground: 223 40% 8%;
+  --primary-soft: 42 34% 13%;
+  --gold-ink: 43 80% 66%;
+  --secondary: 223 24% 14%;
+  --secondary-foreground: 42 30% 94%;
+  --muted: 223 24% 13%;
+  --muted-foreground: 220 14% 68%;
+  --accent: 42 34% 13%;
+  --accent-foreground: 42 30% 96%;
+  --success: 152 48% 56%;
+  --success-foreground: 223 40% 8%;
+  --success-soft: 155 36% 12%;
+  --warning: 38 86% 63%;
+  --warning-foreground: 223 40% 8%;
+  --warning-soft: 36 44% 12%;
+  --destructive: 0 84% 68%;
+  --destructive-foreground: 223 40% 8%;
+  --destructive-soft: 0 42% 14%;
+  --input: 223 16% 30%;
+  --ring: 43 78% 62%;
+  --chart-1: 43 70% 57%;
+  --chart-2: 152 48% 56%;
+  --chart-3: 42 30% 94%;
+  --chart-4: 220 14% 60%;
+  --chart-5: 38 86% 63%;
 
   --shadow-2xs: 0 0 0 0 transparent;
-  --shadow-xs: 0 1px 2px 0 hsl(223 60% 2% / 0.4);
+  --shadow-xs: 0 0 0 0 transparent;
   --shadow-sm: 0 1px 2px 0 hsl(223 60% 2% / 0.4);
-  --shadow: 0 2px 8px -2px hsl(223 60% 2% / 0.5);
-  --shadow-md: 0 6px 16px -6px hsl(223 60% 2% / 0.6);
-  --shadow-lg: 0 16px 40px -12px hsl(223 60% 2% / 0.7);
+  --shadow: 0 1px 2px 0 hsl(223 60% 2% / 0.4);
+  --shadow-md: 0 8px 20px -8px hsl(223 60% 2% / 0.6);
+  --shadow-lg: 0 20px 44px -16px hsl(223 60% 2% / 0.7);
   --shadow-xl: 0 24px 56px -16px hsl(223 60% 2% / 0.75);
   --shadow-2xl: 0 32px 72px -24px hsl(223 60% 2% / 0.8);
 }
+
 
 @layer base {
   * {
@@ -239,7 +255,7 @@
   html.dark { color-scheme: dark; }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-feature-settings: 'cv11', 'ss01';
+    font-feature-settings: 'cv11', 'ss01', 'cv05';
     text-rendering: optimizeLegibility;
   }
   html[lang='ar'] body {
@@ -247,32 +263,38 @@
     font-feature-settings: normal;
     line-height: 1.7;
   }
-  html[lang='ar'] .tracking-tight, html[lang='ar'] .tracking-wide, html[lang='ar'] .tracking-widest { letter-spacing: 0; }
+  html[lang='ar'] [class*='tracking-'] { letter-spacing: 0 !important; }
+  html[lang='ar'] .uppercase { text-transform: none; }
+  html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { line-height: 1.45; }
   :focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
     border-radius: 6px;
+    transition: outline-offset var(--duration-fast) ease-out;
   }
   button:focus-visible, a:focus-visible { outline-offset: 3px; }
-  ::selection { background: hsl(var(--primary) / 0.18); }
+  ::selection { background: hsl(var(--primary) / 0.28); }
 }
 
-.tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+.tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum', 'cv11'; }
+/* Hero financial figure: 32–48px, tabular, tight but readable. */
+.figure-hero { font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3rem); line-height: 1; font-weight: 600; letter-spacing: -0.025em; }
+.eyebrow { font-size: 12.5px; font-weight: 500; letter-spacing: 0.02em; color: hsl(var(--gold-ink)); }
 
-@keyframes sfos-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sfos-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes sfos-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sfos-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-@keyframes sfos-pop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes sfos-pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 .motion-rise { animation: sfos-rise var(--duration-slow) var(--ease-out-soft) both; }
 .motion-fade { animation: sfos-fade var(--duration-base) ease-out both; }
-.motion-pop { animation: sfos-pop 380ms var(--ease-out-soft) both; }
+.motion-pop { animation: sfos-pop 200ms var(--ease-out-soft) both; }
 .stagger > * { animation: sfos-rise var(--duration-slow) var(--ease-out-soft) both; }
-.stagger > *:nth-child(2) { animation-delay: 50ms; }
-.stagger > *:nth-child(3) { animation-delay: 100ms; }
-.stagger > *:nth-child(4) { animation-delay: 150ms; }
-.stagger > *:nth-child(5) { animation-delay: 200ms; }
-.stagger > *:nth-child(n+6) { animation-delay: 240ms; }
+.stagger > *:nth-child(2) { animation-delay: 30ms; }
+.stagger > *:nth-child(3) { animation-delay: 60ms; }
+.stagger > *:nth-child(4) { animation-delay: 90ms; }
+.stagger > *:nth-child(5) { animation-delay: 120ms; }
+.stagger > *:nth-child(n+6) { animation-delay: 140ms; }
 
 .skeleton-shimmer { position: relative; overflow: hidden; background: hsl(var(--muted)); }
 .skeleton-shimmer::after {

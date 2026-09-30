@@ -1,1 +1,2 @@
 - [Preview JSX instrumentation](preview-jsx.md) — explicit generic JSX arguments can break development preview despite a passing production build.
+- [Visual token verification](visual-token-verification.md) — a passing CSS build does not prove Tailwind semantic tokens reach the browser.

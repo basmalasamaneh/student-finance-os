@@ -2,20 +2,34 @@ import { formatMoney, type Money } from '@/lib/money';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { cn } from '@/lib/utils';
 
-type Size = 'sm' | 'md' | 'lg' | 'xl';
-type Tone = 'default' | 'muted' | 'positive' | 'negative';
+type Size = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
+/**
+ * Semantic tones:
+ * - default / negative: foreground (spending never screams red)
+ * - positive: calm success green, paired with "+" via showPlus
+ * - neutral / muted: secondary text
+ * - planned: intended, not yet happened → dotted underline
+ * - projected: an estimate → "≈" prefix, secondary text
+ * - highlight: gold ink for the one key figure in a view
+ */
+export type MoneyTone = 'default' | 'muted' | 'neutral' | 'positive' | 'negative' | 'planned' | 'projected' | 'highlight';
 
 const sizes: Record<Size, string> = {
   sm: 'text-sm font-medium',
   md: 'text-base font-semibold',
-  lg: 'text-2xl font-semibold tracking-tight',
-  xl: 'text-[40px] leading-none font-semibold tracking-tight md:text-5xl',
+  lg: 'text-2xl font-semibold tracking-[-0.015em]',
+  xl: 'text-[32px] leading-none font-semibold tracking-[-0.02em] md:text-[40px]',
+  hero: 'figure-hero',
 };
-const tones: Record<Tone, string> = {
+const tones: Record<MoneyTone, string> = {
   default: 'text-foreground',
   muted: 'text-muted-foreground',
+  neutral: 'text-muted-foreground',
   positive: 'text-success',
   negative: 'text-foreground',
+  planned: 'text-foreground underline decoration-muted-foreground/60 decoration-dotted decoration-[1.5px] underline-offset-[5px]',
+  projected: 'text-muted-foreground',
+  highlight: 'text-gold-ink',
 };
 
 /**
@@ -35,7 +49,7 @@ export function MoneyDisplay({
 }: {
   value: Money;
   size?: Size;
-  tone?: Tone;
+  tone?: MoneyTone;
   /** Prefix positive amounts with "+" (e.g. money in). */
   showPlus?: boolean;
   hidden?: boolean;
@@ -45,7 +59,7 @@ export function MoneyDisplay({
 }) {
   const { locale } = useI18n();
   const formatted = formatMoney(value, locale);
-  const text = showPlus && value.minor > 0 ? `+${formatted}` : formatted;
+  const prefix = tone === 'projected' ? '≈ ' : showPlus && value.minor > 0 ? '+' : '';
   if (hidden) {
     return (
       <span className={cn('tabular select-none', sizes[size], 'text-muted-foreground', className)} aria-label={hiddenLabel} data-testid={testId}>
@@ -55,7 +69,8 @@ export function MoneyDisplay({
   }
   return (
     <bdi dir="ltr" className={cn('tabular inline-block whitespace-nowrap', sizes[size], tones[tone], className)} data-testid={testId}>
-      {text}
+      {prefix}
+      {formatted}
     </bdi>
   );
 }

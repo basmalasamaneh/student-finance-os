@@ -24,9 +24,9 @@ function Choice<T extends string>({ name, value, options, onChange }: { name: st
             data-testid={`radio-${name.replace(/\s+/g, '-').toLowerCase()}-${o.value}`}
           >
             <input type="radio" className="sr-only" name={name} value={o.value} checked={checked} onChange={() => onChange(o.value)} />
-            {o.icon ? <span className={cn('[&_svg]:size-4', checked ? 'text-primary' : 'text-muted-foreground')} aria-hidden>{o.icon}</span> : null}
+            {o.icon ? <span className={cn('[&_svg]:size-4', checked ? 'text-gold-ink' : 'text-muted-foreground')} aria-hidden>{o.icon}</span> : null}
             <span lang={o.lang}>{o.label}</span>
-            {checked ? <Check className="ms-auto size-4 text-primary" aria-hidden /> : null}
+            {checked ? <Check className="ms-auto size-4 text-gold-ink" aria-hidden /> : null}
           </label>
         );
       })}

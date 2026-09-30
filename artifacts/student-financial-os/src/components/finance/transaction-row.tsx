@@ -34,27 +34,27 @@ export function TransactionRow({
   const { locale } = useI18n();
   const Icon = direction === 'in' ? ArrowDownLeft : direction === 'out' ? ArrowUpRight : Clock;
   return (
-    <li className="group flex items-center gap-4 py-3.5" data-testid={testId}>
+    <li className="flex min-h-16 items-center gap-4 py-3" data-testid={testId}>
       <span
         className={cn(
-          'grid size-10 shrink-0 place-items-center rounded-full',
+          'grid size-9 shrink-0 place-items-center rounded-full',
           direction === 'in' && 'bg-success-soft text-success',
-          direction === 'out' && 'bg-muted text-foreground',
+          direction === 'out' && 'bg-surface-sunken text-foreground/75',
           direction === 'pending' && 'bg-warning-soft text-warning',
         )}
         aria-hidden
       >
-        <Icon className="size-[18px] rtl:-scale-x-100" />
+        <Icon className="size-4 rtl:-scale-x-100" strokeWidth={1.9} />
       </span>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-medium">{title}</span>
-        <span className="truncate text-xs text-muted-foreground">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-[15px] font-medium">{title}</span>
+        <span className="truncate text-[13px] text-muted-foreground">
           {meta} · <time dateTime={date.toISOString()}>{formatDate(date, locale)}</time>
         </span>
       </div>
       <div className="flex flex-col items-end">
         <span className="sr-only">{directionLabel}</span>
-        <MoneyDisplay value={amount} size="sm" tone={direction === 'in' ? 'positive' : direction === 'pending' ? 'muted' : 'default'} showPlus={direction === 'in'} hidden={hidden} hiddenLabel={hiddenLabel} />
+        <MoneyDisplay value={amount} size="sm" className="text-[15px]" tone={direction === 'in' ? 'positive' : direction === 'pending' ? 'muted' : 'default'} showPlus={direction === 'in'} hidden={hidden} hiddenLabel={hiddenLabel} />
       </div>
     </li>
   );

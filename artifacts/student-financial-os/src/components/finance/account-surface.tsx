@@ -4,8 +4,9 @@ import { MoneyDisplay } from './money-display';
 import { cn } from '@/lib/utils';
 
 /**
- * Reusable account presentation surface. Presentational only — it receives
- * data from callers and never fetches or computes balances itself.
+ * Reusable account presentation surface — the "raised surface" level.
+ * Presentational only: receives data, never fetches or computes balances.
+ * `emphasis` adds a gold hairline, not a gold fill.
  */
 export function AccountSurface({
   name,
@@ -35,27 +36,27 @@ export function AccountSurface({
   return (
     <article
       className={cn(
-        'flex flex-col gap-6 rounded-xl border border-card-border bg-surface p-5 transition-shadow duration-200 hover:shadow-md md:p-6',
-        emphasis && 'border-primary/25 bg-primary-soft/40',
+        'relative flex flex-col gap-8 overflow-hidden rounded-xl border border-card-border bg-surface p-5 transition-colors duration-150 hover:border-input md:p-6',
         className,
       )}
       data-testid={testId}
     >
+      {emphasis ? <span aria-hidden className="absolute inset-x-0 top-0 h-0.5 bg-primary" /> : null}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary [&_svg]:size-5" aria-hidden>
+          <span className="grid size-9 place-items-center rounded-lg bg-surface-sunken text-foreground/80 [&_svg]:size-[18px]" aria-hidden>
             {icon}
           </span>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">{name}</span>
-            <span className="text-xs text-muted-foreground">{kind}</span>
+            <span className="text-sm font-medium">{name}</span>
+            <span className="text-[13px] text-muted-foreground">{kind}</span>
           </div>
         </div>
         {badge}
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <MoneyDisplay value={amount} size="lg" hidden={hidden} hiddenLabel={hiddenLabel} />
-        {meta ? <span className="text-xs text-muted-foreground">{meta}</span> : null}
+        {meta ? <span className="text-[13px] text-muted-foreground">{meta}</span> : null}
       </div>
     </article>
   );
