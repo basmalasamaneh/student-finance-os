@@ -90,3 +90,28 @@ export function CostSources({ plan, t }: { plan: FinancialPlan; t: Tx }) {
     </Collapsible>
   );
 }
+
+/** Goal forecast extension: effective savings = max(manual envelope, dated goal requirements) per currency — never their sum. */
+export function GoalSavingsPanel({ plan, t }: { plan: FinancialPlan; t: Tx }) {
+  const rows = plan.goalSavings ?? [];
+  if (!rows.length) return null;
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-card-border bg-card p-4 md:p-5" data-testid="panel-goal-savings">
+      <p className="type-label">{t('Savings: manual plan vs goal requirements', 'الادخار: الخطة اليدوية مقابل متطلبات الأهداف')}</p>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {rows.map((r) => {
+          const goalsWin = r.goalRequired.minor > r.manualSavings.minor;
+          return (
+            <dl key={r.currency} className="divide-y divide-divider" data-testid={`card-goal-savings-${r.currency}`}>
+              <Term label={`${t('Manual savings lines', 'بنود الادخار اليدوية')} · ${r.currency}`}><MoneyDisplay value={r.manualSavings} size="sm" tone="planned" /></Term>
+              <Term label={t('Dated goals require', 'تتطلب الأهداف المؤرخة')}><MoneyDisplay value={r.goalRequired} size="sm" tone="planned" /></Term>
+              <Term label={t('Counted in plan (the larger)', 'المحتسب في الخطة (الأكبر)')}><MoneyDisplay value={r.effectiveSavings} size="sm" tone="highlight" testId={`text-effective-savings-${r.currency}`} /></Term>
+              <p className="type-caption pt-2 text-muted-foreground">{goalsWin ? t('Your goals need more than your manual savings lines, so the goal requirement sets the floor.', 'أهدافك تحتاج أكثر من بنود الادخار اليدوية، لذا يحدد متطلب الأهداف الحد الأدنى.') : t('Your manual savings already cover your goals, so they aren’t added twice.', 'ادخارك اليدوي يغطي أهدافك، لذا لا يُحتسبان مرتين.')}
+                {r.undatedActiveCount > 0 ? ` ${t(`${r.undatedActiveCount} active goal(s) without a date aren’t forecast.`, `${r.undatedActiveCount} هدف نشط بلا تاريخ غير متوقع.`)}` : ''}</p>
+            </dl>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

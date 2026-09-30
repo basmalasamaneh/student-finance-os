@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import { GoalsHomeBlock } from './goals-block';
 import type { Profile } from '@workspace/api-client-react';
 import { formatDate } from '@workspace/finance-core';
 import { MoneyDisplay } from '@/components/finance/money-display';
@@ -130,7 +131,7 @@ export function SchoolPlanning({ profile, incomes, today, t }: { profile: Profil
             : <><p className="type-label">{t('Date unknown', 'الموعد غير معروف')}</p><p className="type-caption text-muted-foreground">{t('Add an expected date to an active parent allowance to see it here.', 'أضف تاريخاً متوقعاً لمصروف أهل نشط ليظهر هنا.')}</p></>}
         </div>
         <Unavailable testId="status-school-spending" label={t('Spending', 'الإنفاق')} body={t('Appears once purchases are recorded. Nothing is estimated from your allowance.', 'يظهر بعد تسجيل المشتريات. لا نقدّر شيئاً من مصروفك.')} />
-        <Unavailable testId="status-school-savings" label={t('Savings', 'الادخار')} body={t('Savings goals are not available yet.', 'أهداف الادخار غير متاحة بعد.')} />
+        <div data-testid="status-school-savings"><p className="type-caption pb-1 text-muted-foreground">{t('Savings', 'الادخار')}</p><GoalsHomeBlock t={t} limit={1} /></div>
       </div>
     </HomeBlock>
   );

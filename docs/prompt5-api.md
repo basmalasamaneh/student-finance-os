@@ -1,5 +1,7 @@
 # Prompt 5 backend/frontend API handoff
 
+Prompt 7 extension: `relatedGoalId` is now populated on savings contribution ledger entries; `goalFundingSource` distinguishes `student_account` and `parent_simulated`. Filter options contain real owner goal IDs plus additive `goalOptions:[{id,name}]`. Other future relationship fields remain nullable. The original Prompt 5-only exclusions below describe historical scope; see `docs/prompt7-api.md`.
+
 Source of truth: `lib/api-spec/openapi.yaml`. Generated with `pnpm --filter @workspace/api-spec run codegen`; import hooks and DTOs from `@workspace/api-client-react`. All calls use the existing session and `/api` base URL. Student role required.
 
 ## Generated hooks

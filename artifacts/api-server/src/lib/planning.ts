@@ -67,5 +67,6 @@ export function resolveCosts(profile: readonly CostEntry[], recurring: readonly 
   })).sort((a, b) => a.category.localeCompare(b.category) || a.amount.currency.localeCompare(b.amount.currency));
 }
 export function isBudgetDebit(row: { direction: string; kind: string; serviceId?: string | null }): boolean {
+  if (row.kind === "savings") return row.direction === "credit";
   return row.direction === "debit" && (row.kind === "payment" || row.kind === "withdrawal");
 }

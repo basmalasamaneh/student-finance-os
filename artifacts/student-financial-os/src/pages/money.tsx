@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import { CreditCard, ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Banknote, HandCoins, Inbox, Landmark, Plus, ShoppingBag, Wallet } from 'lucide-react';
 import {
-  getListFinanceAccountsQueryKey, getListFinanceTransactionsQueryKey, getListMoneyRequestsQueryKey,
+  getGetFinanceSummaryQueryKey, getListFinanceAccountsQueryKey, getListFinanceTransactionsQueryKey, useGetFinanceSummary, getListMoneyRequestsQueryKey,
   useListFinanceAccounts, useListFinanceTransactions, useListMoneyRequests,
   type FinanceMovementInputKind, type FinanceTransaction,
 } from '@workspace/api-client-react';
@@ -39,6 +39,7 @@ export default function MoneyPage() {
   const accountsQ = useListFinanceAccounts({ query: { queryKey: getListFinanceAccountsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
   const txQ = useListFinanceTransactions({ query: { queryKey: getListFinanceTransactionsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
   const reqQ = useListMoneyRequests({ query: { queryKey: getListMoneyRequestsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
+  const summaryQ = useGetFinanceSummary({ query: { queryKey: getGetFinanceSummaryQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
   const [selected, setSelected] = useState<string>();
   const [movement, setMovement] = useState<FinanceMovementInputKind | null>(null);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -75,7 +76,18 @@ export default function MoneyPage() {
                 <div className="flex flex-wrap items-end gap-x-10 gap-y-3" data-testid="text-totals">
                   {totals.map((m) => m.value ? <MoneyDisplay key={m.currency} value={m.value} size="hero" /> : <p key={m.currency} role="alert" className="type-label text-destructive">{t(`${m.currency} total is too large to display exactly.`, `إجمالي ${m.currency} أكبر من أن يُعرض بدقة.`)}</p>)}
                 </div>
-                <p className="type-caption text-muted-foreground">{t('Currencies are never mixed or converted.', 'لا تُخلط العملات ولا تُحوَّل.')}</p>
+                {summaryQ.data?.cashflow.some((c) => (c.reservedBalance?.minor ?? 0) > 0) ? (
+                  <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="list-balance-breakdown">
+                    {summaryQ.data.cashflow.filter((c) => c.reservedBalance && c.netBalance).map((c) => (
+                      <div key={c.currency} className="type-caption flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg bg-surface-sunken px-3 py-2">
+                        <span><dt className="inline text-muted-foreground">{t('Available', 'المتاح')} </dt><dd className="inline"><MoneyDisplay value={c.balance} size="sm" className="inline !text-xs" /></dd></span>
+                        <span><dt className="inline text-muted-foreground">+ {t('Reserved in goals', 'محجوز في الأهداف')} </dt><dd className="inline"><MoneyDisplay value={c.reservedBalance!} size="sm" tone="highlight" className="inline !text-xs" testId={`text-money-reserved-${c.currency}`} /></dd></span>
+                        <span><dt className="inline text-muted-foreground">= {t('Net', 'الصافي')} </dt><dd className="inline"><MoneyDisplay value={c.netBalance!} size="sm" className="inline !text-xs" testId={`text-money-net-${c.currency}`} /></dd></span>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <p className="type-caption text-muted-foreground">{t('Totals above are spendable. Money in savings goals is reserved and can’t be spent or sent. Currencies are never mixed or converted.', 'الإجماليات أعلاه قابلة للإنفاق. مال أهداف الادخار محجوز ولا يمكن إنفاقه أو إرساله. لا تُخلط العملات ولا تُحوَّل.')} <Link href="/goals" className="text-gold-ink underline-offset-4 hover:underline" data-testid="link-money-goals">{t('Goals', 'الأهداف')}</Link></p>
               </section>
 
               <nav aria-label={t('Money actions', 'إجراءات المال')} className="grid grid-cols-3 gap-2 min-[400px]:grid-cols-5 lg:grid-cols-9" data-testid="grid-actions">

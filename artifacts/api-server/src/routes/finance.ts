@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request } from "express";
-import { and, desc, eq, or, sql } from "drizzle-orm";
+import { and, desc, eq, ne, or, sql } from "drizzle-orm";
 import { db, financeAccounts, financeTransactions, moneyRequests, users } from "@workspace/db";
 import {
   CreateFinanceAccountBody, CreateFinanceAccountResponse, ListFinanceAccountsResponse, GetFinanceAccountResponse,
@@ -26,7 +26,7 @@ const key = (req: Request) => req.get("Idempotency-Key");
 router.use(historyRouter);
 
 router.get("/finance/accounts", async (req, res) => {
-  const rows = await db.select().from(financeAccounts).where(eq(financeAccounts.userId, owner(req)));
+  const rows = await db.select().from(financeAccounts).where(and(eq(financeAccounts.userId, owner(req)), ne(financeAccounts.type, "goal_reserve")));
   res.json(ListFinanceAccountsResponse.parse(rows.map(accountDto)));
 });
 router.post("/finance/accounts", async (req, res) => {
@@ -40,13 +40,13 @@ router.post("/finance/accounts", async (req, res) => {
 });
 router.get("/finance/accounts/:id", async (req, res) => {
   const [row] = await db.select().from(financeAccounts).where(and(eq(financeAccounts.id, id(req)), eq(financeAccounts.userId, owner(req))));
-  if (!row) throw new ApiError("NOT_FOUND");
+  if (!row || row.type === "goal_reserve") throw new ApiError("NOT_FOUND");
   res.json(GetFinanceAccountResponse.parse(accountDto(row)));
 });
 router.get("/finance/recipients/:id", async (req, res) => {
   owner(req);
   const [row] = await db.select({ accountId: financeAccounts.id, currency: financeAccounts.currency, name: users.name, role: users.role })
-    .from(financeAccounts).innerJoin(users, eq(financeAccounts.userId, users.id)).where(eq(financeAccounts.id, id(req)));
+    .from(financeAccounts).innerJoin(users, eq(financeAccounts.userId, users.id)).where(and(eq(financeAccounts.id, id(req)), ne(financeAccounts.type, "goal_reserve")));
   if (!row || row.role !== "student") throw new ApiError("NOT_FOUND");
   res.json(LookupFinanceRecipientResponse.parse({ accountId: row.accountId, currency: row.currency, name: row.name }));
 });
@@ -100,7 +100,7 @@ router.post("/finance/requests", async (req, res) => {
       tx.select().from(financeAccounts).where(eq(financeAccounts.id, input.recipientAccountId)).then(r => r[0]),
       tx.select().from(financeAccounts).where(eq(financeAccounts.id, input.payerAccountId)).then(r => r[0]),
     ]);
-    if (!recipient || recipient.userId !== userId || !payer) throw new ApiError("NOT_FOUND");
+    if (!recipient || recipient.userId !== userId || !payer || recipient.type === "goal_reserve" || payer.type === "goal_reserve") throw new ApiError("NOT_FOUND");
     if (payer.userId === userId || recipient.currency !== payer.currency || payer.currency !== input.amount.currency) throw new ApiError("BAD_REQUEST");
     const [payerUser] = await tx.select({ role: users.role }).from(users).where(eq(users.id, payer.userId));
     if (payerUser?.role !== "student") throw new ApiError("NOT_FOUND");
@@ -143,14 +143,14 @@ router.get("/finance/summary", async (req, res) => {
     db.select().from(moneyRequests).where(and(or(eq(moneyRequests.issuerId, userId), eq(moneyRequests.payerId, userId)), eq(moneyRequests.status, "pending"))).orderBy(desc(moneyRequests.createdAt)).limit(20),
   ]);
   const since = new Date(); since.setUTCDate(1); since.setUTCHours(0, 0, 0, 0);
-  const totals = new Map<string, { balance: bigint; income: bigint; spending: bigint }>();
-  for (const a of accounts) { const t = totals.get(a.currency) ?? { balance: 0n, income: 0n, spending: 0n }; t.balance = checked(t.balance + a.balanceMinor); totals.set(a.currency, t); }
+  const totals = new Map<string, { balance: bigint; reserved: bigint; income: bigint; spending: bigint }>();
+  for (const a of accounts) { const t = totals.get(a.currency) ?? { balance: 0n, reserved: 0n, income: 0n, spending: 0n }; if (a.type === "goal_reserve") t.reserved = checked(t.reserved + a.balanceMinor); else t.balance = checked(t.balance + a.balanceMinor); totals.set(a.currency, t); }
   const categories = new Map<string, bigint>();
   for (const tx of txs) {
     if (tx.createdAt < since) continue;
-    const t = totals.get(tx.currency) ?? { balance: 0n, income: 0n, spending: 0n };
+    const t = totals.get(tx.currency) ?? { balance: 0n, reserved: 0n, income: 0n, spending: 0n };
     // Transfers are movements between accounts, not earned income or spending.
-    if (tx.category !== "transfer") {
+    if (tx.category !== "transfer" && tx.goalFundingSource !== "student_account") {
       if (tx.direction === "credit") t.income = checked(t.income + tx.amountMinor);
       else {
         t.spending = checked(t.spending + tx.amountMinor);
@@ -167,6 +167,7 @@ router.get("/finance/summary", async (req, res) => {
   res.json(GetFinanceSummaryResponse.parse({
     cashflow: [...totals].map(([currency, t]) => ({
       currency, balance: { currency, minor: Number(t.balance) },
+      reservedBalance: { currency, minor: Number(t.reserved) }, netBalance: { currency, minor: Number(checked(t.balance + t.reserved)) },
       monthlyIncome: { currency, minor: Number(t.income) }, monthlySpending: { currency, minor: Number(t.spending) },
     })),
     categoryTotals: [...categories].map(([k, v]) => {

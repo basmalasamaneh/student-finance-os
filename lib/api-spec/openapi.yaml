@@ -20,7 +20,104 @@ tags:
     description: Simulated campus catalog
   - name: planning
     description: Owner-only student budgets and estimates
+  - name: goals
+    description: Reserved student savings and consent-scoped simulated parent funding
 paths:
+  /goals:
+    get:
+      operationId: listSavingsGoals
+      tags: [goals]
+      responses:
+        "200": { description: All owner goals including archived, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoalsOverview" } } } }
+    post:
+      operationId: createSavingsGoal
+      tags: [goals]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoalInput" } } } }
+      responses:
+        "201": { description: Created at zero reserved balance, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoal" } } } }
+  /goals/{id}:
+    parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+    get:
+      operationId: getSavingsGoal
+      tags: [goals]
+      responses:
+        "200": { description: Owner goal, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoal" } } } }
+    put:
+      operationId: updateSavingsGoal
+      tags: [goals]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoalInput" } } } }
+      responses:
+        "200": { description: Edited metadata without changing reserved funds, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoal" } } } }
+  /goals/{id}/status:
+    post:
+      operationId: changeSavingsGoalStatus
+      tags: [goals]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoalAction" } } } }
+      responses:
+        "200": { description: Updated status; archived funds remain reserved, content: { application/json: { schema: { $ref: "#/components/schemas/SavingsGoal" } } } }
+  /goals/{id}/contributions:
+    post:
+      operationId: contributeToSavingsGoal
+      tags: [goals]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/StudentGoalContributionInput" } } } }
+      responses:
+        "201": { description: Atomic available-to-reserved movement, content: { application/json: { schema: { $ref: "#/components/schemas/GoalContributionReceipt" } } } }
+  /goals/{id}/history:
+    get:
+      operationId: getSavingsGoalHistory
+      tags: [goals]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200": { description: Owner-only immutable goal events newest first, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/GoalHistoryEntry" } } } } }
+  /goals/{id}/invitations:
+    parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+    get:
+      operationId: listGoalInvitations
+      tags: [goals]
+      responses:
+        "200": { description: Owner-only consents; never returns raw tokens, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/GoalInvitation" } } } } }
+    post:
+      operationId: createGoalInvitation
+      tags: [goals]
+      description: Explicit limited consent to one authenticated parent to view this goal's public funding summary and simulate funding. Token is shown only in this response, hashed at rest, single-use and expires after seven days. No idempotency response storage of the raw token.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/GoalConsentInput" } } } }
+      responses:
+        "201": { description: Share the token privately; no email is sent, content: { application/json: { schema: { $ref: "#/components/schemas/GoalInvitationCreated" } } } }
+  /goals/{id}/invitations/{invitationId}:
+    delete:
+      operationId: revokeGoalInvitation
+      tags: [goals]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - { in: path, name: invitationId, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "204": { description: Token and any redeemed grant revoked; funds retained }
+  /parent/goals:
+    get:
+      operationId: listParentFundingGoals
+      tags: [goals]
+      responses:
+        "200": { description: Parent principal only; exact goals with unrevoked consent, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/ParentFundingGoal" } } } } }
+  /parent/goal-invitations/redeem:
+    post:
+      operationId: redeemGoalInvitation
+      tags: [goals]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/GoalInvitationRedemption" } } } }
+      responses:
+        "200": { description: Authenticated parent receives limited exact-goal consent, content: { application/json: { schema: { $ref: "#/components/schemas/ParentFundingGoal" } } } }
+  /parent/goals/{id}/contributions:
+    post:
+      operationId: fundSavingsGoalAsParent
+      tags: [goals]
+      description: Authenticated parent principal with current exact-goal consent only. Simulated external funding, no bank connection and no student wallet deduction.
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ParentGoalContributionInput" } } } }
+      responses:
+        "201": { description: Limited receipt with no student account or profile data, content: { application/json: { schema: { $ref: "#/components/schemas/ParentGoalContributionReceipt" } } } }
   /planning:
     get:
       operationId: getFinancialPlan
@@ -531,6 +628,171 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    GoalPositiveAmount:
+      type: object
+      additionalProperties: false
+      required: [minor, currency]
+      properties:
+        minor: { type: integer, minimum: 1, maximum: 9007199254740991 }
+        currency: { type: string, enum: [ILS, USD, JOD] }
+    SavingsGoalInput:
+      type: object
+      additionalProperties: false
+      required: [name, target, targetDate, category, priority, notes]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        target: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        targetDate: { type: [string, "null"], format: date }
+        category: { type: string, minLength: 1, maxLength: 80 }
+        priority: { type: string, enum: [low, medium, high] }
+        notes: { type: string, maxLength: 2000 }
+    SavingsGoalStatus:
+      type: string
+      enum: [active, paused, completed, archived]
+    SavingsGoal:
+      allOf:
+        - { $ref: "#/components/schemas/SavingsGoalInput" }
+        - type: object
+          required: [id, currency, current, status, percentage, remaining, requiredContributionMonthly, estimatedCompletion, createdAt, updatedAt]
+          properties:
+            id: { type: string, format: uuid }
+            currency: { type: string, enum: [ILS, USD, JOD] }
+            current: { $ref: "#/components/schemas/Amount" }
+            status: { $ref: "#/components/schemas/SavingsGoalStatus" }
+            percentage: { type: number, minimum: 0, maximum: 100 }
+            remaining: { $ref: "#/components/schemas/Amount" }
+            requiredContributionMonthly:
+              description: Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.
+              anyOf: [{ $ref: "#/components/schemas/Amount" }, { type: "null" }]
+            estimatedCompletion: { type: [string, "null"], format: date }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    SavingsGoalAction:
+      type: object
+      additionalProperties: false
+      required: [action]
+      properties:
+        action: { type: string, enum: [pause, resume, complete, archive] }
+    GoalCurrencyTotals:
+      type: object
+      required: [currency, available, reserved, netBalance, requiredContributionMonthly]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        available: { $ref: "#/components/schemas/Amount" }
+        reserved: { $ref: "#/components/schemas/Amount" }
+        netBalance: { $ref: "#/components/schemas/Amount" }
+        requiredContributionMonthly: { $ref: "#/components/schemas/Amount" }
+    GoalFilterOption:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+    GoalPlanSavings:
+      type: object
+      required: [currency, goalRequired, manualSavings, effectiveSavings, undatedActiveCount, policy]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        goalRequired: { $ref: "#/components/schemas/Amount" }
+        manualSavings: { $ref: "#/components/schemas/Amount" }
+        effectiveSavings: { $ref: "#/components/schemas/Amount" }
+        undatedActiveCount: { type: integer, minimum: 0 }
+        policy: { type: string, enum: [maximum_manual_or_goals] }
+    SavingsGoalsOverview:
+      type: object
+      required: [goals, totals, activeCount, completedCount, policy]
+      properties:
+        goals: { type: array, items: { $ref: "#/components/schemas/SavingsGoal" } }
+        totals: { type: array, items: { $ref: "#/components/schemas/GoalCurrencyTotals" } }
+        activeCount: { type: integer, minimum: 0 }
+        completedCount: { type: integer, minimum: 0 }
+        policy: { type: string }
+    StudentGoalContributionInput:
+      type: object
+      additionalProperties: false
+      required: [accountId, amount]
+      properties:
+        accountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        note: { type: string, maxLength: 500 }
+    ParentGoalContributionInput:
+      type: object
+      additionalProperties: false
+      required: [amount, simulatedFundingAcknowledged]
+      properties:
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        simulatedFundingAcknowledged: { type: boolean, enum: [true] }
+        note: { type: string, maxLength: 500 }
+    GoalHistoryEntry:
+      type: object
+      required: [id, goalId, action, source, amount, transactionIds, note, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        goalId: { type: string, format: uuid }
+        action: { type: string, enum: [created, edited, contribution, paused, resumed, completed, archived] }
+        source: { type: [string, "null"], enum: [student_account, parent_simulated, null] }
+        amount:
+          anyOf: [{ $ref: "#/components/schemas/Amount" }, { type: "null" }]
+        transactionIds: { type: array, items: { type: string, format: uuid } }
+        note: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+    GoalContributionReceipt:
+      type: object
+      required: [goal, entry, transactions]
+      properties:
+        goal: { $ref: "#/components/schemas/SavingsGoal" }
+        entry: { $ref: "#/components/schemas/GoalHistoryEntry" }
+        transactions: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } }
+    GoalConsentInput:
+      type: object
+      additionalProperties: false
+      required: [limitedConsentAcknowledged]
+      properties:
+        limitedConsentAcknowledged: { type: boolean, enum: [true] }
+    GoalInvitation:
+      type: object
+      required: [id, goalId, expiresAt, redeemedAt, revokedAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        goalId: { type: string, format: uuid }
+        expiresAt: { type: string, format: date-time }
+        redeemedAt: { type: [string, "null"], format: date-time }
+        revokedAt: { type: [string, "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+    GoalInvitationCreated:
+      type: object
+      required: [invitation, token]
+      properties:
+        invitation: { $ref: "#/components/schemas/GoalInvitation" }
+        token: { type: string }
+    GoalInvitationRedemption:
+      type: object
+      additionalProperties: false
+      required: [token, limitedConsentAcknowledged]
+      properties:
+        token: { type: string, minLength: 43, maxLength: 128 }
+        limitedConsentAcknowledged: { type: boolean, enum: [true] }
+    ParentFundingGoal:
+      type: object
+      description: Deliberately excludes student identity, accounts, notes, history and unrelated goals.
+      required: [id, name, target, current, remaining, status, targetDate]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        target: { $ref: "#/components/schemas/Amount" }
+        current: { $ref: "#/components/schemas/Amount" }
+        remaining: { $ref: "#/components/schemas/Amount" }
+        status: { $ref: "#/components/schemas/SavingsGoalStatus" }
+        targetDate: { type: [string, "null"], format: date }
+    ParentGoalContributionReceipt:
+      type: object
+      required: [id, goal, amount, source, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        goal: { $ref: "#/components/schemas/ParentFundingGoal" }
+        amount: { $ref: "#/components/schemas/Amount" }
+        source: { type: string, enum: [parent_simulated] }
+        createdAt: { type: string, format: date-time }
     PlanningCategory:
       type: string
       enum: [tuition, registration, university_fees, transportation, food, cafeteria, housing, accommodation, rent, utilities, internet, books, bookstore, printing, academic_supplies, subscriptions, personal, shopping, savings, fees, campus_transportation, other]
@@ -647,6 +909,10 @@ components:
         estimate: { type: boolean }
         policy: { type: string }
         totals: { type: array, items: { $ref: "#/components/schemas/PlanTotals" } }
+        goalSavings:
+          description: Additive goal forecast metadata; plannedSavings uses max(manual savings, goal requirement) per currency, not their sum.
+          type: array
+          items: { $ref: "#/components/schemas/GoalPlanSavings" }
         costs: { type: array, items: { $ref: "#/components/schemas/PlanCost" } }
         income: { type: array, items: { $ref: "#/components/schemas/PlanIncome" } }
         irregularIncome: { type: array, items: { $ref: "#/components/schemas/Income" } }
@@ -789,6 +1055,7 @@ components:
               name: { type: string }
               arabicName: { type: string }
         goals: { type: array, items: { type: string, format: uuid } }
+        goalOptions: { type: array, items: { $ref: "#/components/schemas/GoalFilterOption" } }
     FinanceTransaction:
       type: object
       required: [id, userId, accountId, kind, type, category, direction, amount, balanceAfter, status, createdAt, description, source, destination, relatedGoalId, relatedBudgetId, parentTransferId, campusServiceId, universityId, campusId, recurringExpenseId]
@@ -814,6 +1081,7 @@ components:
         destination: { type: ["string", "null"] }
         accountName: { type: string }
         relatedGoalId: { type: ["string", "null"], format: uuid }
+        goalFundingSource: { type: [string, "null"], enum: [student_account, parent_simulated, null] }
         relatedBudgetId: { type: ["string", "null"], format: uuid }
         parentTransferId: { type: ["string", "null"], format: uuid }
         campusServiceId: { type: ["string", "null"], format: uuid }
@@ -835,6 +1103,8 @@ components:
       properties:
         currency: { type: string, enum: [ILS, USD, JOD] }
         balance: { $ref: "#/components/schemas/Amount" }
+        reservedBalance: { $ref: "#/components/schemas/Amount" }
+        netBalance: { $ref: "#/components/schemas/Amount" }
         monthlyIncome: { $ref: "#/components/schemas/Amount" }
         monthlySpending: { $ref: "#/components/schemas/Amount" }
     FinanceSummary:

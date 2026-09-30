@@ -32,14 +32,16 @@ export const transactionDto = (t: typeof financeTransactions.$inferSelect, conte
     add: "Simulated funds added", receive: "Simulated funds received", deposit: "Simulated deposit",
     withdrawal: "Simulated withdrawal", payment: "Simulated payment", transfer: "Account transfer",
     send: "Student transfer", request_fulfillment: "Fulfilled money request",
+    savings: t.goalFundingSource === "parent_simulated" ? "Simulated parent goal funding" : "Reserved goal contribution",
   } as Record<string, string>)[t.kind] ?? "Ledger transaction",
   source: t.direction === "credit"
-    ? t.counterpartyAccountId ? context?.counterpartyName ?? "Another account" : "External (simulated)"
+    ? t.goalFundingSource === "parent_simulated" ? "Parent external funding (simulated)" : t.counterpartyAccountId ? context?.counterpartyName ?? "Another account" : "External (simulated)"
     : context?.accountName ?? "Account",
   destination: t.direction === "debit"
     ? t.counterpartyAccountId ? context?.counterpartyName ?? "Another account" : t.merchantName ?? "External (simulated)"
     : context?.accountName ?? "Account",
   relatedGoalId: t.relatedGoalId, relatedBudgetId: t.relatedBudgetId,
+  goalFundingSource: t.goalFundingSource,
   parentTransferId: t.parentTransferId, campusServiceId: t.serviceId,
   universityId: t.universityId ?? context?.universityId ?? null,
   campusId: t.campusId ?? context?.campusId ?? null,
@@ -53,13 +55,17 @@ export const requestDto = (r: typeof moneyRequests.$inferSelect) => ({
   ...(r.note ? { note: r.note } : {}), ...(r.transactionId ? { transactionId: r.transactionId } : {}),
   createdAt: r.createdAt.toISOString(),
 });
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
-export async function lockedAccounts(tx: Tx, ids: string[]) {
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export function assertOrdinaryAccount(account: { type: string }) {
+  if (account.type === "goal_reserve") throw new ApiError("NOT_FOUND");
+}
+export async function lockedAccounts(tx: Tx, ids: string[], allowGoalReserve = false) {
   // Stable lock ordering prevents cycles when two senders exchange money.
   const rows = [];
   for (const id of [...new Set(ids)].sort()) {
     const [row] = await tx.select().from(financeAccounts).where(eq(financeAccounts.id, id)).for("update");
     if (!row) throw new ApiError("NOT_FOUND");
+    if (!allowGoalReserve) assertOrdinaryAccount(row);
     rows.push(row);
   }
   return new Map(rows.map(row => [row.id, row]));
@@ -68,7 +74,9 @@ export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect,
   kind: string; category: string; counterpartyAccountId?: string; serviceId?: string;
   merchantName?: string; items?: unknown; note?: string;
   universityId?: string; campusId?: string; universityName?: string; campusName?: string;
+  relatedGoalId?: string; goalFundingSource?: "student_account" | "parent_simulated"; goalFundingActorId?: string;
 }) {
+  if (account.type === "goal_reserve" && !(details.relatedGoalId && details.kind === "savings" && delta > 0n)) throw new ApiError("NOT_FOUND");
   if (delta < 0n && account.balanceMinor < -delta) throw new ApiError("INSUFFICIENT_FUNDS");
   const next = checked(account.balanceMinor + delta);
   await tx.update(financeAccounts).set({ balanceMinor: next }).where(eq(financeAccounts.id, account.id));
@@ -80,6 +88,7 @@ export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect,
     merchantName: details.merchantName, items: details.items, note: details.note,
     universityId: details.universityId, campusId: details.campusId,
     universityName: details.universityName, campusName: details.campusName,
+    relatedGoalId: details.relatedGoalId, goalFundingSource: details.goalFundingSource, goalFundingActorId: details.goalFundingActorId,
   }).returning();
   await tx.insert(financeEvents).values({
     transactionId: entry!.id, userId: account.userId, eventType: "finance.transaction.posted",
@@ -97,10 +106,10 @@ export async function move(tx: Tx, senderId: string, recipientId: string, value:
   await post(tx, recipient, value, { kind, category: "transfer", counterpartyAccountId: sender.id, note });
   return sent;
 }
-export async function once<T>(owner: string, key: string | undefined, operation: string, input: unknown, run: (tx: Tx) => Promise<T>): Promise<T> {
+export async function once<T>(owner: string, key: string | undefined, operation: string, input: unknown, run: (tx: Tx) => Promise<T>, transaction?: Tx): Promise<T> {
   if (!key || !/^[a-zA-Z0-9_:.~-]{8,128}$/.test(key)) throw new ApiError("BAD_REQUEST");
   const digest = createHash("sha256").update(JSON.stringify({ operation, input })).digest("hex");
-  return db.transaction(async tx => {
+  const execute = async (tx: Tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${owner + ":" + key}, 0))`);
     const [existing] = await tx.select().from(financeIdempotency).where(and(eq(financeIdempotency.userId, owner), eq(financeIdempotency.key, key)));
     if (existing) {
@@ -110,5 +119,6 @@ export async function once<T>(owner: string, key: string | undefined, operation:
     const result = await run(tx);
     await tx.insert(financeIdempotency).values({ userId: owner, key, fingerprint: digest, response: result });
     return result;
-  });
+  };
+  return transaction ? execute(transaction) : db.transaction(execute);
 }

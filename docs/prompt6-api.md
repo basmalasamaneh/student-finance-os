@@ -1,5 +1,7 @@
 # Prompt 6 planning API handoff
 
+Prompt 7 extension: savings budgets now accept category `savings` and count each reserve credit once; student paired debits are excluded. Planning adds `goalSavings` metadata and uses max(manual monthly savings envelope, summed active dated goal requirements) per currency. See `docs/prompt7-api.md`; the original Prompt 6-only exclusions below describe its historical scope.
+
 Source contract: `lib/api-spec/openapi.yaml`. Generated with `pnpm --filter @workspace/api-spec run codegen`; import DTOs/hooks from `@workspace/api-client-react`. Student session required on all `/api/planning` endpoints. Mutation requests require same-origin Origin and `X-CSRF-Intent: 1` (existing generated fetcher). No userId or balance is accepted from clients.
 
 - `useGetFinancialPlan()` returns `FinancialPlan`: `asOf`, `estimate:true`, `policy`, `totals[]`, `costs[]`, `income[]`, `irregularIncome[]`, `irregularCount`, `upcoming[]`, `budgets[]`, `budgetCounts:{weekly,monthly}`, `recurringExpenses[]`, `lines[]`, `housing?`, `commute?`, `scholarships[]`, `commuteOverride`. `totals[]` contains a currency row for each currency represented in any owner profile/income/budget/recurring/line record, including a zero total when only an excluded irregular income or budget exists; an untouched owner has `totals:[]`. Use `getGetFinancialPlanQueryKey()` to invalidate after all planning mutations, profile/income changes and campus/finance payments. Also refetch on focus/mount for other-session payments.

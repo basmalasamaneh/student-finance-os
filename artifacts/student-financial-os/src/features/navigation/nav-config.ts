@@ -53,7 +53,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'transactions', path: '/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', mobileLabelKey: 'nav.m.activity', group: 'money', roles: ['student'], implemented: true },
   { id: 'upcoming', path: '/upcoming', icon: CalendarClock, labelKey: 'nav.upcoming', group: 'money', roles: ['student'], implemented: false },
   { id: 'plan', path: '/plan', icon: MapIcon, labelKey: 'nav.plan', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 4 } },
-  { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: false, mobile: { student: 5 } },
+  { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 5 } },
   { id: 'afford', path: '/afford', icon: Scale, labelKey: 'nav.afford', group: 'plan', roles: ['student'], implemented: false },
   { id: 'campus', path: '/campus', icon: ShoppingBag, labelKey: 'nav.campus', schoolLabelKey: 'nav.campus.school', mobileLabelKey: 'nav.group.campus', group: 'campus', roles: ['student'], implemented: true, mobile: { student: 3 } },
   { id: 'assistant', path: '/assistant', icon: MessageCircle, labelKey: 'nav.assistant', group: 'campus', roles: ['student'], implemented: false },
@@ -62,7 +62,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'children', path: '/parent/children', icon: Users, labelKey: 'nav.children', group: 'family', roles: ['parent'], implemented: false, mobile: { parent: 2 } },
   { id: 'allowances', path: '/parent/allowances', icon: Wallet, labelKey: 'nav.allowance', group: 'family', roles: ['parent'], implemented: false, mobile: { parent: 3 } },
   { id: 'requests', path: '/parent/requests', icon: Inbox, labelKey: 'nav.requests', group: 'family', roles: ['parent'], implemented: false, mobile: { parent: 4 } },
-  { id: 'parent-goals', path: '/parent/goals', icon: Goal, labelKey: 'nav.goals', group: 'family', roles: ['parent'], implemented: false, mobile: { parent: 5 } },
+  { id: 'parent-goals', path: '/goals/fund', icon: Goal, labelKey: 'nav.fundGoal', group: 'family', roles: ['parent'], implemented: true, mobile: { parent: 5 } },
   // Admin
   { id: 'admin-dashboard', path: '/admin', icon: LayoutDashboard, labelKey: 'nav.dashboard', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 2 } },
   { id: 'admin-users', path: '/admin/users', icon: UserRound, labelKey: 'nav.users', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 3 } },

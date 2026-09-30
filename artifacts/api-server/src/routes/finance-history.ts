@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request } from "express";
-import { and, desc, eq, gte, ilike, inArray, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, lte, ne, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { db, financeAccounts, financeTransactions, campusServices, campuses, universities } from "@workspace/db";
+import { db, financeAccounts, financeTransactions, campusServices, campuses, universities, savingsGoals } from "@workspace/db";
 import { GetFinanceHistoryQueryParams, GetFinanceHistoryResponse, GetFinanceHistoryFilterOptionsResponse } from "@workspace/api-zod";
 import { requireRole, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
@@ -116,10 +116,11 @@ export async function enrichedTransactions(userId: string, rows: (typeof t.$infe
 
 router.get("/finance/history/filter-options", async (req, res) => {
   const userId = owner(req);
-  const [accounts, rows] = await Promise.all([
+  const [accounts, rows, goalOptions] = await Promise.all([
     db.select({ id: financeAccounts.id, name: financeAccounts.name, currency: financeAccounts.currency })
-      .from(financeAccounts).where(eq(financeAccounts.userId, userId)).orderBy(financeAccounts.name, financeAccounts.id),
+      .from(financeAccounts).where(and(eq(financeAccounts.userId, userId), ne(financeAccounts.type, "goal_reserve"))).orderBy(financeAccounts.name, financeAccounts.id),
     joined().where(eq(t.userId, userId)),
+    db.select({ id: savingsGoals.id, name: savingsGoals.name }).from(savingsGoals).where(eq(savingsGoals.userId, userId)),
   ]);
   const campusMap = new Map<string, { id: string; universityId: string; name: string; arabicName: string }>();
   const universityMap = new Map<string, { id: string; name: string; arabicName: string }>();
@@ -130,7 +131,7 @@ router.get("/finance/history/filter-options", async (req, res) => {
     campusMap.set(cid, { id: cid, universityId: uid, name: row.tx.campusName ?? row.fallbackCampusName ?? "Campus", arabicName: row.fallbackCampusArabicName ?? row.tx.campusName ?? "Campus" });
   }
   res.json(GetFinanceHistoryFilterOptionsResponse.parse({
-    categories: historyCategories, accounts, universities: [...universityMap.values()], campuses: [...campusMap.values()], goals: [],
+    categories: historyCategories, accounts, universities: [...universityMap.values()], campuses: [...campusMap.values()], goals: goalOptions.map(g => g.id), goalOptions,
   }));
 });
 router.get("/finance/history", async (req, res) => {

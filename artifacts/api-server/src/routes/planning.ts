@@ -9,6 +9,7 @@ import {
 } from "@workspace/api-zod";
 import { requireRole, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
+import { ownerGoals, GOAL_POLICY } from "../lib/goals";
 import { canonicalCategory, halfUp, isBudgetDebit, monthlyNumerator, periodBounds, POLICY, resolveCosts, safeMinor, validDate, type Amount, type Currency } from "../lib/planning";
 
 const router: IRouter = Router();
@@ -77,6 +78,7 @@ router.get("/planning", async (req, res): Promise<void> => {
     db.select().from(planningSettings).where(eq(planningSettings.userId, userId)),
   ]);
   const now = new Date();
+  const goalOverview = await ownerGoals(userId);
   const today = now.toISOString().slice(0, 10);
   const setting = settingsRows[0];
   const commuteOverride = setting?.commuteOverrideEnabled ? {
@@ -134,17 +136,25 @@ router.get("/planning", async (req, res): Promise<void> => {
   const currencies = new Set<Currency>([...incomeNumerators.keys(), ...costs.map(c => c.amount.currency),
     ...lineRows.map(r => r.currency as Currency), ...recurringRows.map(r => r.currency as Currency),
     ...budgetRows.map(r => r.currency as Currency), ...profileCosts.map(c => c.amount.currency),
-    ...allIncome.filter(i => i.active).map(i => i.amount.currency)]);
+    ...allIncome.filter(i => i.active).map(i => i.amount.currency), ...goalOverview.goals.map(g => g.currency as Currency)]);
+  const goalSavings = [...currencies].sort().map(currency => {
+    const manual = lineRows.filter(r => r.type === "savings" && r.currency === currency).reduce((n, r) => n + r.amountMinor, 0n);
+    const required = goalOverview.goals.filter(g => g.currency === currency).reduce((n, g) => n + BigInt(g.requiredContributionMonthly?.minor ?? 0), 0n);
+    return { currency, goalRequired: amount(required, currency), manualSavings: amount(manual, currency),
+      effectiveSavings: amount(manual > required ? manual : required, currency),
+      undatedActiveCount: goalOverview.goals.filter(g => g.currency === currency && g.status === "active" && !g.targetDate).length,
+      policy: "maximum_manual_or_goals" };
+  });
   const totals = [...currencies].sort().map(currency => {
     const expected = halfUp(incomeNumerators.get(currency) ?? 0n, 12n);
     const expenses = costs.filter(c => c.amount.currency === currency).reduce((n, c) => n + BigInt(c.amount.minor), 0n);
-    const savings = lineRows.filter(r => r.type === "savings" && r.currency === currency).reduce((n, r) => n + r.amountMinor, 0n);
+    const savings = BigInt(goalSavings.find(g => g.currency === currency)!.effectiveSavings.minor);
     return { currency, expectedIncome: amount(expected, currency), plannedExpenses: amount(expenses, currency),
       plannedSavings: amount(savings, currency), projectedRemaining: amount(expected - expenses - savings, currency) };
   });
   const budgets = await Promise.all(budgetRows.map(r => liveBudget(r, now)));
   res.json(GetFinancialPlanResponse.parse({
-    asOf: today, estimate: true, policy: POLICY, totals, costs, income, irregularIncome,
+    asOf: today, estimate: true, policy: POLICY + " " + GOAL_POLICY, totals, goalSavings, costs, income, irregularIncome,
     irregularCount: irregularIncome.length,
     upcoming: upcoming.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
     budgets, budgetCounts: { weekly: budgetRows.filter(r => r.period === "weekly").length,
@@ -158,7 +168,6 @@ router.get("/planning", async (req, res): Promise<void> => {
 router.post("/planning/budgets", async (req, res): Promise<void> => {
   const userId = own(req);
   const input = parse(CreateBudgetBody, req.body);
-  assertExpenseCategory(input.category);
   let row;
   try {
     [row] = await db.insert(planningBudgets).values({
@@ -171,7 +180,6 @@ router.post("/planning/budgets", async (req, res): Promise<void> => {
 router.put("/planning/budgets/:id", async (req, res): Promise<void> => {
   const userId = own(req), { id } = parse(UpdateBudgetParams, req.params);
   const input = parse(UpdateBudgetBody, req.body);
-  assertExpenseCategory(input.category);
   let row;
   try {
     [row] = await db.update(planningBudgets).set({

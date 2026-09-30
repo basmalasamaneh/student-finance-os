@@ -9,6 +9,7 @@ import type { Budget } from './budget';
 import type { Commute } from './commute';
 import type { CommuteOverride } from './commuteOverride';
 import type { FinancialPlanBudgetCounts } from './financialPlanBudgetCounts';
+import type { GoalPlanSavings } from './goalPlanSavings';
 import type { Income } from './income';
 import type { PlanCost } from './planCost';
 import type { PlanIncome } from './planIncome';
@@ -24,6 +25,8 @@ export interface FinancialPlan {
   estimate: boolean;
   policy: string;
   totals: PlanTotals[];
+  /** Additive goal forecast metadata; plannedSavings uses max(manual savings, goal requirement) per currency, not their sum. */
+  goalSavings?: GoalPlanSavings[];
   costs: PlanCost[];
   income: PlanIncome[];
   irregularIncome: Income[];

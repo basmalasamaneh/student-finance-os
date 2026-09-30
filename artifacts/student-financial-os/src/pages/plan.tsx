@@ -5,7 +5,7 @@ import { StatePanel } from '@/components/states/state-panel';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useTx } from '@/features/money/money-model';
 import { formatUtcDate, planErrorText, usePlan } from '@/features/planning/planning-model';
-import { CostSources, EquationCard, PolicyPanel } from '@/components/planning/plan-totals';
+import { CostSources, EquationCard, GoalSavingsPanel, PolicyPanel } from '@/components/planning/plan-totals';
 import { BudgetsSection } from '@/components/planning/budgets-section';
 import { RecurringSection } from '@/components/planning/recurring-section';
 import { LinesSection } from '@/components/planning/lines-section';
@@ -43,6 +43,7 @@ export default function PlanPage() {
               <StatePanel tone="empty" title={t('Nothing planned yet', 'لا شيء مخطط بعد')} body={t('No income, expenses or savings are saved, so there is no projection. Start with a plan line or add income in your profile.', 'لا دخل أو مصاريف أو ادخار محفوظ، لذا لا توجد توقعات. ابدأ ببند خطة أو أضف دخلاً في ملفك.')} />
             )}
             <p className="type-caption text-muted-foreground" data-testid="text-plan-asof">{t('As of', 'حتى')} {formatUtcDate(p.asOf, locale)}{plan.isFetching ? ` · ${t('refreshing…', 'جارٍ التحديث…')}` : ''}</p>
+            <GoalSavingsPanel plan={p} t={t} />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2"><PolicyPanel plan={p} t={t} /><CostSources plan={p} t={t} /></div>
           </div>
           <BudgetsSection budgets={p.budgets} t={t} />

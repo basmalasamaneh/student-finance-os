@@ -86,7 +86,8 @@ function Detail({ tx, t }: { tx: FinanceTransaction; t: Tx }) {
           <Row term={t('Campus service', 'الخدمة الجامعية')} testId="field-campus-service"><Linked id={tx.campusServiceId} t={t} /></Row>
           <Row term={t('University', 'الجامعة')} testId="field-university"><Linked id={tx.universityId} name={tx.universityName} t={t} /></Row>
           <Row term={t('Campus', 'الحرم')} testId="field-campus"><Linked id={tx.campusId} name={tx.campusName} t={t} /></Row>
-          <Row term={t('Related goal', 'الهدف المرتبط')} testId="field-goal"><Linked id={tx.relatedGoalId} t={t} future /></Row>
+          <Row term={t('Related goal', 'الهدف المرتبط')} testId="field-goal">{tx.relatedGoalId ? <Link href={`/goals/${tx.relatedGoalId}`} className="text-gold-ink underline-offset-4 hover:underline" data-testid="link-related-goal">{optionsQ.data?.goalOptions?.find((g) => g.id === tx.relatedGoalId)?.name ?? t('Open goal', 'افتح الهدف')}</Link> : <Missing text={t('Not linked', 'غير مرتبط')} />}</Row>
+          {tx.goalFundingSource ? <Row term={t('Goal funding source', 'مصدر تمويل الهدف')} testId="field-goal-source">{tx.goalFundingSource === 'parent_simulated' ? t('Parent · simulated external funding (no bank, no real money)', 'الأهل · تمويل خارجي محاكى (لا بنك ولا أموال حقيقية)') : t('Your own account', 'حسابك الخاص')}</Row> : null}
           <Row term={t('Related budget', 'الميزانية المرتبطة')} testId="field-budget"><Linked id={tx.relatedBudgetId} t={t} /></Row>
           <Row term={t('Parent transfer', 'تحويل الأهل')} testId="field-parent-transfer"><Linked id={tx.parentTransferId} t={t} future /></Row>
           <Row term={t('Recurring expense', 'المصروف المتكرر')} testId="field-recurring"><Linked id={tx.recurringExpenseId} t={t} /></Row>

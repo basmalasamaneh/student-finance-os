@@ -9,6 +9,7 @@ import type { Amount } from './amount';
 import type { FinanceReceiptItem } from './financeReceiptItem';
 import type { FinanceSemanticType } from './financeSemanticType';
 import type { FinanceTransactionDirection } from './financeTransactionDirection';
+import type { FinanceTransactionGoalFundingSource } from './financeTransactionGoalFundingSource';
 import type { FinanceTransactionStatus } from './financeTransactionStatus';
 
 export interface FinanceTransaction {
@@ -36,6 +37,8 @@ export interface FinanceTransaction {
   accountName?: string;
   /** @nullable */
   relatedGoalId: string | null;
+  /** @nullable */
+  goalFundingSource?: FinanceTransactionGoalFundingSource;
   /** @nullable */
   relatedBudgetId: string | null;
   /** @nullable */

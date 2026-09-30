@@ -11,6 +11,8 @@ import type { FinanceCashflowCurrency } from './financeCashflowCurrency';
 export interface FinanceCashflow {
   currency: FinanceCashflowCurrency;
   balance: Amount;
+  reservedBalance?: Amount;
+  netBalance?: Amount;
   monthlyIncome: Amount;
   monthlySpending: Amount;
 }

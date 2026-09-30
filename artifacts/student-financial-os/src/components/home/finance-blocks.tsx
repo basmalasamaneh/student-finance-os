@@ -33,8 +33,18 @@ export function BalanceBlock({ summary, t }: { summary: Q<FinanceSummary>; t: T 
   </>;
   return (
     <div className="flex flex-col gap-2" data-testid="text-balance">
-      {rows.map((c) => <MoneyDisplay key={c.currency} value={c.balance} size={rows.length > 1 ? 'xl' : 'hero'} />)}
-      <p className="type-caption text-muted-foreground">{t('Simulated ledger balance, grouped by currency.', 'رصيد السجل المحاكى، مجمّع حسب العملة.')}</p>
+      {rows.map((c) => (
+        <div key={c.currency} className="flex flex-col gap-1">
+          <MoneyDisplay value={c.balance} size={rows.length > 1 ? 'xl' : 'hero'} />
+          {c.reservedBalance && c.reservedBalance.minor > 0 ? (
+            <p className="type-caption text-muted-foreground" data-testid={`text-reserved-${c.currency}`}>
+              + {t('reserved in goals', 'محجوز في الأهداف')} <MoneyDisplay value={c.reservedBalance} size="sm" className="inline !text-xs" tone="highlight" />
+              {c.netBalance ? <> = {t('net', 'الصافي')} <MoneyDisplay value={c.netBalance} size="sm" className="inline !text-xs" /></> : null}
+            </p>
+          ) : null}
+        </div>
+      ))}
+      <p className="type-caption text-muted-foreground">{t('Spendable simulated balance, grouped by currency. Goal savings are reserved and not included.', 'الرصيد المحاكى القابل للإنفاق حسب العملة. مدّخرات الأهداف محجوزة وغير مشمولة.')}</p>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import type { FinanceHistoryFilterOptionsAccountsItem } from './financeHistoryFi
 import type { FinanceHistoryFilterOptionsCampusesItem } from './financeHistoryFilterOptionsCampusesItem';
 import type { FinanceHistoryFilterOptionsCategoriesItem } from './financeHistoryFilterOptionsCategoriesItem';
 import type { FinanceHistoryFilterOptionsUniversitiesItem } from './financeHistoryFilterOptionsUniversitiesItem';
+import type { GoalFilterOption } from './goalFilterOption';
 
 export interface FinanceHistoryFilterOptions {
   categories: FinanceHistoryFilterOptionsCategoriesItem[];
@@ -16,4 +17,5 @@ export interface FinanceHistoryFilterOptions {
   universities: FinanceHistoryFilterOptionsUniversitiesItem[];
   campuses: FinanceHistoryFilterOptionsCampusesItem[];
   goals: string[];
+  goalOptions?: GoalFilterOption[];
 }

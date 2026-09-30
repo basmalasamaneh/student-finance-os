@@ -3,7 +3,8 @@ import { Link } from 'wouter';
 import { Lightbulb } from 'lucide-react';
 import { getGetFinanceSummaryQueryKey, getListFinanceAccountsQueryKey, useGetFinanceSummary, useListFinanceAccounts, type Profile } from '@workspace/api-client-react';
 import { AccountsBlock, ActualIncomeSpending, BalanceBlock, LedgerBlock, RequestsBlock } from './finance-blocks';
-import { EstimateList, HomeBlock, Unavailable, type T } from './home-primitives';
+import { EstimateList, HomeBlock, type T } from './home-primitives';
+import { GoalsHomeBlock } from './goals-block';
 import { PlanTotalsBlock } from './plan-totals-block';
 import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
 import { deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
@@ -79,7 +80,7 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
       {/* 7 Savings, 8 Campus */}
       <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
         <HomeBlock id="savings" title={t('Savings goals', 'أهداف الادخار')}>
-          <Unavailable testId="status-savings" label={t('No goals yet', 'لا أهداف بعد')} body={t('Savings goals are coming in a later release.', 'أهداف الادخار قادمة في إصدار لاحق.')} />
+          <GoalsHomeBlock t={t} />
         </HomeBlock>
         <HomeBlock id="campus" title={t('Campus activity', 'نشاط الحرم')}>
           <LedgerBlock summary={summary} which="campus" t={t} />

@@ -123,15 +123,15 @@ export function FilterPanel({ open, onOpenChange, value, onApply, options, optio
           </Field>
 
           <div className="flex flex-col gap-5 border-t border-divider pt-5">
-            <p className="type-caption text-muted-foreground">{t('Parent transfers and goals arrive in later releases. No entries are linked yet, so these filters currently return no results. You can still paste an ID.', 'تحويلات الأهل والأهداف تصل في إصدارات لاحقة. لا توجد قيود مرتبطة بعد، لذا تعيد هذه المرشحات حالياً لا نتائج. يمكنك لصق معرّف.')}</p>
+            <p className="type-caption text-muted-foreground">{t('Filter by one of your savings goals. Parent transfers arrive in a later release, so that filter currently returns no results.', 'صفِّ حسب أحد أهداف ادخارك. تحويلات الأهل تصل في إصدار لاحق، لذا يعيد ذلك المرشح حالياً لا نتائج.')}</p>
             <Field label={t('Parent transfer ID', 'معرّف تحويل الأهل')} htmlFor={`${id}-pt`} error={has('parentTransferId') ? t('Enter a full ID (UUID).', 'أدخل معرّفاً كاملاً (UUID).') : undefined} hint={t('Optional · not yet available', 'اختياري · غير متاح بعد')}>
               <input id={`${id}-pt`} dir="ltr" className={`${control} font-mono text-xs`} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value={draft.parentTransferId} onChange={(e) => set('parentTransferId', e.target.value)} aria-invalid={has('parentTransferId')} data-testid="input-parent-transfer" />
             </Field>
-            <Field label={t('Goal', 'الهدف')} htmlFor={`${id}-goal`} error={has('goalId') ? t('Enter a full ID (UUID).', 'أدخل معرّفاً كاملاً (UUID).') : undefined} hint={(opt?.goals.length ?? 0) ? undefined : t('No goals exist yet. Paste an ID, or leave empty.', 'لا توجد أهداف بعد. الصق معرّفاً أو اتركه فارغاً.')}>
+            <Field label={t('Goal', 'الهدف')} htmlFor={`${id}-goal`} error={has('goalId') ? t('Enter a full ID (UUID).', 'أدخل معرّفاً كاملاً (UUID).') : undefined} hint={(opt?.goals.length ?? 0) ? undefined : t('No goals yet. Create one on the Goals page, or paste an ID.', 'لا أهداف بعد. أنشئ هدفاً في صفحة الأهداف أو الصق معرّفاً.')}>
               {opt?.goals.length ? (
                 <select id={`${id}-goal`} className={control} value={draft.goalId} onChange={(e) => set('goalId', e.target.value)} data-testid="select-goal">
                   <option value="">{t('All goals', 'كل الأهداف')}</option>
-                  {opt.goals.map((g) => <option key={g} value={g}>{g}</option>)}
+                  {opt.goals.map((g) => <option key={g} value={g}>{opt.goalOptions?.find((o) => o.id === g)?.name ?? `${g.slice(0, 8)}…`}</option>)}
                 </select>
               ) : (
                 <input id={`${id}-goal`} dir="ltr" className={`${control} font-mono text-xs`} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value={draft.goalId} onChange={(e) => set('goalId', e.target.value)} aria-invalid={has('goalId')} data-testid="input-goal" />

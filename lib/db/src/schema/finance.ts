@@ -34,6 +34,8 @@ export const financeTransactions = pgTable("finance_transactions", {
   universityName: text("university_name"),
   campusName: text("campus_name"),
   relatedGoalId: uuid("related_goal_id"),
+  goalFundingSource: text("goal_funding_source"),
+  goalFundingActorId: uuid("goal_funding_actor_id"),
   relatedBudgetId: uuid("related_budget_id"),
   parentTransferId: uuid("parent_transfer_id"),
   recurringExpenseId: uuid("recurring_expense_id"),

@@ -8,6 +8,790 @@
 import * as zod from 'zod';
 
 
+export const listSavingsGoalsResponseGoalsItemOneNameMax = 120;
+
+export const listSavingsGoalsResponseGoalsItemOneTargetMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseGoalsItemOneCategoryMax = 80;
+
+export const listSavingsGoalsResponseGoalsItemOneNotesMax = 2000;
+
+export const listSavingsGoalsResponseGoalsItemTwoCurrentMinorMin = 0;
+export const listSavingsGoalsResponseGoalsItemTwoCurrentMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseGoalsItemTwoPercentageMin = 0;
+export const listSavingsGoalsResponseGoalsItemTwoPercentageMax = 100;
+
+export const listSavingsGoalsResponseGoalsItemTwoRemainingMinorMin = 0;
+export const listSavingsGoalsResponseGoalsItemTwoRemainingMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseGoalsItemTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const listSavingsGoalsResponseGoalsItemTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseTotalsItemAvailableMinorMin = 0;
+export const listSavingsGoalsResponseTotalsItemAvailableMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseTotalsItemReservedMinorMin = 0;
+export const listSavingsGoalsResponseTotalsItemReservedMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseTotalsItemNetBalanceMinorMin = 0;
+export const listSavingsGoalsResponseTotalsItemNetBalanceMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseTotalsItemRequiredContributionMonthlyMinorMin = 0;
+export const listSavingsGoalsResponseTotalsItemRequiredContributionMonthlyMinorMax = 9007199254740991;
+
+export const listSavingsGoalsResponseActiveCountMin = 0;
+
+export const listSavingsGoalsResponseCompletedCountMin = 0;
+
+
+
+export const ListSavingsGoalsResponse = zod.object({
+  "goals": zod.array(zod.object({
+  "name": zod.string().min(1).max(listSavingsGoalsResponseGoalsItemOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(listSavingsGoalsResponseGoalsItemOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(listSavingsGoalsResponseGoalsItemOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(listSavingsGoalsResponseGoalsItemOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseGoalsItemTwoCurrentMinorMin).max(listSavingsGoalsResponseGoalsItemTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(listSavingsGoalsResponseGoalsItemTwoPercentageMin).max(listSavingsGoalsResponseGoalsItemTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseGoalsItemTwoRemainingMinorMin).max(listSavingsGoalsResponseGoalsItemTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseGoalsItemTwoRequiredContributionMonthlyOneMinorMin).max(listSavingsGoalsResponseGoalsItemTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}))),
+  "totals": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "available": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseTotalsItemAvailableMinorMin).max(listSavingsGoalsResponseTotalsItemAvailableMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reserved": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseTotalsItemReservedMinorMin).max(listSavingsGoalsResponseTotalsItemReservedMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "netBalance": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseTotalsItemNetBalanceMinorMin).max(listSavingsGoalsResponseTotalsItemNetBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.object({
+  "minor": zod.number().int().min(listSavingsGoalsResponseTotalsItemRequiredContributionMonthlyMinorMin).max(listSavingsGoalsResponseTotalsItemRequiredContributionMonthlyMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})),
+  "activeCount": zod.number().int().min(listSavingsGoalsResponseActiveCountMin),
+  "completedCount": zod.number().int().min(listSavingsGoalsResponseCompletedCountMin),
+  "policy": zod.string()
+})
+
+
+export const createSavingsGoalHeaderIdempotencyKeyMin = 8;
+export const createSavingsGoalHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateSavingsGoalHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createSavingsGoalHeaderIdempotencyKeyMin).max(createSavingsGoalHeaderIdempotencyKeyMax)
+})
+
+export const createSavingsGoalBodyNameMax = 120;
+
+export const createSavingsGoalBodyTargetMinorMax = 9007199254740991;
+
+export const createSavingsGoalBodyCategoryMax = 80;
+
+export const createSavingsGoalBodyNotesMax = 2000;
+
+
+
+export const CreateSavingsGoalBody = zod.object({
+  "name": zod.string().min(1).max(createSavingsGoalBodyNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(createSavingsGoalBodyTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(createSavingsGoalBodyCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(createSavingsGoalBodyNotesMax)
+})
+
+export const createSavingsGoalResponseOneNameMax = 120;
+
+export const createSavingsGoalResponseOneTargetMinorMax = 9007199254740991;
+
+export const createSavingsGoalResponseOneCategoryMax = 80;
+
+export const createSavingsGoalResponseOneNotesMax = 2000;
+
+export const createSavingsGoalResponseTwoCurrentMinorMin = 0;
+export const createSavingsGoalResponseTwoCurrentMinorMax = 9007199254740991;
+
+export const createSavingsGoalResponseTwoPercentageMin = 0;
+export const createSavingsGoalResponseTwoPercentageMax = 100;
+
+export const createSavingsGoalResponseTwoRemainingMinorMin = 0;
+export const createSavingsGoalResponseTwoRemainingMinorMax = 9007199254740991;
+
+export const createSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const createSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+
+
+export const CreateSavingsGoalResponse = zod.object({
+  "name": zod.string().min(1).max(createSavingsGoalResponseOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(createSavingsGoalResponseOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(createSavingsGoalResponseOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(createSavingsGoalResponseOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(createSavingsGoalResponseTwoCurrentMinorMin).max(createSavingsGoalResponseTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(createSavingsGoalResponseTwoPercentageMin).max(createSavingsGoalResponseTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(createSavingsGoalResponseTwoRemainingMinorMin).max(createSavingsGoalResponseTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(createSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin).max(createSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const GetSavingsGoalParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getSavingsGoalResponseOneNameMax = 120;
+
+export const getSavingsGoalResponseOneTargetMinorMax = 9007199254740991;
+
+export const getSavingsGoalResponseOneCategoryMax = 80;
+
+export const getSavingsGoalResponseOneNotesMax = 2000;
+
+export const getSavingsGoalResponseTwoCurrentMinorMin = 0;
+export const getSavingsGoalResponseTwoCurrentMinorMax = 9007199254740991;
+
+export const getSavingsGoalResponseTwoPercentageMin = 0;
+export const getSavingsGoalResponseTwoPercentageMax = 100;
+
+export const getSavingsGoalResponseTwoRemainingMinorMin = 0;
+export const getSavingsGoalResponseTwoRemainingMinorMax = 9007199254740991;
+
+export const getSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const getSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+
+
+export const GetSavingsGoalResponse = zod.object({
+  "name": zod.string().min(1).max(getSavingsGoalResponseOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(getSavingsGoalResponseOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(getSavingsGoalResponseOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(getSavingsGoalResponseOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(getSavingsGoalResponseTwoCurrentMinorMin).max(getSavingsGoalResponseTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(getSavingsGoalResponseTwoPercentageMin).max(getSavingsGoalResponseTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(getSavingsGoalResponseTwoRemainingMinorMin).max(getSavingsGoalResponseTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(getSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin).max(getSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const UpdateSavingsGoalParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateSavingsGoalHeaderIdempotencyKeyMin = 8;
+export const updateSavingsGoalHeaderIdempotencyKeyMax = 128;
+
+
+
+export const UpdateSavingsGoalHeader = zod.object({
+  "Idempotency-Key": zod.string().min(updateSavingsGoalHeaderIdempotencyKeyMin).max(updateSavingsGoalHeaderIdempotencyKeyMax)
+})
+
+export const updateSavingsGoalBodyNameMax = 120;
+
+export const updateSavingsGoalBodyTargetMinorMax = 9007199254740991;
+
+export const updateSavingsGoalBodyCategoryMax = 80;
+
+export const updateSavingsGoalBodyNotesMax = 2000;
+
+
+
+export const UpdateSavingsGoalBody = zod.object({
+  "name": zod.string().min(1).max(updateSavingsGoalBodyNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(updateSavingsGoalBodyTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(updateSavingsGoalBodyCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(updateSavingsGoalBodyNotesMax)
+})
+
+export const updateSavingsGoalResponseOneNameMax = 120;
+
+export const updateSavingsGoalResponseOneTargetMinorMax = 9007199254740991;
+
+export const updateSavingsGoalResponseOneCategoryMax = 80;
+
+export const updateSavingsGoalResponseOneNotesMax = 2000;
+
+export const updateSavingsGoalResponseTwoCurrentMinorMin = 0;
+export const updateSavingsGoalResponseTwoCurrentMinorMax = 9007199254740991;
+
+export const updateSavingsGoalResponseTwoPercentageMin = 0;
+export const updateSavingsGoalResponseTwoPercentageMax = 100;
+
+export const updateSavingsGoalResponseTwoRemainingMinorMin = 0;
+export const updateSavingsGoalResponseTwoRemainingMinorMax = 9007199254740991;
+
+export const updateSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const updateSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+
+
+export const UpdateSavingsGoalResponse = zod.object({
+  "name": zod.string().min(1).max(updateSavingsGoalResponseOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(updateSavingsGoalResponseOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(updateSavingsGoalResponseOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(updateSavingsGoalResponseOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(updateSavingsGoalResponseTwoCurrentMinorMin).max(updateSavingsGoalResponseTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(updateSavingsGoalResponseTwoPercentageMin).max(updateSavingsGoalResponseTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(updateSavingsGoalResponseTwoRemainingMinorMin).max(updateSavingsGoalResponseTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(updateSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMin).max(updateSavingsGoalResponseTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const ChangeSavingsGoalStatusParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const changeSavingsGoalStatusHeaderIdempotencyKeyMin = 8;
+export const changeSavingsGoalStatusHeaderIdempotencyKeyMax = 128;
+
+
+
+export const ChangeSavingsGoalStatusHeader = zod.object({
+  "Idempotency-Key": zod.string().min(changeSavingsGoalStatusHeaderIdempotencyKeyMin).max(changeSavingsGoalStatusHeaderIdempotencyKeyMax)
+})
+
+export const ChangeSavingsGoalStatusBody = zod.object({
+  "action": zod.enum(['pause', 'resume', 'complete', 'archive'])
+})
+
+export const changeSavingsGoalStatusResponseOneNameMax = 120;
+
+export const changeSavingsGoalStatusResponseOneTargetMinorMax = 9007199254740991;
+
+export const changeSavingsGoalStatusResponseOneCategoryMax = 80;
+
+export const changeSavingsGoalStatusResponseOneNotesMax = 2000;
+
+export const changeSavingsGoalStatusResponseTwoCurrentMinorMin = 0;
+export const changeSavingsGoalStatusResponseTwoCurrentMinorMax = 9007199254740991;
+
+export const changeSavingsGoalStatusResponseTwoPercentageMin = 0;
+export const changeSavingsGoalStatusResponseTwoPercentageMax = 100;
+
+export const changeSavingsGoalStatusResponseTwoRemainingMinorMin = 0;
+export const changeSavingsGoalStatusResponseTwoRemainingMinorMax = 9007199254740991;
+
+export const changeSavingsGoalStatusResponseTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const changeSavingsGoalStatusResponseTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+
+
+export const ChangeSavingsGoalStatusResponse = zod.object({
+  "name": zod.string().min(1).max(changeSavingsGoalStatusResponseOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(changeSavingsGoalStatusResponseOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(changeSavingsGoalStatusResponseOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(changeSavingsGoalStatusResponseOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(changeSavingsGoalStatusResponseTwoCurrentMinorMin).max(changeSavingsGoalStatusResponseTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(changeSavingsGoalStatusResponseTwoPercentageMin).max(changeSavingsGoalStatusResponseTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(changeSavingsGoalStatusResponseTwoRemainingMinorMin).max(changeSavingsGoalStatusResponseTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(changeSavingsGoalStatusResponseTwoRequiredContributionMonthlyOneMinorMin).max(changeSavingsGoalStatusResponseTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const ContributeToSavingsGoalParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const contributeToSavingsGoalHeaderIdempotencyKeyMin = 8;
+export const contributeToSavingsGoalHeaderIdempotencyKeyMax = 128;
+
+
+
+export const ContributeToSavingsGoalHeader = zod.object({
+  "Idempotency-Key": zod.string().min(contributeToSavingsGoalHeaderIdempotencyKeyMin).max(contributeToSavingsGoalHeaderIdempotencyKeyMax)
+})
+
+export const contributeToSavingsGoalBodyAmountMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalBodyNoteMax = 500;
+
+
+
+export const ContributeToSavingsGoalBody = zod.object({
+  "accountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(contributeToSavingsGoalBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(contributeToSavingsGoalBodyNoteMax).optional()
+})
+
+export const contributeToSavingsGoalResponseGoalOneNameMax = 120;
+
+export const contributeToSavingsGoalResponseGoalOneTargetMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseGoalOneCategoryMax = 80;
+
+export const contributeToSavingsGoalResponseGoalOneNotesMax = 2000;
+
+export const contributeToSavingsGoalResponseGoalTwoCurrentMinorMin = 0;
+export const contributeToSavingsGoalResponseGoalTwoCurrentMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseGoalTwoPercentageMin = 0;
+export const contributeToSavingsGoalResponseGoalTwoPercentageMax = 100;
+
+export const contributeToSavingsGoalResponseGoalTwoRemainingMinorMin = 0;
+export const contributeToSavingsGoalResponseGoalTwoRemainingMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseGoalTwoRequiredContributionMonthlyOneMinorMin = 0;
+export const contributeToSavingsGoalResponseGoalTwoRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseEntryAmountOneMinorMin = 0;
+export const contributeToSavingsGoalResponseEntryAmountOneMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseTransactionsItemAmountMinorMin = 0;
+export const contributeToSavingsGoalResponseTransactionsItemAmountMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseTransactionsItemBalanceAfterMinorMin = 0;
+export const contributeToSavingsGoalResponseTransactionsItemBalanceAfterMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseTransactionsItemItemsItemUnitPriceMinorMin = 0;
+export const contributeToSavingsGoalResponseTransactionsItemItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const contributeToSavingsGoalResponseTransactionsItemItemsItemLineTotalMinorMin = 0;
+export const contributeToSavingsGoalResponseTransactionsItemItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const ContributeToSavingsGoalResponse = zod.object({
+  "goal": zod.object({
+  "name": zod.string().min(1).max(contributeToSavingsGoalResponseGoalOneNameMax),
+  "target": zod.object({
+  "minor": zod.number().int().min(1).max(contributeToSavingsGoalResponseGoalOneTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "category": zod.string().min(1).max(contributeToSavingsGoalResponseGoalOneCategoryMax),
+  "priority": zod.enum(['low', 'medium', 'high']),
+  "notes": zod.string().max(contributeToSavingsGoalResponseGoalOneNotesMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "current": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseGoalTwoCurrentMinorMin).max(contributeToSavingsGoalResponseGoalTwoCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "percentage": zod.number().min(contributeToSavingsGoalResponseGoalTwoPercentageMin).max(contributeToSavingsGoalResponseGoalTwoPercentageMax),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseGoalTwoRemainingMinorMin).max(contributeToSavingsGoalResponseGoalTwoRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseGoalTwoRequiredContributionMonthlyOneMinorMin).max(contributeToSavingsGoalResponseGoalTwoRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]).describe('Null without deadline or when inactive; exact ceiling of remaining over inclusive UTC calendar months through deadline, minimum one month.'),
+  "estimatedCompletion": zod.string().date().nullable(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "updatedAt": zod.string().datetime({"offset":true})
+})),
+  "entry": zod.object({
+  "id": zod.string().uuid(),
+  "goalId": zod.string().uuid(),
+  "action": zod.enum(['created', 'edited', 'contribution', 'paused', 'resumed', 'completed', 'archived']),
+  "source": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullable(),
+  "amount": zod.union([zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseEntryAmountOneMinorMin).max(contributeToSavingsGoalResponseEntryAmountOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]),
+  "transactionIds": zod.array(zod.string().uuid()),
+  "note": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}),
+  "transactions": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseTransactionsItemAmountMinorMin).max(contributeToSavingsGoalResponseTransactionsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseTransactionsItemBalanceAfterMinorMin).max(contributeToSavingsGoalResponseTransactionsItemBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseTransactionsItemItemsItemUnitPriceMinorMin).max(contributeToSavingsGoalResponseTransactionsItemItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(contributeToSavingsGoalResponseTransactionsItemItemsItemLineTotalMinorMin).max(contributeToSavingsGoalResponseTransactionsItemItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
+}))
+})
+
+
+export const GetSavingsGoalHistoryParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getSavingsGoalHistoryResponseAmountOneMinorMin = 0;
+export const getSavingsGoalHistoryResponseAmountOneMinorMax = 9007199254740991;
+
+
+
+export const GetSavingsGoalHistoryResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "goalId": zod.string().uuid(),
+  "action": zod.enum(['created', 'edited', 'contribution', 'paused', 'resumed', 'completed', 'archived']),
+  "source": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullable(),
+  "amount": zod.union([zod.object({
+  "minor": zod.number().int().min(getSavingsGoalHistoryResponseAmountOneMinorMin).max(getSavingsGoalHistoryResponseAmountOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]),
+  "transactionIds": zod.array(zod.string().uuid()),
+  "note": zod.string().nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const GetSavingsGoalHistoryResponse = zod.array(GetSavingsGoalHistoryResponseItem)
+
+
+export const ListGoalInvitationsParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const ListGoalInvitationsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "goalId": zod.string().uuid(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "redeemedAt": zod.string().datetime({"offset":true}).nullable(),
+  "revokedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListGoalInvitationsResponse = zod.array(ListGoalInvitationsResponseItem)
+
+
+/**
+ * Explicit limited consent to one authenticated parent to view this goal's public funding summary and simulate funding. Token is shown only in this response, hashed at rest, single-use and expires after seven days. No idempotency response storage of the raw token.
+ */
+export const CreateGoalInvitationParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const CreateGoalInvitationBody = zod.object({
+  "limitedConsentAcknowledged": zod.literal(true)
+})
+
+export const CreateGoalInvitationResponse = zod.object({
+  "invitation": zod.object({
+  "id": zod.string().uuid(),
+  "goalId": zod.string().uuid(),
+  "expiresAt": zod.string().datetime({"offset":true}),
+  "redeemedAt": zod.string().datetime({"offset":true}).nullable(),
+  "revokedAt": zod.string().datetime({"offset":true}).nullable(),
+  "createdAt": zod.string().datetime({"offset":true})
+}),
+  "token": zod.string()
+})
+
+
+export const RevokeGoalInvitationParams = zod.object({
+  "id": zod.coerce.string().uuid(),
+  "invitationId": zod.coerce.string().uuid()
+})
+
+export const RevokeGoalInvitationResponse = zod.void()
+
+
+export const listParentFundingGoalsResponseTargetMinorMin = 0;
+export const listParentFundingGoalsResponseTargetMinorMax = 9007199254740991;
+
+export const listParentFundingGoalsResponseCurrentMinorMin = 0;
+export const listParentFundingGoalsResponseCurrentMinorMax = 9007199254740991;
+
+export const listParentFundingGoalsResponseRemainingMinorMin = 0;
+export const listParentFundingGoalsResponseRemainingMinorMax = 9007199254740991;
+
+
+
+export const ListParentFundingGoalsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "target": zod.object({
+  "minor": zod.number().int().min(listParentFundingGoalsResponseTargetMinorMin).max(listParentFundingGoalsResponseTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "current": zod.object({
+  "minor": zod.number().int().min(listParentFundingGoalsResponseCurrentMinorMin).max(listParentFundingGoalsResponseCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(listParentFundingGoalsResponseRemainingMinorMin).max(listParentFundingGoalsResponseRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "targetDate": zod.string().date().nullable()
+}).describe('Deliberately excludes student identity, accounts, notes, history and unrelated goals.')
+export const ListParentFundingGoalsResponse = zod.array(ListParentFundingGoalsResponseItem)
+
+
+export const redeemGoalInvitationBodyTokenMin = 43;
+export const redeemGoalInvitationBodyTokenMax = 128;
+
+
+
+export const RedeemGoalInvitationBody = zod.object({
+  "token": zod.string().min(redeemGoalInvitationBodyTokenMin).max(redeemGoalInvitationBodyTokenMax),
+  "limitedConsentAcknowledged": zod.literal(true)
+})
+
+export const redeemGoalInvitationResponseTargetMinorMin = 0;
+export const redeemGoalInvitationResponseTargetMinorMax = 9007199254740991;
+
+export const redeemGoalInvitationResponseCurrentMinorMin = 0;
+export const redeemGoalInvitationResponseCurrentMinorMax = 9007199254740991;
+
+export const redeemGoalInvitationResponseRemainingMinorMin = 0;
+export const redeemGoalInvitationResponseRemainingMinorMax = 9007199254740991;
+
+
+
+export const RedeemGoalInvitationResponse = zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "target": zod.object({
+  "minor": zod.number().int().min(redeemGoalInvitationResponseTargetMinorMin).max(redeemGoalInvitationResponseTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "current": zod.object({
+  "minor": zod.number().int().min(redeemGoalInvitationResponseCurrentMinorMin).max(redeemGoalInvitationResponseCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(redeemGoalInvitationResponseRemainingMinorMin).max(redeemGoalInvitationResponseRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "targetDate": zod.string().date().nullable()
+}).describe('Deliberately excludes student identity, accounts, notes, history and unrelated goals.')
+
+
+/**
+ * Authenticated parent principal with current exact-goal consent only. Simulated external funding, no bank connection and no student wallet deduction.
+ */
+export const FundSavingsGoalAsParentParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const fundSavingsGoalAsParentHeaderIdempotencyKeyMin = 8;
+export const fundSavingsGoalAsParentHeaderIdempotencyKeyMax = 128;
+
+
+
+export const FundSavingsGoalAsParentHeader = zod.object({
+  "Idempotency-Key": zod.string().min(fundSavingsGoalAsParentHeaderIdempotencyKeyMin).max(fundSavingsGoalAsParentHeaderIdempotencyKeyMax)
+})
+
+export const fundSavingsGoalAsParentBodyAmountMinorMax = 9007199254740991;
+
+export const fundSavingsGoalAsParentBodyNoteMax = 500;
+
+
+
+export const FundSavingsGoalAsParentBody = zod.object({
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(fundSavingsGoalAsParentBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "simulatedFundingAcknowledged": zod.literal(true),
+  "note": zod.string().max(fundSavingsGoalAsParentBodyNoteMax).optional()
+})
+
+export const fundSavingsGoalAsParentResponseGoalTargetMinorMin = 0;
+export const fundSavingsGoalAsParentResponseGoalTargetMinorMax = 9007199254740991;
+
+export const fundSavingsGoalAsParentResponseGoalCurrentMinorMin = 0;
+export const fundSavingsGoalAsParentResponseGoalCurrentMinorMax = 9007199254740991;
+
+export const fundSavingsGoalAsParentResponseGoalRemainingMinorMin = 0;
+export const fundSavingsGoalAsParentResponseGoalRemainingMinorMax = 9007199254740991;
+
+export const fundSavingsGoalAsParentResponseAmountMinorMin = 0;
+export const fundSavingsGoalAsParentResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const FundSavingsGoalAsParentResponse = zod.object({
+  "id": zod.string().uuid(),
+  "goal": zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "target": zod.object({
+  "minor": zod.number().int().min(fundSavingsGoalAsParentResponseGoalTargetMinorMin).max(fundSavingsGoalAsParentResponseGoalTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "current": zod.object({
+  "minor": zod.number().int().min(fundSavingsGoalAsParentResponseGoalCurrentMinorMin).max(fundSavingsGoalAsParentResponseGoalCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(fundSavingsGoalAsParentResponseGoalRemainingMinorMin).max(fundSavingsGoalAsParentResponseGoalRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['active', 'paused', 'completed', 'archived']),
+  "targetDate": zod.string().date().nullable()
+}).describe('Deliberately excludes student identity, accounts, notes, history and unrelated goals.'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(fundSavingsGoalAsParentResponseAmountMinorMin).max(fundSavingsGoalAsParentResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "source": zod.enum(['parent_simulated']),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
 export const getFinancialPlanResponseTotalsItemExpectedIncomeMinorMin = 0;
 export const getFinancialPlanResponseTotalsItemExpectedIncomeMinorMax = 9007199254740991;
 
@@ -19,6 +803,17 @@ export const getFinancialPlanResponseTotalsItemPlannedSavingsMinorMax = 90071992
 
 export const getFinancialPlanResponseTotalsItemProjectedRemainingMinorMin = -9007199254740991;
 export const getFinancialPlanResponseTotalsItemProjectedRemainingMinorMax = 9007199254740991;
+
+export const getFinancialPlanResponseGoalSavingsItemGoalRequiredMinorMin = 0;
+export const getFinancialPlanResponseGoalSavingsItemGoalRequiredMinorMax = 9007199254740991;
+
+export const getFinancialPlanResponseGoalSavingsItemManualSavingsMinorMin = 0;
+export const getFinancialPlanResponseGoalSavingsItemManualSavingsMinorMax = 9007199254740991;
+
+export const getFinancialPlanResponseGoalSavingsItemEffectiveSavingsMinorMin = 0;
+export const getFinancialPlanResponseGoalSavingsItemEffectiveSavingsMinorMax = 9007199254740991;
+
+export const getFinancialPlanResponseGoalSavingsItemUndatedActiveCountMin = 0;
 
 export const getFinancialPlanResponseCostsItemAmountMinorMin = 0;
 export const getFinancialPlanResponseCostsItemAmountMinorMax = 9007199254740991;
@@ -138,6 +933,23 @@ export const GetFinancialPlanResponse = zod.object({
   "currency": zod.enum(['ILS', 'USD', 'JOD'])
 })
 })),
+  "goalSavings": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "goalRequired": zod.object({
+  "minor": zod.number().int().min(getFinancialPlanResponseGoalSavingsItemGoalRequiredMinorMin).max(getFinancialPlanResponseGoalSavingsItemGoalRequiredMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "manualSavings": zod.object({
+  "minor": zod.number().int().min(getFinancialPlanResponseGoalSavingsItemManualSavingsMinorMin).max(getFinancialPlanResponseGoalSavingsItemManualSavingsMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "effectiveSavings": zod.object({
+  "minor": zod.number().int().min(getFinancialPlanResponseGoalSavingsItemEffectiveSavingsMinorMin).max(getFinancialPlanResponseGoalSavingsItemEffectiveSavingsMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "undatedActiveCount": zod.number().int().min(getFinancialPlanResponseGoalSavingsItemUndatedActiveCountMin),
+  "policy": zod.enum(['maximum_manual_or_goals'])
+})).optional().describe('Additive goal forecast metadata; plannedSavings uses max(manual savings, goal requirement) per currency, not their sum.'),
   "costs": zod.array(zod.object({
   "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
   "source": zod.enum(['profile', 'override', 'recurring', 'manual']),
@@ -762,6 +1574,7 @@ export const ListFinanceTransactionsResponseItem = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -866,6 +1679,7 @@ export const GetFinanceHistoryResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -905,7 +1719,11 @@ export const GetFinanceHistoryFilterOptionsResponse = zod.object({
   "name": zod.string(),
   "arabicName": zod.string()
 })),
-  "goals": zod.array(zod.string().uuid())
+  "goals": zod.array(zod.string().uuid()),
+  "goalOptions": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string()
+})).optional()
 })
 
 
@@ -967,6 +1785,7 @@ export const GetFinanceTransactionResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -1062,6 +1881,7 @@ export const CreateFinanceMovementResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -1195,6 +2015,12 @@ export const DecideMoneyRequestResponse = zod.object({
 export const getFinanceSummaryResponseCashflowItemBalanceMinorMin = 0;
 export const getFinanceSummaryResponseCashflowItemBalanceMinorMax = 9007199254740991;
 
+export const getFinanceSummaryResponseCashflowItemReservedBalanceMinorMin = 0;
+export const getFinanceSummaryResponseCashflowItemReservedBalanceMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCashflowItemNetBalanceMinorMin = 0;
+export const getFinanceSummaryResponseCashflowItemNetBalanceMinorMax = 9007199254740991;
+
 export const getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMin = 0;
 export const getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMax = 9007199254740991;
 
@@ -1242,6 +2068,14 @@ export const GetFinanceSummaryResponse = zod.object({
   "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemBalanceMinorMin).max(getFinanceSummaryResponseCashflowItemBalanceMinorMax),
   "currency": zod.enum(['ILS', 'USD', 'JOD'])
 }),
+  "reservedBalance": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemReservedBalanceMinorMin).max(getFinanceSummaryResponseCashflowItemReservedBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).optional(),
+  "netBalance": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemNetBalanceMinorMin).max(getFinanceSummaryResponseCashflowItemNetBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).optional(),
   "monthlyIncome": zod.object({
   "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMin).max(getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMax),
   "currency": zod.enum(['ILS', 'USD', 'JOD'])
@@ -1315,6 +2149,7 @@ export const GetFinanceSummaryResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -1364,6 +2199,7 @@ export const GetFinanceSummaryResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),
@@ -2129,6 +2965,7 @@ export const CreateCampusPaymentResponse = zod.object({
   "destination": zod.string().nullable(),
   "accountName": zod.string().optional(),
   "relatedGoalId": zod.string().uuid().nullable(),
+  "goalFundingSource": zod.union([zod.literal('student_account'),zod.literal('parent_simulated'),zod.literal(null)]).nullish(),
   "relatedBudgetId": zod.string().uuid().nullable(),
   "parentTransferId": zod.string().uuid().nullable(),
   "campusServiceId": zod.string().uuid().nullable(),

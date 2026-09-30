@@ -4,6 +4,7 @@ import onboardingRouter from "./onboarding";
 import financeRouter from "./finance";
 import campusRouter from "./campus";
 import planningRouter from "./planning";
+import goalsRouter from "./goals";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(onboardingRouter);
 router.use(financeRouter);
 router.use(campusRouter);
 router.use(planningRouter);
+router.use(goalsRouter);
 
 export default router;
