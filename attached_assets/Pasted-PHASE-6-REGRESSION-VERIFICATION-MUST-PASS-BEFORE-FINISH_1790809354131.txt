@@ -1,0 +1,30 @@
+PHASE 6 — REGRESSION VERIFICATION (MUST PASS BEFORE FINISHING)
+
+Run the app and actually test each item; fix anything broken without changing business logic:
+
+ Sign up / log in / log out / onboarding / profile edit
+ Home loads with real data (balance, income, spending, upcoming, goals, campus activity, insight, recent transactions)
+ Add money / send / receive / internal transfer (simulated) → balance and transactions update
+ Campus payment: select university → campus → service → item → checkout → receipt → transaction created
+ Transactions: list, search, every filter, categories, detail view
+ Budget & Plan: income, budgets, university plan, housing, transportation, recurring, financial plan all render and save
+ Goals: create, edit, contribute (from student account), parent funding if already present, pause, resume, complete, archive, history; balance/transaction/goal/budget/dashboard update together
+ Language switch EN↔AR persists; theme Light/Dark/System persists
+ Every existing route still resolves; no console errors; no hydration/type/lint errors
+ Viewports 320, 375, 414, 768, 1024, 1440: no horizontal overflow, no clipping, no overlapping
+ Security UX: hide balances persists; app lock set/unlock/wrong PIN cooldown/disable; idle auto-lock; privacy cover on background; slide-to-confirm works with keyboard fallback; existing login/logout untouched
+ Gold discipline check: each screen has at most one strong gold gradient and gold text on light backgrounds uses gold-700+
+ grep confirms no stray old-brand colors (
+#4338CA, 
+#34D399, indigo/emerald raw classes) in components or charts
+PHASE 7 — DOCUMENT FOR FUTURE PROMPTS
+
+Update replit.md (or the project docs file) with a "Design System v2 — Gold Fintech" section containing: token file locations, palette, typography, component inventory, mobile patterns (bottom tab bar, bottom sheets, pull-to-refresh, skeletons, safe areas), and the rule:
+
+All future screens (Prompts 8–15) MUST use existing tokens and shared components only, must be mobile-first with bottom sheets on mobile, must support EN/AR + Light/Dark, and must never introduce raw colors or a second styling approach.
+
+DELIVERABLE
+The entire existing app visually migrated to the gold fintech theme, consistent across all screens built so far.
+A native-feeling, installable mobile experience.
+Zero regressions in functionality from Prompts 1–7.
+Short final report listing: files changed, components restyled, anything you deliberately did NOT touch, and any existing issue you noticed but left alone.

@@ -9,7 +9,7 @@ export default function NotFound() {
   return (
     <Page>
       <div className="stagger flex max-w-2xl flex-col gap-5 py-6 md:py-12" data-testid="state-not-found">
-        <p className="tabular text-[64px] font-semibold leading-none tracking-tight text-primary/40 md:text-[96px]" aria-hidden>404</p>
+        <p className="tabular text-[64px] font-semibold leading-none tracking-tight text-gold-ink md:text-[96px]" aria-hidden>404</p>
         <p className="text-[13px] font-medium tracking-wide text-gold-ink">{t('nf.eyebrow')}</p>
         <h1 className="text-[28px] font-semibold leading-tight tracking-tight md:text-4xl" data-testid="text-page-title">{t('nf.title')}</h1>
         <p className="text-base leading-7 text-muted-foreground">{t('nf.body')}</p>
