@@ -77,7 +77,7 @@ export function InvitationPanel({ goal, t }: { goal: SavingsGoal; t: Tx }) {
                         {s === 'pending' ? <> · <bdi>{t('Expires', 'تنتهي')} {fmtDateTime(i.expiresAt, locale)}</bdi></> : null}
                         {s === 'revoked' && i.revokedAt ? <> · <bdi>{fmtDateTime(i.revokedAt, locale)}</bdi></> : null}</p>
                     </div>
-                    {s === 'pending' || s === 'redeemed' ? <Button variant="ghost" className="min-h-11 text-destructive" onClick={() => setRevokeTarget(i)} data-testid={`button-revoke-${i.id}`}>{s === 'redeemed' ? t('Revoke access', 'إلغاء الوصول') : t('Revoke', 'إلغاء')}</Button> : null}
+                    {s === 'pending' || s === 'redeemed' ? <Button variant="ghost" className="text-destructive" onClick={() => setRevokeTarget(i)} data-testid={`button-revoke-${i.id}`}>{s === 'redeemed' ? t('Revoke access', 'إلغاء الوصول') : t('Revoke', 'إلغاء')}</Button> : null}
                   </li>
                 );
               })}

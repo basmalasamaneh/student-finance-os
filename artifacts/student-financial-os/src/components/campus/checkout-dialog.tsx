@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useCreateCampusPayment, type CampusProduct, type CampusService, type FinanceAccount, type FinanceTransaction } from '@workspace/api-client-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { FlowSteps, SuccessCheck } from '@/components/money/flow-steps';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { Notice } from '@/components/states/state-panel';
 import { Field, ReviewRow, SimulatedNote } from '@/components/money/fields';
@@ -50,6 +51,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
           <DialogTitle>{step === 'done' ? t('Payment receipt', 'إيصال الدفع') : step === 'review' ? t('Confirm payment', 'تأكيد الدفع') : t('Pay with', 'الدفع من')}</DialogTitle>
           <DialogDescription>{serviceName}</DialogDescription>
         </DialogHeader>
+        <FlowSteps label={t('Progress', 'التقدم')} current={step === 'account' ? 0 : step === 'review' ? 1 : 2} steps={[t('Account', 'الحساب'), t('Review', 'مراجعة'), t('Receipt', 'الإيصال')]} />
 
         {step === 'account' && (
           <div className="flex flex-col gap-4">
@@ -99,8 +101,8 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
             <SimulatedNote t={t} />
             <DialogFooter className="gap-2">
               <Button variant="outline" disabled={mutation.isPending} onClick={() => { setStep('account'); idem.renew(); mutation.reset(); }}><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Back', 'رجوع')}</Button>
-              <Button onClick={pay} disabled={mutation.isPending} aria-busy={mutation.isPending} data-testid="button-confirm-payment">
-                {mutation.isPending ? <><Loader2 className="animate-spin" aria-hidden />{t('Paying…', 'جارٍ الدفع…')}</> : mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm simulated payment', 'تأكيد الدفع المحاكى')}
+              <Button onClick={pay} loading={mutation.isPending} data-testid="button-confirm-payment">
+                {mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm simulated payment', 'تأكيد الدفع المحاكى')}
               </Button>
             </DialogFooter>
           </div>
@@ -108,6 +110,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
 
         {step === 'done' && receipt && (
           <>
+            <SuccessCheck label={t('Payment recorded', 'تم تسجيل الدفع')} />
             <Receipt tx={receipt} account={account} t={t} />
             <DialogFooter><Button onClick={() => onOpenChange(false)} data-testid="button-receipt-done">{t('Done', 'تم')}</Button></DialogFooter>
           </>

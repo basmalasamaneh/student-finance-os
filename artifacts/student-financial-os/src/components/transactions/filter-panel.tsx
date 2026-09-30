@@ -140,8 +140,8 @@ export function FilterPanel({ open, onOpenChange, value, onApply, options, optio
           </div>
         </form>
         <SheetFooter className="flex-row gap-2 border-t border-divider px-5 py-4 safe-bottom">
-          <Button type="button" variant="ghost" className="min-h-11 flex-1" onClick={() => setDraft({ ...EMPTY_FILTERS, search: value.search })} data-testid="button-reset-draft">{t('Reset', 'إعادة ضبط')}</Button>
-          <Button type="submit" form={`${id}-form`} className="min-h-11 flex-[2]" disabled={built.errors.length > 0} data-testid="button-apply-filters">{t('Show results', 'عرض النتائج')}</Button>
+          <Button type="button" variant="ghost" className="flex-1" onClick={() => setDraft({ ...EMPTY_FILTERS, search: value.search })} data-testid="button-reset-draft">{t('Reset', 'إعادة ضبط')}</Button>
+          <Button type="submit" form={`${id}-form`} variant="gradient" className="flex-[2]" disabled={built.errors.length > 0} data-testid="button-apply-filters">{t('Show results', 'عرض النتائج')}</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

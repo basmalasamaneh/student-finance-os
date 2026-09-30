@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useCreateMoneyRequest, type FinanceAccount, type MoneyRequest } from '@workspace/api-client-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { FlowSteps, SuccessCheck } from '@/components/money/flow-steps';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { Notice } from '@/components/states/state-panel';
 import { AccountSelect, AmountInput, Field, inputClass, ReviewRow, SimulatedNote } from './fields';
@@ -66,6 +67,7 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
           <DialogTitle>{step === 'done' ? t('Request sent', 'تم إرسال الطلب') : step === 'review' ? t('Review request', 'مراجعة الطلب') : t('Request money', 'طلب مال')}</DialogTitle>
           <DialogDescription>{t('The payer sees it as pending and chooses to pay or decline. No money moves until they pay.', 'يراه الدافع معلّقاً ويختار الدفع أو الرفض. لا يتحرك مال حتى يدفع.')}</DialogDescription>
         </DialogHeader>
+        <FlowSteps label={t('Progress', 'التقدم')} current={step === 'form' ? 0 : step === 'review' ? 1 : 2} steps={[t('Details', 'التفاصيل'), t('Review', 'مراجعة'), t('Done', 'تم')]} />
         {step === 'form' && (
           <form className="flex flex-col gap-4" noValidate onSubmit={(e) => { e.preventDefault(); validate(); }}>
             <Field id="req_account" label={t('Receive into', 'الاستلام في')} error={errors.req_account}>
@@ -99,15 +101,15 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
             <SimulatedNote t={t} />
             <DialogFooter className="gap-2">
               <Button variant="outline" disabled={mutation.isPending} onClick={() => { setStep('form'); idem.renew(); mutation.reset(); }}><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Edit', 'تعديل')}</Button>
-              <Button onClick={confirm} disabled={mutation.isPending} aria-busy={mutation.isPending} data-testid="button-confirm-request">
-                {mutation.isPending ? <><Loader2 className="animate-spin" aria-hidden />{t('Sending…', 'جارٍ الإرسال…')}</> : t('Send request', 'إرسال الطلب')}
+              <Button onClick={confirm} loading={mutation.isPending} data-testid="button-confirm-request">
+                {t('Send request', 'إرسال الطلب')}
               </Button>
             </DialogFooter>
           </div>
         )}
         {step === 'done' && created && (
-          <div className="motion-rise flex flex-col items-center gap-3 py-3 text-center">
-            <span className="grid size-11 place-items-center rounded-full bg-success-soft text-success"><CheckCircle2 className="size-5" aria-hidden /></span>
+          <div className="motion-rise card-premium flex flex-col items-center gap-3 rounded-card border p-5 text-center">
+            <SuccessCheck label={t('Request sent', 'تم إرسال الطلب')} />
             <MoneyDisplay value={created.amount} size="lg" />
             <p className="type-label text-muted-foreground">{t('Pending until the payer responds.', 'معلّق حتى يرد الدافع.')}</p>
             <DialogFooter className="w-full"><Button className="w-full sm:w-auto" onClick={() => onOpenChange(false)}>{t('Done', 'تم')}</Button></DialogFooter>

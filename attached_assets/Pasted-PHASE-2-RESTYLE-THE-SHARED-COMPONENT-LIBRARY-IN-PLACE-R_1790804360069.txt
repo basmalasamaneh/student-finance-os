@@ -1,0 +1,31 @@
+PHASE 2 — RESTYLE THE SHARED COMPONENT LIBRARY (IN PLACE)
+
+Restyle the existing reusable components from Prompt 1. Keep file names, exports, and props.
+
+Buttons: Primary = gold gradient fill + on-brand text, 52px height on mobile, subtle press scale (0.97) + pressed color; Secondary = outlined gold; Tertiary = text; Destructive = error color. Loading state with spinner that keeps button width. Disabled state clearly different.
+Inputs / selects / search: 52px height, floating or clear top labels, gold focus ring, clear button, inline validation messages. Amount inputs: large centered numeric style with inputmode="decimal".
+Cards: flat surface, 20px radius, optional "premium" variant with gold-shine overlay (used for hero balance, goal highlight, campus receipt).
+Balance hero card: gold gradient, large tabular balance, eye icon to hide/show balance (persist the preference), sub-line with account count, optional tiny sparkline; "Quick actions" row beneath it (Add money, Send, Request, Pay campus — only those that already exist or are marked Coming soon).
+Transaction rows: circular category icon in gold-tinted container, title + subtitle, right-aligned tabular amount, date group headers ("Today", "Yesterday"), sticky group headers while scrolling.
+Progress bars / goal rings: gold gradient fill on a gold-200 (light) / 
+#33291A (dark) track; animated on mount (respect reduced motion); circular ring variant for goals.
+Badges/chips: soft tinted backgrounds, never saturated blocks.
+Tabs / segmented controls: pill-style segmented control with animated gold indicator.
+Charts: restyle to the gold palette, rounded bars, soft gridlines, tooltips with token colors, accessible text alternatives.
+Empty / loading / error / success states: elegant gold line-art style illustration or icon, short helpful copy, one clear primary action. Loading = skeleton shimmer matching the real layout (not spinners for page loads).
+Toasts: top on mobile under the safe area, bottom-right on desktop; success/error with icon.
+Dialogs: on mobile, all dialogs/forms that used centered modals become bottom sheets (see Phase 4). On desktop they stay centered dialogs.
+Icons: one consistent icon set, 1.75px stroke, rounded caps; RTL-mirrored where directional (arrows, chevrons, back).
+PHASE 3 — SCREEN-BY-SCREEN VISUAL SWEEP (PROMPTS 1–7 ONLY)
+
+Apply the new system to every screen that exists so far. Do not add new features; only improve layout, hierarchy, spacing, and polish.
+
+Auth, onboarding, profile: branded gold splash/welcome with logo + tagline ("More than a wallet. Your financial life, organized."), step progress indicator in onboarding, one question per screen on mobile, big tappable option cards, friendly copy.
+Student Home: order stays exactly as in Prompt 3. Top = greeting + avatar + notifications entry point (only if it exists) → gold balance hero → quick actions → monthly income/spending mini cards (horizontal scroll snap on mobile) → upcoming payments → goals carousel → campus activity → insight card → recent transactions.
+Money / accounts / wallet / campus payments: accounts as stacked or swipeable cards; simulated flows (add money, send, transfer, campus checkout) as multi-step bottom sheets/full-screen flows with a progress indicator, a review step, and a polished success screen + receipt (premium card style with a subtle gold check animation). Keep "simulated" labeling and "Coming soon" labels intact.
+Transactions: search bar, filter chips row (horizontal scroll), filter bottom sheet, grouped-by-date list, transaction detail as a bottom sheet / detail page.
+Plan (budget, income, university, housing, transportation, recurring, financial plan): section cards with clear progress, budget rings/bars, calm non-judgmental warning styling (use wording already defined: "You are above your planned budget." — never shame language).
+Goals: goal cards with ring progress, remaining amount, estimated completion; contribute via bottom sheet with quick-amount chips; completed goals get a subtle gold celebration (respect reduced motion).
+Settings/profile screens that exist: grouped list style (iOS-like grouped sections), toggles, language switcher, theme switcher (Light/Dark/System).
+
+For every screen confirm: loading skeleton, empty state, error state, Arabic RTL, dark mode.

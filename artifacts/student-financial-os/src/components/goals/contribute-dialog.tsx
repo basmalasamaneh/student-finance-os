@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'wouter';
 import { useContributeToSavingsGoal, type FinanceAccount, type GoalContributionReceipt, type SavingsGoal } from '@workspace/api-client-react';
 import { Button } from '@/components/ui/button';
+import { FlowSteps, SuccessCheck } from '@/components/money/flow-steps';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AccountSelect, AmountInput, BalanceHint, Field, inputClass, ReviewRow, SimulatedNote } from '@/components/money/fields';
 import { MoneyDisplay } from '@/components/finance/money-display';
@@ -9,6 +10,16 @@ import { StatePanel } from '@/components/states/state-panel';
 import { accountName, amountErrorText, parseAmountInput, type Tx } from '@/features/money/money-model';
 import { goalErrorText, useRefreshAfterContribution, useSubmissionKey } from '@/features/goals/goals-model';
 import type { Currency } from '@/lib/money';
+import { cn } from '@/lib/utils';
+
+/** Quick-amount chips only fill the same validated text field; parsing stays with parseAmountInput. */
+const QUICK = ['10', '25', '50'];
+/** Exact minor → decimal string (BigInt, no float). JOD uses 3 decimals. */
+function minorToDecimal(minor: number, currency: Currency) {
+  const digits = currency === 'JOD' ? 3 : 2;
+  const m = BigInt(minor); const scale = 10n ** BigInt(digits);
+  return `${m / scale}.${(m % scale).toString().padStart(digits, '0')}`;
+}
 
 export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { open: boolean; onOpenChange: (o: boolean) => void; goal: SavingsGoal; accounts: FinanceAccount[]; t: Tx }) {
   const eligible = useMemo(() => accounts.filter((a) => a.currency === goal.currency), [accounts, goal.currency]);
@@ -47,8 +58,10 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
           <DialogTitle>{receipt ? t('Contribution recorded', 'سُجّلت المساهمة') : t('Add to goal', 'أضف إلى الهدف')}</DialogTitle>
           <DialogDescription>{t('Money moves from an account you own into this goal’s protected reserve. It stays yours but is no longer spendable.', 'ينتقل المال من حساب تملكه إلى احتياطي الهدف المحمي. يبقى لك لكنه لم يعد قابلاً للإنفاق.')}</DialogDescription>
         </DialogHeader>
+        {eligible.length ? <FlowSteps label={t('Progress', 'التقدم')} current={receipt ? 2 : step === 'form' ? 0 : 1} steps={[t('Amount', 'المبلغ'), t('Review', 'مراجعة'), t('Done', 'تم')]} /> : null}
         {receipt ? (
-          <div className="flex flex-col gap-3" data-testid="receipt-contribution">
+          <div className="card-premium flex flex-col gap-3 rounded-card border p-4" data-testid="receipt-contribution">
+            <SuccessCheck label={t('Contribution recorded', 'سُجّلت المساهمة')} />
             <dl className="divide-y divide-divider border-y border-divider">
               <ReviewRow label={t('Amount', 'المبلغ')} testId="text-receipt-amount">{receipt.entry.amount ? <MoneyDisplay value={receipt.entry.amount} size="sm" /> : '—'}</ReviewRow>
               <ReviewRow label={t('Saved now', 'المدّخر الآن')}><MoneyDisplay value={receipt.goal.current} size="sm" /></ReviewRow>
@@ -72,8 +85,12 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
             </Field>
             <BalanceHint account={account} t={t} />
             <Field id="contrib-amount" label={t('Amount', 'المبلغ')} error={touched ? amountErr : undefined}>
-              <AmountInput id="contrib-amount" value={amount} onChange={setAmount} currency={goal.currency} error={touched ? amountErr : undefined} />
+              <AmountInput id="contrib-amount" large value={amount} onChange={setAmount} currency={goal.currency} error={touched ? amountErr : undefined} />
             </Field>
+            <div className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t('Quick amounts', 'مبالغ سريعة')}>
+              {QUICK.map((q) => <button key={q} type="button" onClick={() => setAmount(q)} aria-pressed={amount === q} className={cn('type-label min-h-11 shrink-0 snap-start rounded-full border px-4 tabular transition-colors', amount === q ? 'border-primary bg-primary-soft text-gold-ink' : 'border-border hover:border-primary')} data-testid={`chip-amount-${q}`}><bdi>{q}</bdi> <span className="text-muted-foreground">{goal.currency}</span></button>)}
+              {goal.remaining.minor > 0 ? <button type="button" onClick={() => setAmount(minorToDecimal(goal.remaining.minor, goal.currency))} aria-pressed={amount === minorToDecimal(goal.remaining.minor, goal.currency)} className={cn('type-label min-h-11 shrink-0 snap-start rounded-full border px-4 transition-colors', amount === minorToDecimal(goal.remaining.minor, goal.currency) ? 'border-primary bg-primary-soft text-gold-ink' : 'border-border hover:border-primary')} data-testid="chip-amount-remaining">{t('Remaining', 'المتبقي')}</button> : null}
+            </div>
             <p className="type-caption text-muted-foreground">{t('Remaining on this goal', 'المتبقي في هذا الهدف')}: <MoneyDisplay value={goal.remaining} size="sm" className="inline !text-xs" /></p>
             <Field id="contrib-note" label={t('Note (optional)', 'ملاحظة (اختياري)')} hint={`${note.length}/500`}>
               <input id="contrib-note" className={inputClass} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} data-testid="input-contrib-note" />
@@ -97,7 +114,7 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
             : !eligible.length ? <Button variant="ghost" onClick={() => onOpenChange(false)}>{t('Close', 'إغلاق')}</Button>
               : step === 'form' ? <><Button variant="ghost" onClick={() => onOpenChange(false)}>{t('Cancel', 'إلغاء')}</Button><Button type="submit" form="contribute-form" data-testid="button-review-contribution">{t('Review', 'مراجعة')}</Button></>
                 : <><Button variant="ghost" onClick={() => setStep('form')} disabled={m.isPending} data-testid="button-back-contribution">{t('Back', 'رجوع')}</Button>
-                  <Button onClick={confirm} disabled={m.isPending} data-testid="button-confirm-contribution">{m.isPending ? t('Recording…', 'جارٍ التسجيل…') : m.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm contribution', 'تأكيد المساهمة')}</Button></>}
+                  <Button onClick={confirm} loading={m.isPending} data-testid="button-confirm-contribution">{m.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm contribution', 'تأكيد المساهمة')}</Button></>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

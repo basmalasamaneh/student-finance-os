@@ -41,7 +41,7 @@ export default function GoalsPage() {
     <Page>
       <PageHeader eyebrow={t('SAVINGS GOALS', 'أهداف الادخار')} title={t('What you’re saving for', 'ما تدّخر من أجله')}
         lede={t('Each goal has its own protected reserve. Money you set aside stays yours, but it’s no longer counted as spendable.', 'لكل هدف احتياطي محمي خاص. المال الذي تجنّبه يبقى لك، لكنه لا يُحسب كقابل للإنفاق.')}
-        actions={<Button onClick={() => setCreateOpen(true)} data-testid="button-new-goal"><Plus aria-hidden />{t('New goal', 'هدف جديد')}</Button>} />
+        actions={<Button variant="gradient" onClick={() => setCreateOpen(true)} data-testid="button-new-goal"><Plus aria-hidden />{t('New goal', 'هدف جديد')}</Button>} />
 
       {q.isPending ? (
         <div className="flex flex-col gap-4" role="status" aria-label={t('Loading goals…', 'جارٍ تحميل الأهداف…')} data-testid="state-loading">

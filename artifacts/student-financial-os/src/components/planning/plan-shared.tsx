@@ -56,8 +56,8 @@ export function parseAmount(raw: string, currency: Currency, t: Tx, allowZero = 
 export function RowActions({ onEdit, onDelete, t, testId }: { onEdit: () => void; onDelete: () => void; t: Tx; testId: string }) {
   return (
     <div className="flex shrink-0 items-center gap-1">
-      <Button variant="ghost" size="icon" className="size-10" onClick={onEdit} aria-label={t('Edit', 'تعديل')} data-testid={`button-edit-${testId}`}><Pencil className="size-4" aria-hidden /></Button>
-      <Button variant="ghost" size="icon" className="size-10 text-muted-foreground hover:text-destructive" onClick={onDelete} aria-label={t('Delete', 'حذف')} data-testid={`button-delete-${testId}`}><Trash2 className="size-4" aria-hidden /></Button>
+      <Button variant="ghost" size="icon" className="size-11" onClick={onEdit} aria-label={t('Edit', 'تعديل')} data-testid={`button-edit-${testId}`}><Pencil className="size-4" aria-hidden /></Button>
+      <Button variant="ghost" size="icon" className="size-11 text-muted-foreground hover:text-destructive" onClick={onDelete} aria-label={t('Delete', 'حذف')} data-testid={`button-delete-${testId}`}><Trash2 className="size-4" aria-hidden /></Button>
     </div>
   );
 }

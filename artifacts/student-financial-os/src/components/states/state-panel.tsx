@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 type Tone = 'empty' | 'error' | 'success' | 'permission';
 
 const toneStyles: Record<Tone, { icon: typeof Check; ring: string }> = {
-  empty: { icon: CircleDashed, ring: 'bg-muted text-muted-foreground' },
+  empty: { icon: CircleDashed, ring: 'bg-primary-soft text-gold-ink' },
   error: { icon: AlertTriangle, ring: 'bg-destructive-soft text-destructive' },
   success: { icon: Check, ring: 'bg-success-soft text-success' },
   permission: { icon: Lock, ring: 'bg-primary-soft text-gold-ink' },
@@ -20,6 +20,7 @@ export function StatePanel({
   action,
   icon,
   className,
+  align = 'start',
 }: {
   tone: Tone;
   title: string;
@@ -27,17 +28,23 @@ export function StatePanel({
   action?: ReactNode;
   icon?: ReactNode;
   className?: string;
+  /** Optional: center the composition (empty pages); default start-aligned. */
+  align?: 'start' | 'center';
 }) {
   const { icon: Icon, ring } = toneStyles[tone];
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
-      className={cn('motion-rise flex flex-col items-start gap-4 py-8', className)}
+      className={cn('motion-rise flex flex-col gap-4 py-8', align === 'center' ? 'items-center text-center' : 'items-start', className)}
       data-testid={`state-${tone}`}
     >
-      <span className={cn('grid size-10 place-items-center rounded-full', ring, tone === 'success' && 'motion-pop')}>{icon ?? <Icon className="size-[18px]" aria-hidden />}</span>
+      {/* Gold line-art mark: concentric hairline rings around a tinted glyph. */}
+      <span aria-hidden className={cn('relative grid size-16 place-items-center rounded-full border border-dashed border-gold-300/80 dark:border-gold-700/70', align === 'center' && 'self-center')}>
+        <span className="absolute inset-1.5 rounded-full border border-gold-200/80 dark:border-gold-800/70" />
+        <span className={cn('relative grid size-10 place-items-center rounded-full', ring, tone === 'success' && 'motion-pop')}>{icon ?? <Icon className="size-5" />}</span>
+      </span>
       <div className="flex max-w-md flex-col gap-1.5">
-        <p className="type-body font-semibold">{title}</p>
+        <p className="type-subtitle">{title}</p>
         <p className="type-label font-normal text-muted-foreground">{body}</p>
       </div>
       {action}
@@ -70,7 +77,7 @@ export function Notice({ tone, title, body, className }: { tone: NoticeTone; tit
 
 export function RetryButton({ label, busyLabel, busy, onClick }: { label: string; busyLabel: string; busy?: boolean; onClick: () => void }) {
   return (
-    <Button variant="outline" onClick={onClick} disabled={busy} aria-busy={busy} data-testid="button-retry">
+    <Button variant="outline" onClick={onClick} disabled={busy} aria-busy={busy} className="self-start" data-testid="button-retry">
       <RotateCw className={cn(busy && 'animate-spin')} aria-hidden />
       {busy ? busyLabel : label}
     </Button>
@@ -83,7 +90,7 @@ export function SkeletonRows({ rows = 3, label }: { rows?: number; label: string
     <div role="status" aria-live="polite" aria-label={label} className="flex flex-col divide-y divide-divider" data-testid="state-loading">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 py-4">
-          <span className="skeleton-shimmer size-9 shrink-0 rounded-full" />
+          <span className="skeleton-shimmer size-10 shrink-0 rounded-full" />
           <div className="flex flex-1 flex-col gap-2">
             <span className="skeleton-shimmer h-3.5 w-2/5 rounded" />
             <span className="skeleton-shimmer h-3 w-1/4 rounded" />

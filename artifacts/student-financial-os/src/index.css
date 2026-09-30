@@ -544,3 +544,104 @@ html[data-motion='reduce'] *, html[data-motion='reduce'] *::before, html[data-mo
     inset: -1px;
   }
 }
+
+/* ═════════════ Gold visual migration · Phase 2 — shared component layer ═════════════ */
+
+/* Icons: one set (lucide), 1.75 stroke, rounded caps. Directional glyphs mirror in RTL unless the
+   caller already mirrors them with a scale utility (avoids double flip). */
+svg.lucide { stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+[dir='rtl'] :is(.lucide-arrow-left, .lucide-arrow-right, .lucide-chevron-left, .lucide-chevron-right,
+  .lucide-chevrons-left, .lucide-chevrons-right, .lucide-arrow-up-right, .lucide-arrow-down-left,
+  .lucide-arrow-up-left, .lucide-arrow-down-right, .lucide-undo-2, .lucide-redo-2, .lucide-log-out,
+  .lucide-log-in, .lucide-send, .lucide-arrow-left-right, .lucide-move-right, .lucide-move-left,
+  .lucide-external-link):not([class*='scale-x']) { scale: -1 1; }
+
+/* Emphasised primary: the gold gradient. Use on ONE action per screen (the first emphasised primary
+   when there is no hero). Inside a .surface-gold hero it collapses to the hero's flat primary. */
+.btn-gradient {
+  background-image: var(--gradient-gold-shine), var(--gradient-gold);
+  color: hsl(var(--on-brand));
+  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--gold-50) / 0.35);
+}
+.btn-gradient:hover { background-image: var(--gradient-gold-shine), var(--gradient-gold); filter: saturate(1.08) brightness(1.02); }
+.btn-gradient:active { filter: brightness(0.94); }
+.surface-gold .btn-gradient { background-image: none; background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); box-shadow: none; filter: none; }
+
+/* Button loading: content hidden but kept in flow so width never jumps. */
+.btn-loading > :not(.btn-spinner) { visibility: hidden; }
+.btn-spinner { position: absolute; inset: 0; display: grid; place-items: center; }
+
+/* Premium card: flat surface + soft gold wash + shine. Not a strong gradient (hero stays unique). */
+.card-premium {
+  background-image: var(--gradient-gold-shine), linear-gradient(160deg, hsl(var(--gold-50)) 0%, hsl(var(--bg-surface)) 55%);
+  border-color: hsl(var(--gold-200));
+}
+.dark .card-premium {
+  background-image: var(--gradient-gold-shine), linear-gradient(160deg, hsl(40 40% 10%) 0%, hsl(var(--bg-surface)) 60%);
+  border-color: hsl(var(--gold-800) / 0.7);
+}
+
+/* Progress / rings: gradient fill on a gold-200 (light) / #33291A (dark) track, grow on mount. */
+.track-gold { background-color: hsl(var(--gold-200) / 0.7); }
+.dark .track-gold { background-color: hsl(var(--border-subtle)); }
+.fill-gold { background-image: var(--gradient-gold); }
+@keyframes sfos-grow { from { transform: scaleX(0); } }
+.motion-grow { animation: sfos-grow 700ms var(--ease-out-soft) both; }
+.ring-track { stroke: hsl(var(--gold-200) / 0.7); }
+.dark .ring-track { stroke: hsl(var(--border-subtle)); }
+.ring-stop-a { stop-color: hsl(var(--gold-300)); }
+.ring-stop-b { stop-color: hsl(var(--gold-500)); }
+.ring-stop-c { stop-color: hsl(var(--bronze)); }
+@keyframes sfos-ring { from { stroke-dashoffset: var(--ring-c); } }
+.motion-ring { animation: sfos-ring 800ms var(--ease-out-soft) both; }
+
+/* Sticky date group headers in transaction lists. */
+.date-header {
+  position: sticky; top: 0; z-index: 5;
+  background-color: hsl(var(--background) / 0.92);
+  backdrop-filter: blur(8px);
+}
+
+/* Pill tabs: moving indicator. */
+.tabs-indicator { transition: transform var(--duration-base) var(--ease-out-soft), width var(--duration-base) var(--ease-out-soft); }
+
+/* Toasts: top on mobile under the safe area, bottom-right on desktop. */
+.toast-viewport { padding-top: calc(env(safe-area-inset-top) + 0.75rem); }
+@media (min-width: 768px) { .toast-viewport { padding-top: 1rem; padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); } }
+
+/* Amount entry: large centred tabular figure. */
+.input-amount { font-size: 2rem; line-height: 1.1; font-weight: 600; text-align: center; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* Dialog → bottom sheet on mobile (CSS only; Radix focus trap, portal and dismiss behaviour untouched).
+   !important beats per-dialog max-w / translate utilities passed by consumers. */
+@keyframes sfos-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sfos-sheet-out { from { transform: translateY(0); } to { transform: translateY(100%); } }
+.sheet-grabber { display: none; }
+@media (max-width: 639.98px) {
+  .sheet-mobile {
+    top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+    translate: none !important; transform: none;
+    width: 100% !important; max-width: none !important;
+    max-height: calc(100dvh - 2.5rem) !important;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0 !important;
+    border-bottom-width: 0 !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1.25rem) !important;
+    padding-top: 1.75rem !important;
+  }
+  .sheet-mobile[data-state='open'] { animation: sfos-sheet-in 280ms var(--ease-out-soft) both !important; }
+  .sheet-mobile[data-state='closed'] { animation: sfos-sheet-out 200ms ease-in both !important; }
+  .sheet-mobile > .sheet-grabber {
+    display: block; position: absolute; top: 0.625rem; left: 50%; translate: -50% 0;
+    width: 2.5rem; height: 0.3125rem; border-radius: 999px; background: hsl(var(--border));
+  }
+}
+
+/* Phase 3 — success check stroke draw (collapses under reduced motion via global rules). */
+@keyframes sfos-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.check-draw { stroke-dasharray: 1; stroke-dashoffset: 0; animation: sfos-draw 420ms 120ms var(--ease-out-soft) both; }
+/* Phase 3 — plan section cards and iOS-style grouped settings lists. */
+.plan-card { border-radius: var(--radius-card); border: 1px solid hsl(var(--card-border)); background-color: hsl(var(--card)); padding-inline: 1rem; box-shadow: var(--shadow-xs); }
+@media (min-width: 768px) { .plan-card { padding-inline: 1.5rem; } }
+.plan-card > section, .plan-card > div { border-top-width: 0 !important; }
+.grouped-list { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-card); border: 1px solid hsl(var(--card-border)); background-color: hsl(var(--card)); }
+.grouped-list > * + * { border-top: 1px solid hsl(var(--divider)); }

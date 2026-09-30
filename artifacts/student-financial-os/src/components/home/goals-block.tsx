@@ -1,9 +1,9 @@
 import { Link } from 'wouter';
 import { getListSavingsGoalsQueryKey, useListSavingsGoals } from '@workspace/api-client-react';
 import { MoneyDisplay } from '@/components/finance/money-display';
-import { GoalProgress } from '@/components/goals/goal-progress';
+import { GoalRing } from '@/components/finance/progress-meter';
 import { Unavailable, type T } from './home-primitives';
-import { GOAL_REFETCH } from '@/features/goals/goals-model';
+import { GOAL_REFETCH, isFunded, pct } from '@/features/goals/goals-model';
 
 const linkCls = 'type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline';
 
@@ -24,7 +24,12 @@ export function GoalsHomeBlock({ t, limit = 3 }: { t: T; limit?: number }) {
           <div key={c.currency}><p className="type-caption text-muted-foreground">{t('Reserved', 'محجوز')} · {c.currency}</p><MoneyDisplay value={c.reserved} size="lg" tone="highlight" /></div>
         ))}
       </div>
-      {active.slice(0, limit).map((g) => <Link key={g.id} href={`/goals/${g.id}`} className="block rounded-lg" data-testid={`link-home-goal-${g.id}`}><GoalProgress goal={g} t={t} /></Link>)}
+      {active.length ? <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-col md:overflow-visible md:px-0" data-testid="carousel-goals">
+        {active.slice(0, limit).map((g) => <Link key={g.id} href={`/goals/${g.id}`} className="hover-elevate flex w-[78%] shrink-0 snap-start items-center gap-4 rounded-card border border-card-border bg-card p-4 md:w-auto" data-testid={`link-home-goal-${g.id}`}>
+          <GoalRing value={pct(g)} label={g.name} done={isFunded(g)} size={60} stroke={6} />
+          <div className="min-w-0 flex-1"><p className="type-subtitle truncate">{g.name}</p><p className="type-caption text-muted-foreground"><MoneyDisplay value={g.current} size="sm" className="inline !text-xs" /> {t('of', 'من')} <MoneyDisplay value={g.target} size="sm" className="inline !text-xs" /></p></div>
+        </Link>)}
+      </div> : null}
       {!active.length ? <p className="type-label text-muted-foreground">{t('No active goals right now.', 'لا أهداف نشطة حالياً.')}</p> : null}
       <Link href="/goals" className={linkCls} data-testid="link-all-goals">{t(`All goals (${q.data.goals.length})`, `كل الأهداف (${q.data.goals.length})`)}</Link>
     </div>

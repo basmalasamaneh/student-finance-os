@@ -60,7 +60,7 @@ export default function MoneyPage() {
     <Page>
       <PageHeader eyebrow={t('SIMULATED LEDGER', 'سجل محاكاة')} title={t('Money', 'المال')}
         lede={t('Every balance here is the sum of recorded entries. No real money moves, and balances are never edited directly.', 'كل رصيد هنا هو مجموع قيود مسجلة. لا تتحرك أموال حقيقية، ولا تُعدَّل الأرصدة مباشرة.')}
-        actions={<Button onClick={() => setCreateOpen(true)} data-testid="button-new-account"><Plus aria-hidden />{t('New account', 'حساب جديد')}</Button>} />
+        actions={<Button variant="gradient" onClick={() => setCreateOpen(true)} data-testid="button-new-account"><Plus aria-hidden />{t('New account', 'حساب جديد')}</Button>} />
 
       {accountsQ.isPending ? <SkeletonRows rows={3} label={t('Loading accounts…', 'جارٍ تحميل الحسابات…')} />
         : accountsQ.isError ? <StatePanel tone="error" title={t('Accounts did not load', 'تعذّر تحميل الحسابات')} body={t('No balance is shown until real data arrives.', 'لا يُعرض رصيد حتى تصل البيانات الحقيقية.')}
@@ -73,7 +73,7 @@ export default function MoneyPage() {
             <div className="flex flex-col gap-10">
               <section aria-labelledby="totals-title" className="flex flex-col gap-3">
                 <h2 id="totals-title" className="type-caption text-muted-foreground">{t('Total by currency', 'الإجمالي حسب العملة')}</h2>
-                <div className="flex flex-wrap items-end gap-x-10 gap-y-3" data-testid="text-totals">
+                <div className="card-premium flex flex-wrap items-end gap-x-10 gap-y-3 rounded-card border p-5 md:p-6" data-testid="text-totals">
                   {totals.map((m) => m.value ? <MoneyDisplay key={m.currency} value={m.value} size="hero" /> : <p key={m.currency} role="alert" className="type-label text-destructive">{t(`${m.currency} total is too large to display exactly.`, `إجمالي ${m.currency} أكبر من أن يُعرض بدقة.`)}</p>)}
                 </div>
                 {summaryQ.data?.cashflow.some((c) => (c.reservedBalance?.minor ?? 0) > 0) ? (
@@ -126,7 +126,7 @@ export default function MoneyPage() {
                 <SectionHeading id="activity" title={t('Activity', 'النشاط')} meta={selected ? t('Filtered by account', 'مُصفّى حسب الحساب') : undefined} trailing={<Link href={selected ? `/transactions?accountId=${selected}` : '/transactions'} className="type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid="link-full-history">{t('Full history', 'السجل الكامل')}</Link>} />
                 {txQ.isPending ? <SkeletonRows rows={4} label={t('Loading activity…', 'جارٍ تحميل النشاط…')} />
                   : txQ.isError ? <StatePanel tone="error" title={t('Activity did not load', 'تعذّر تحميل النشاط')} body={t('Try again in a moment.', 'حاول بعد قليل.')} action={<RetryButton label={t('Retry', 'إعادة المحاولة')} busyLabel="…" busy={txQ.isRefetching} onClick={() => txQ.refetch()} />} />
-                    : txs.length ? <LedgerList items={txs.slice(0, 30)} accounts={accounts} t={t} onOpen={setReceipt} />
+                    : txs.length ? <LedgerList grouped items={txs.slice(0, 30)} accounts={accounts} t={t} onOpen={setReceipt} />
                       : <StatePanel tone="empty" className="py-5" title={t('No activity yet', 'لا نشاط بعد')} body={t('Add money or make a campus payment to see entries here.', 'أضف مالاً أو ادفع في الحرم لتظهر القيود هنا.')} />}
               </section>
             </div>

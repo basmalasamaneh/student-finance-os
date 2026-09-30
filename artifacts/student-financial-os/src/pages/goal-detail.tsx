@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'wouter';
-import { Archive, ArrowLeft, ArrowRight, CheckCircle2, Pause, Pencil, Play, PiggyBank } from 'lucide-react';
+import { Archive, ArrowLeft, ArrowRight, CheckCircle2, Pause, Pencil, Play, PiggyBank, Sparkles } from 'lucide-react';
 import {
   ApiError, getGetSavingsGoalHistoryQueryKey, getGetSavingsGoalQueryKey, getListFinanceAccountsQueryKey,
   useChangeSavingsGoalStatus, useGetSavingsGoal, useGetSavingsGoalHistory, useListFinanceAccounts,
@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { GoalProgress, StatusPill } from '@/components/goals/goal-progress';
+import { GoalRing } from '@/components/finance/progress-meter';
 import { GoalFormDialog } from '@/components/goals/goal-form-dialog';
 import { ContributeDialog } from '@/components/goals/contribute-dialog';
 import { InvitationPanel } from '@/components/goals/invitation-panel';
@@ -20,7 +21,7 @@ import { useI18n } from '@/features/i18n/i18n-provider';
 import { useTx, type Tx } from '@/features/money/money-model';
 import { isUuid } from '@/features/transactions/history-filters';
 import {
-  ACTION_LABEL, fmtDate, fmtDateTime, goalErrorText, GOAL_REFETCH, isFunded, PRIORITY_LABEL, SOURCE_LABEL, tl,
+  ACTION_LABEL, fmtDate, fmtDateTime, goalErrorText, GOAL_REFETCH, isFunded, pct, PRIORITY_LABEL, SOURCE_LABEL, tl,
   useRefreshAfterGoalChange, useSubmissionKey,
 } from '@/features/goals/goals-model';
 
@@ -96,9 +97,13 @@ function Detail({ goal, t }: { goal: SavingsGoal; t: Tx }) {
         <div className="flex flex-wrap items-center gap-2"><StatusPill status={goal.status} t={t} /><span className="type-caption text-muted-foreground">{goal.category} · {t('Priority', 'الأولوية')}: {tl(PRIORITY_LABEL, goal.priority, t)}</span></div>
         <h1 className="type-display break-words" data-testid="text-page-title">{goal.name}</h1>
         <div className="flex flex-wrap items-baseline gap-x-3"><MoneyDisplay value={goal.current} size="hero" tone="highlight" testId="text-goal-current" /><span className="type-body text-muted-foreground">{t('of', 'من')} <MoneyDisplay value={goal.target} size="md" className="inline" testId="text-goal-target" /></span></div>
-        <GoalProgress goal={goal} t={t} compact />
+        <div className="flex items-center gap-4">
+          <GoalRing value={pct(goal)} label={goal.name} done={funded} size={88} stroke={8} className={funded ? 'motion-pop' : undefined} />
+          <div className="min-w-0 flex-1"><GoalProgress goal={goal} t={t} compact /></div>
+        </div>
+        {funded ? <p role="status" className="card-premium motion-rise type-label flex items-center gap-2 rounded-card border px-4 py-3" data-testid="status-goal-celebrate"><Sparkles className="size-4 text-gold-ink" aria-hidden />{t('Fully funded', 'مموّل بالكامل')}</p> : null}
         <div className="flex flex-wrap gap-2 pt-2" data-testid="group-goal-actions">
-          {goal.status === 'active' && !funded ? <Button onClick={() => setContribOpen(true)} data-testid="button-contribute"><PiggyBank aria-hidden />{t('Add money', 'أضف مالاً')}</Button> : null}
+          {goal.status === 'active' && !funded ? <Button variant="gradient" onClick={() => setContribOpen(true)} data-testid="button-contribute"><PiggyBank aria-hidden />{t('Add money', 'أضف مالاً')}</Button> : null}
           {open ? <Button variant="outline" onClick={() => setEditOpen(true)} data-testid="button-edit-goal"><Pencil aria-hidden />{t('Edit', 'تعديل')}</Button> : null}
           {goal.status === 'active' ? <Button variant="outline" onClick={() => setPending('pause')} data-testid="button-pause"><Pause aria-hidden />{t('Pause', 'إيقاف مؤقت')}</Button> : null}
           {goal.status === 'paused' ? <Button variant="outline" onClick={() => setPending('resume')} data-testid="button-resume"><Play aria-hidden />{t('Resume', 'استئناف')}</Button> : null}

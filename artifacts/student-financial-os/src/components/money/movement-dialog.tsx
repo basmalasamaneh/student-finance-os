@@ -6,6 +6,7 @@ import {
 } from '@workspace/api-client-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { FlowSteps, SuccessCheck } from '@/components/money/flow-steps';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { Notice } from '@/components/states/state-panel';
 import { AccountSelect, AmountInput, BalanceHint, Field, inputClass, ReviewRow, SimulatedNote } from './fields';
@@ -112,6 +113,7 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
           <DialogTitle>{step === 'review' ? t(`Review: ${title}`, `مراجعة: ${title}`) : step === 'done' ? t('Recorded', 'تم التسجيل') : title}</DialogTitle>
           <DialogDescription>{step === 'review' ? t('Check every detail. Nothing moves until you confirm.', 'راجع كل التفاصيل. لا يتحرك شيء حتى تؤكد.') : t(DESCRIPTION[kind][0], DESCRIPTION[kind][1])}</DialogDescription>
         </DialogHeader>
+        <FlowSteps label={t('Progress', 'التقدم')} current={step === 'form' ? 0 : step === 'review' ? 1 : 2} steps={[t('Details', 'التفاصيل'), t('Review', 'مراجعة'), t('Done', 'تم')]} />
 
         {step === 'form' && (
           <form className="flex flex-col gap-4" noValidate onSubmit={(e) => { e.preventDefault(); validate(); }}>
@@ -169,8 +171,8 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
             <SimulatedNote t={t} />
             <DialogFooter className="gap-2">
               <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => { setStep('form'); idem.renew(); mutation.reset(); }} data-testid="button-edit"><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Edit', 'تعديل')}</Button>
-              <Button type="button" onClick={confirm} disabled={mutation.isPending || sendBlocked} aria-busy={mutation.isPending} data-testid="button-confirm">
-                {mutation.isPending ? <><Loader2 className="animate-spin" aria-hidden />{t('Confirming…', 'جارٍ التأكيد…')}</> : mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm', 'تأكيد')}
+              <Button type="button" onClick={confirm} disabled={sendBlocked} loading={mutation.isPending} data-testid="button-confirm">
+                {mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm', 'تأكيد')}
               </Button>
             </DialogFooter>
           </div>
@@ -178,6 +180,7 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
 
         {step === 'done' && receipt && (
           <>
+            <SuccessCheck label={t('Recorded', 'تم التسجيل')} />
             <Receipt tx={receipt} account={source} t={t} />
             <DialogFooter><Button onClick={() => onOpenChange(false)} data-testid="button-done">{t('Done', 'تم')}</Button></DialogFooter>
           </>

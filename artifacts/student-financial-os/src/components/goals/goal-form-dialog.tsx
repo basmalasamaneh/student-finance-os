@@ -76,7 +76,7 @@ export function GoalFormDialog({ open, onOpenChange, goal, t, onSaved }: { open:
             <Field id="goal-date" label={t('Target date (optional)', 'التاريخ المستهدف (اختياري)')} error={err('targetDate')} hint={t('Without a date, no monthly requirement is forecast.', 'بدون تاريخ لا يُتوقع مبلغ شهري.')}>
               <div className="flex gap-2">
                 <input id="goal-date" type="date" dir="ltr" className={inputClass} value={d.targetDate} onChange={(e) => set('targetDate', e.target.value)} data-testid="input-goal-date" />
-                {d.targetDate ? <Button type="button" variant="ghost" className="min-h-11 shrink-0" onClick={() => set('targetDate', '')} data-testid="button-clear-date">{t('Clear', 'مسح')}</Button> : null}
+                {d.targetDate ? <Button type="button" variant="ghost" className="shrink-0" onClick={() => set('targetDate', '')} data-testid="button-clear-date">{t('Clear', 'مسح')}</Button> : null}
               </div>
             </Field>
             <Field id="goal-priority" label={t('Priority', 'الأولوية')}>

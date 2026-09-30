@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
 import type { SavingsGoal } from '@workspace/api-client-react';
-import { ProgressMeter } from '@/components/finance/progress-meter';
+import { GoalRing, ProgressMeter } from '@/components/finance/progress-meter';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import type { Tx } from '@/features/money/money-model';
@@ -25,9 +25,10 @@ export function GoalProgress({ goal, t, compact }: { goal: Pick<SavingsGoal, 'na
 export function GoalCard({ goal, t }: { goal: SavingsGoal; t: Tx }) {
   const { locale } = useI18n();
   return (
-    <Link href={`/goals/${goal.id}`} className="hover-elevate flex min-w-0 flex-col gap-3 rounded-card border border-card-border bg-card p-4 shadow-xs md:p-5" data-testid={`card-goal-${goal.id}`}>
+    <Link href={`/goals/${goal.id}`} className={cn('hover-elevate flex min-w-0 flex-col gap-3 rounded-card border p-4 shadow-xs md:p-5', isFunded(goal) ? 'card-premium' : 'border-card-border bg-card')} data-testid={`card-goal-${goal.id}`}>
       <div className="flex min-w-0 items-start justify-between gap-3">
-        <div className="min-w-0">
+        <GoalRing value={pct(goal)} label={goal.name} done={isFunded(goal)} size={64} stroke={6} className="shrink-0" />
+        <div className="min-w-0 flex-1">
           <p className="type-subtitle break-words" data-testid={`text-goal-name-${goal.id}`}>{goal.name}</p>
           <p className="type-caption text-muted-foreground break-words">{goal.category} · {t('Priority', 'الأولوية')}: {tl(PRIORITY_LABEL, goal.priority, t)}</p>
         </div>

@@ -10,15 +10,15 @@ import { cn } from '@/lib/utils';
 /** Accessible segmented radio group — reused for every preference. */
 function Choice<T extends string>({ name, value, options, onChange }: { name: string; value: T; options: { value: T; label: string; icon?: ReactNode; lang?: string }[]; onChange: (v: T) => void }) {
   return (
-    <div role="radiogroup" aria-label={name} className="grid gap-2 sm:grid-cols-3">
+    <div role="radiogroup" aria-label={name} className="grouped-list">
       {options.map((o) => {
         const checked = o.value === value;
         return (
           <label
             key={o.value}
             className={cn(
-              'relative flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border px-4 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background',
-              checked ? 'border-primary bg-primary-soft font-semibold text-foreground' : 'border-input hover:bg-muted',
+              'relative flex min-h-[52px] cursor-pointer items-center gap-3 px-4 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background',
+              checked ? 'bg-primary-soft font-semibold text-foreground' : 'hover:bg-muted',
             )}
             data-testid={`radio-${name.replace(/\s+/g, '-').toLowerCase()}-${o.value}`}
           >

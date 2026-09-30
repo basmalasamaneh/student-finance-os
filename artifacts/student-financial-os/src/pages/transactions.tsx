@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearch } from 'wouter';
-import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, SearchX, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, SearchX } from 'lucide-react';
 import {
   getGetFinanceHistoryFilterOptionsQueryKey, getGetFinanceHistoryQueryKey, useGetFinanceHistory, useGetFinanceHistoryFilterOptions,
   type GetFinanceHistoryParams,
 } from '@workspace/api-client-react';
 import { Page, PageHeader } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
 import { LedgerList } from '@/components/money/ledger-list';
 import { FilterPanel } from '@/components/transactions/filter-panel';
@@ -14,8 +16,8 @@ import { ActiveFilters } from '@/components/transactions/active-filters';
 import { useAccount } from '@/features/auth/account';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { apiErrorText, useTx } from '@/features/money/money-model';
-import { EMPTY_FILTERS, activeFilterCount, buildParams, filtersFromSearch, filtersToSearch, pageCount, type HistoryFilters } from '@/features/transactions/history-filters';
-import { categoryLabel } from '@/features/transactions/labels';
+import { SEMANTIC_TYPES, EMPTY_FILTERS, activeFilterCount, buildParams, filtersFromSearch, filtersToSearch, pageCount, type HistoryFilters } from '@/features/transactions/history-filters';
+import { categoryLabel, typeLabel } from '@/features/transactions/labels';
 
 const FRESH = { refetchInterval: 15_000, refetchOnWindowFocus: true, refetchOnMount: 'always' as const };
 
@@ -83,17 +85,23 @@ export default function TransactionsPage() {
         <div className="flex items-stretch gap-2">
           <div className="relative flex-1">
             <label htmlFor="tx-search" className="sr-only">{t('Search transactions', 'ابحث في المعاملات')}</label>
-            <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <input id="tx-search" type="search" value={text} maxLength={120} onChange={(e) => onType(e.target.value)} placeholder={t('Search note, merchant, account, type…', 'ابحث في الملاحظة أو التاجر أو الحساب أو النوع…')}
-              className="min-h-11 w-full rounded-lg border border-input bg-surface ps-9 pe-10 text-sm outline-none focus-visible:border-ring" data-testid="input-search" />
-            {text ? <button type="button" onClick={() => { setText(''); window.clearTimeout(timer.current); patch({ search: '' }); }} className="absolute end-0 top-0 grid size-11 place-items-center text-muted-foreground hover:text-foreground" aria-label={t('Clear search', 'مسح البحث')} data-testid="button-clear-search"><X className="size-4" aria-hidden /></button> : null}
+            <Search className="pointer-events-none absolute start-3 top-1/2 z-[1] size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Input id="tx-search" type="search" value={text} maxLength={120} onChange={(e) => onType(e.target.value)} placeholder={t('Search note, merchant, account, type…', 'ابحث في الملاحظة أو التاجر أو الحساب أو النوع…')}
+              className="ps-9" data-testid="input-search"
+              onClear={text ? () => { setText(''); window.clearTimeout(timer.current); patch({ search: '' }); } : undefined} clearLabel={t('Clear search', 'مسح البحث')} />
           </div>
-          <Button variant="outline" className="min-h-11 shrink-0 gap-2 rounded-lg" onClick={() => { if (optionsQ.isError) optionsQ.refetch(); setPanelOpen(true); }} aria-haspopup="dialog" data-testid="button-open-filters">
+          <Button variant="outline" className="shrink-0 gap-2 rounded-lg" onClick={() => { if (optionsQ.isError) optionsQ.refetch(); setPanelOpen(true); }} aria-haspopup="dialog" data-testid="button-open-filters">
             <SlidersHorizontal aria-hidden /><span className="hidden min-[380px]:inline">{t('Filters', 'المرشحات')}</span>
             {count ? <span className="tabular grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground" aria-label={t(`${count} active`, `${count} مفعّلة`)}>{count}</span> : null}
           </Button>
         </div>
 
+        <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={t('Filter by type', 'تصفية حسب النوع')} data-testid="row-type-chips">
+          {(['', ...SEMANTIC_TYPES] as string[]).map((ty) => {
+            const on = filters.type === ty;
+            return <button key={ty || 'all'} type="button" aria-pressed={on} onClick={() => patch({ type: ty })} className={cn('type-label inline-flex min-h-11 shrink-0 snap-start items-center rounded-full border px-4 transition-colors', on ? 'border-primary bg-primary-soft text-gold-ink' : 'border-border bg-surface text-muted-foreground hover:border-primary hover:text-foreground')} data-testid={`chip-type-${ty || 'all'}`}>{ty ? typeLabel(ty, t) : t('All', 'الكل')}</button>;
+          })}
+        </div>
         <ActiveFilters f={filters} options={optionsQ.data} onChange={patch} onClearAll={clearAll} t={t} />
 
         <div ref={listTop} tabIndex={-1} className="scroll-mt-24 outline-none" aria-live="polite" aria-busy={historyQ.isFetching}>
@@ -114,11 +122,11 @@ export default function TransactionsPage() {
                 <p className="type-caption text-muted-foreground" data-testid="text-total">
                   {t(`${data.total} ${data.total === 1 ? 'transaction' : 'transactions'}`, `${data.total} معاملة`)}{anyFilter ? t(' match', ' مطابقة') : ''} · {t(`Page ${data.page} of ${pages}`, `صفحة ${data.page} من ${pages}`)}
                 </p>
-                <LedgerList items={data.items} t={t} hrefFor={(tx) => `/transactions/${tx.id}${search ? `?from=${encodeURIComponent(search)}` : ''}`} categoryText={(tx) => categoryLabel(tx.category, optionsQ.data?.categories, t, lang)} testId="list-history" />
+                <LedgerList grouped items={data.items} t={t} hrefFor={(tx) => `/transactions/${tx.id}${search ? `?from=${encodeURIComponent(search)}` : ''}`} categoryText={(tx) => categoryLabel(tx.category, optionsQ.data?.categories, t, lang)} testId="list-history" />
                 <nav aria-label={t('Pagination', 'التنقل بين الصفحات')} className="flex items-center justify-between gap-3 border-t border-divider pt-4">
-                  <Button variant="outline" className="min-h-11" disabled={data.page <= 1} onClick={() => goPage(data.page - 1)} data-testid="button-prev-page"><Prev aria-hidden />{t('Newer', 'الأحدث')}</Button>
+                  <Button variant="outline" disabled={data.page <= 1} onClick={() => goPage(data.page - 1)} data-testid="button-prev-page"><Prev aria-hidden />{t('Newer', 'الأحدث')}</Button>
                   <span className="type-caption tabular text-muted-foreground">{data.page} / {pages}</span>
-                  <Button variant="outline" className="min-h-11" disabled={!data.hasMore} onClick={() => goPage(data.page + 1)} data-testid="button-next-page">{t('Older', 'الأقدم')}<Next aria-hidden /></Button>
+                  <Button variant="outline" disabled={!data.hasMore} onClick={() => goPage(data.page + 1)} data-testid="button-next-page">{t('Older', 'الأقدم')}<Next aria-hidden /></Button>
                 </nav>
               </div>
             )}

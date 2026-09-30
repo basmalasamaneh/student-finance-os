@@ -35,8 +35,8 @@ export default function PlanPage() {
         <StatePanel tone="error" title={t('Plan could not load', 'تعذّر تحميل الخطة')} body={planErrorText(plan.error, t)}
           action={<Button variant="outline" onClick={() => void plan.refetch()} data-testid="button-retry-plan"><RotateCw aria-hidden />{t('Retry', 'أعد المحاولة')}</Button>} />
       ) : (
-        <div className="flex flex-col">
-          <div className="flex flex-col gap-4 pb-8">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 pb-4">
             {p.totals.length ? (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{p.totals.map((tot) => <EquationCard key={tot.currency} tot={tot} t={t} />)}</div>
             ) : (
@@ -46,12 +46,12 @@ export default function PlanPage() {
             <GoalSavingsPanel plan={p} t={t} />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2"><PolicyPanel plan={p} t={t} /><CostSources plan={p} t={t} /></div>
           </div>
-          <BudgetsSection budgets={p.budgets} t={t} />
-          <LinesSection lines={p.lines} t={t} />
-          <RecurringSection items={p.recurringExpenses} t={t} />
-          <HousingCommuteSection plan={p} t={t} />
-          <IncomeSection plan={p} t={t} />
-          <UpcomingSection plan={p} t={t} />
+          <div className="plan-card"><BudgetsSection budgets={p.budgets} t={t} /></div>
+          <div className="plan-card"><LinesSection lines={p.lines} t={t} /></div>
+          <div className="plan-card"><RecurringSection items={p.recurringExpenses} t={t} /></div>
+          <div className="plan-card"><HousingCommuteSection plan={p} t={t} /></div>
+          <div className="plan-card"><IncomeSection plan={p} t={t} /></div>
+          <div className="plan-card"><UpcomingSection plan={p} t={t} /></div>
         </div>
       )}
     </Page>

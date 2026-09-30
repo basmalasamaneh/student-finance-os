@@ -38,8 +38,10 @@ const ChartContainer = React.forwardRef<
     children: React.ComponentProps<
       typeof RechartsPrimitive.ResponsiveContainer
     >['children'];
+    /** Optional text alternative read by screen readers (e.g. a one-line summary of the data). */
+    srSummary?: string;
   }
->(({ id, className, children, config, ...props }, ref) => {
+>(({ id, className, children, config, srSummary, ...props }, ref) => {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
 
@@ -55,6 +57,7 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
+        {srSummary ? <p className="sr-only">{srSummary}</p> : null}
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
@@ -63,6 +66,9 @@ const ChartContainer = React.forwardRef<
   );
 });
 ChartContainer.displayName = 'Chart';
+
+/** Rounded top corners for Recharts <Bar radius={CHART_BAR_RADIUS} />. */
+const CHART_BAR_RADIUS: [number, number, number, number] = [6, 6, 0, 0];
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
@@ -176,7 +182,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
+          'grid min-w-[8rem] items-start gap-1.5 rounded-xl border border-card-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md',
           className,
         )}
       >
@@ -357,6 +363,7 @@ function getPayloadConfigFromPayload(
 }
 
 export {
+  CHART_BAR_RADIUS,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

@@ -14,7 +14,7 @@ export function Receipt({ tx, account, t }: { tx: FinanceTransaction; account?: 
   const { locale } = useI18n();
   const when = new Date(tx.createdAt);
   return (
-    <div className="motion-rise flex flex-col gap-4" data-testid="receipt">
+    <div className="card-premium motion-rise flex flex-col gap-4 rounded-card border p-4 md:p-5" data-testid="receipt">
       <div className="flex flex-col items-center gap-2 pt-1 text-center">
         <span className="motion-pop grid size-11 place-items-center rounded-full bg-success-soft text-success"><CheckCircle2 className="size-5" aria-hidden /></span>
         <p className="type-caption text-muted-foreground">{tx.merchantName ?? label(KIND_LABEL, tx.kind, t)}</p>

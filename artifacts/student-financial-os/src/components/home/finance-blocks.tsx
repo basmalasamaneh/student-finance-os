@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
+import { Eye, EyeOff } from 'lucide-react';
 import type { FinanceAccount, FinanceSummary } from '@workspace/api-client-react';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { LedgerList } from '@/components/money/ledger-list';
@@ -22,8 +24,9 @@ export function FinanceError({ q, t }: { q: { refetch: () => unknown }; t: T }) 
   );
 }
 
-export function BalanceBlock({ summary, t }: { summary: Q<FinanceSummary>; t: T }) {
-  if (summary.isPending) return <FinanceLoading />;
+/** Optional presentation props (Phase 3): hide toggle (caller owns persistence), account count, quick actions. */
+export function BalanceBlock({ summary, t, hidden = false, onToggleHidden, accountCount, actions }: { summary: Q<FinanceSummary>; t: T; hidden?: boolean; onToggleHidden?: () => void; accountCount?: number; actions?: ReactNode }) {
+  if (summary.isPending) return <div className="surface-gold flex flex-col gap-3 p-5 md:p-6" role="status" aria-label={t('Loading balance…', 'جارٍ تحميل الرصيد…')}><span className="h-3 w-28 rounded bg-gold-50/40" /><span className="h-10 w-48 rounded-lg bg-gold-50/40" /><span className="h-3 w-40 rounded bg-gold-50/30" /></div>;
   if (summary.isError || !summary.data) return <FinanceError q={summary} t={t} />;
   const rows = summary.data.cashflow;
   if (!rows.length) return <>
@@ -32,19 +35,24 @@ export function BalanceBlock({ summary, t }: { summary: Q<FinanceSummary>; t: T 
     <Link href="/money" className={linkCls} data-testid="link-create-account">{t('Create a Student Wallet', 'أنشئ محفظة طلابية')}</Link>
   </>;
   return (
-    <div className="surface-gold flex min-w-0 flex-col gap-2 p-5 md:p-6" data-testid="text-balance">
+    <div className="surface-gold relative flex min-w-0 flex-col gap-2 overflow-hidden p-5 md:p-6" data-testid="text-balance">
+      {accountCount !== undefined || onToggleHidden ? <div className="flex items-center justify-between gap-3">
+        {accountCount !== undefined ? <span className="type-label" data-testid="text-account-count">{t(`${accountCount} ${accountCount === 1 ? 'account' : 'accounts'}`, `${accountCount} حساب`)}</span> : <span />}
+        {onToggleHidden ? <button type="button" onClick={onToggleHidden} aria-pressed={hidden} className="-me-2 grid size-11 place-items-center rounded-full transition-colors hover:bg-gold-50/25" aria-label={hidden ? t('Show balance', 'إظهار الرصيد') : t('Hide balance', 'إخفاء الرصيد')} data-testid="button-toggle-balance">{hidden ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}</button> : null}
+      </div> : null}
       {rows.map((c) => (
         <div key={c.currency} className="flex flex-col gap-1">
-          <MoneyDisplay value={c.balance} size={rows.length > 1 ? 'xl' : 'hero'} />
+          <MoneyDisplay value={c.balance} size={rows.length > 1 ? 'xl' : 'hero'} hidden={hidden} hiddenLabel={t('Amount hidden', 'المبلغ مخفي')} />
           {c.reservedBalance && c.reservedBalance.minor > 0 ? (
             <p className="type-caption text-muted-foreground" data-testid={`text-reserved-${c.currency}`}>
-              + {t('reserved in goals', 'محجوز في الأهداف')} <MoneyDisplay value={c.reservedBalance} size="sm" className="inline !text-xs" tone="highlight" />
-              {c.netBalance ? <> = {t('net', 'الصافي')} <MoneyDisplay value={c.netBalance} size="sm" className="inline !text-xs" /></> : null}
+              + {t('reserved in goals', 'محجوز في الأهداف')} <MoneyDisplay value={c.reservedBalance} size="sm" className="inline !text-xs" tone="highlight" hidden={hidden} hiddenLabel={t('Amount hidden', 'المبلغ مخفي')} />
+              {c.netBalance ? <> = {t('net', 'الصافي')} <MoneyDisplay value={c.netBalance} size="sm" className="inline !text-xs" hidden={hidden} hiddenLabel={t('Amount hidden', 'المبلغ مخفي')} /></> : null}
             </p>
           ) : null}
         </div>
       ))}
       <p className="type-caption text-muted-foreground">{t('Spendable simulated balance, grouped by currency. Goal savings are reserved and not included.', 'الرصيد المحاكى القابل للإنفاق حسب العملة. مدّخرات الأهداف محجوزة وغير مشمولة.')}</p>
+      {actions ? <div className="pt-3">{actions}</div> : null}
     </div>
   );
 }

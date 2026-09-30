@@ -20,7 +20,7 @@ function useLabel() {
   return (item: NavItem) => t((mode === 'school' && item.schoolLabelKey ? item.schoolLabelKey : item.labelKey) as TranslationKey);
 }
 
-function BrandMark({ className }: { className?: string }) {
+export function BrandMark({ className }: { className?: string }) {
   // Navy tile with a gold ledger arc — the signature detail, not a gold block.
   return (
     <svg viewBox="0 0 32 32" className={cn('size-8 shrink-0', className)} aria-hidden>

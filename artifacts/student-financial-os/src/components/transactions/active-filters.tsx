@@ -24,14 +24,14 @@ export function ActiveFilters({ f, options, onChange, onClearAll, t }: { f: Hist
   if (f.goalId) chips.push({ key: 'goal', text: `${t('Goal', 'الهدف')} ${shortId(f.goalId)}`, clear: { goalId: '' } });
   if (!chips.length) return null;
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label={t('Applied filters', 'المرشحات المطبقة')} role="group" data-testid="group-active-filters">
+    <div className="-mx-4 flex snap-x items-center gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0" aria-label={t('Applied filters', 'المرشحات المطبقة')} role="group" data-testid="group-active-filters">
       {chips.map((c) => (
-        <button key={c.key} type="button" onClick={() => onChange(c.clear)} className="type-caption inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/40 bg-primary-soft ps-3 pe-2 font-medium text-foreground transition-colors hover:border-primary sm:min-h-9"
+        <button key={c.key} type="button" onClick={() => onChange(c.clear)} className="type-caption shrink-0 snap-start inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/40 bg-primary-soft ps-3 pe-2 font-medium text-foreground transition-colors hover:border-primary sm:min-h-9"
           aria-label={`${t('Remove filter', 'إزالة المرشح')}: ${c.text}`} data-testid={`chip-${c.key}`}>
           <bdi className="max-w-[14rem] truncate">{c.text}</bdi><X className="size-3.5 text-muted-foreground" aria-hidden />
         </button>
       ))}
-      <button type="button" onClick={onClearAll} className="type-label inline-flex min-h-11 items-center px-2 text-gold-ink underline-offset-4 hover:underline" data-testid="button-clear-all">{t('Clear all', 'مسح الكل')}</button>
+      <button type="button" onClick={onClearAll} className="type-label inline-flex min-h-11 shrink-0 items-center px-2 text-gold-ink underline-offset-4 hover:underline" data-testid="button-clear-all">{t('Clear all', 'مسح الكل')}</button>
     </div>
   );
 }
