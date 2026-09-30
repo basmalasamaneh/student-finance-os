@@ -1,0 +1,131 @@
+MISSION
+
+Redesign the visual layer (UI/UX) of the existing Student Financial OS app into a premium, modern, professional fintech product with a rich gold theme, and make the mobile experience feel like a native iOS/Android app.
+
+This is a presentation-layer refactor only. Everything built in Prompts 1–7 must keep working exactly as it does today.
+
+ABSOLUTE SAFETY RULES (READ FIRST)
+Do NOT change: database schema, migrations, API routes, server logic, auth/session logic, route paths, financial calculation functions, money representation, i18n keys that already exist, seed/demo data, or any business logic.
+Do NOT delete or rename any existing page, route, component export, hook, or feature. If a component needs a new look, restyle it in place (same file, same props, same exports). Add new props only as optional with safe defaults.
+Do NOT restart the project and do NOT scaffold a second app or a parallel design system. Extend and migrate the existing one.
+Do NOT hardcode values that are dynamic. All numbers, names, and states keep coming from existing data sources.
+Existing translations (English + Arabic) must keep working. New strings must be added to both languages through the existing i18n system.
+Existing features to protect and re-verify at the end: authentication, onboarding, profile, student Home dashboard, Money/accounts/wallet, campus payments + receipts, Transactions + filters, Budget/Plan (income, university plan, housing, transportation, recurring), Savings Goals (create/edit/contribute/pause/resume/complete/archive/history).
+The financial system remains simulated only. Nothing in this prompt adds real payments.
+Work in the phases below, in order. After each phase, run the app and confirm nothing is broken before continuing.
+PHASE 0 — INSPECT BEFORE TOUCHING ANYTHING
+Identify how styling is currently done (Tailwind config, CSS variables, theme provider, component library, etc.) and reuse that mechanism.
+Locate where the current colors live (Indigo 
+#4338CA, Mint 
+#34D399, Amber 
+#F59E0B, Navy 
+#172033, etc.) — theme config, CSS variables, components, charts, inline styles.
+List every screen and shared component built so far (Prompts 1–7) so the restyle covers all of them.
+Find all hardcoded colors (hex values, rgb(), and raw palette classes like indigo-600, emerald-400, amber-500) in components and charts. These will be migrated to tokens in Phase 1–3.
+Write a short note in replit.md (or the project's existing docs file) listing: styling approach, theme files, shared components, and the screens list. You will update this file at the end.
+PHASE 1 — GOLD DESIGN TOKENS (SINGLE SOURCE OF TRUTH)
+
+This section REPLACES the old "DESIGN SYSTEM → Colors" section of the master spec. Indigo/Mint are no longer brand colors.
+
+Create or update semantic design tokens (CSS variables / Tailwind theme extension) and make all components consume tokens only — no raw hex in components.
+
+Gold usage discipline (TRUST-FIRST — very important)
+
+The app must feel like a serious, trustworthy bank-grade product with a gold identity, NOT a flashy crypto/casino look.
+
+60 / 30 / 10 rule: ~60% calm neutral surfaces (ivory/white in light, near-black in dark), ~30% ink/charcoal for text, navigation, and structure, ~10% gold used as the accent.
+Gold is for: the ONE hero element per screen (balance card or main CTA), active navigation state, progress fills, key icons, and focus rings. Gold is NOT for large page backgrounds, body text, every card border, or decorative patterns.
+Max one strong gold gradient per screen. Everything else is flat.
+No glitter, heavy glow, bevels, or ornamental textures. Premium = restraint, space, and precise typography.
+Numbers and clarity always win over decoration.
+Gold scale (brand)
+Token	Hex	Use
+gold-50	
+#FFFBEB	subtle tinted backgrounds
+gold-100	
+#FDF3CF	hover tint, chips
+gold-200	
+#F8E3A0	soft fills, progress track
+gold-300	
+#F0CE6B	highlights
+gold-400	
+#E3B644	accents, icons on dark
+gold-500	
+#D4AF37	primary brand gold
+gold-600	
+#B8902A	primary pressed, links on light
+gold-700	
+#8F6B1C	gold text on light backgrounds (passes contrast)
+gold-800	
+#6B4F16	strong text accents
+gold-900	
+#3F2E0D	deep bronze, text on gold fills
+Light theme (warm ivory)
+bg-app: 
+#FBF8F1
+bg-surface (cards): 
+#FFFFFF
+bg-surface-2 (nested/grouped): 
+#F5F0E3
+border-subtle: 
+#E9E0C8
+text-primary: 
+#1C1608
+text-secondary: 
+#5E5640
+text-muted: 
+#8C8468
+brand: gold-500, brand-pressed: gold-600, on-brand (text on gold fill): 
+#2A1F05
+Dark theme (black-gold, intentionally designed — not an inverted light theme)
+bg-app: 
+#0D0B07
+bg-surface: 
+#17130B
+bg-surface-2: 
+#211B0F
+border-subtle: 
+#33291A
+text-primary: 
+#F8F1DC
+text-secondary: 
+#CDBF96
+text-muted: 
+#8F8465
+brand: gold-400 
+#E3B644, on-brand: 
+#1A1204
+Gradients (define as tokens, reuse everywhere)
+gradient-gold: linear-gradient(135deg, #F0CE6B 0%, #D4AF37 45%, #A97C1F 100%) — hero balance card, primary CTAs
+gradient-gold-soft: linear-gradient(180deg, #FDF3CF 0%, #FBF8F1 100%) (light) / linear-gradient(180deg, #2A2112 0%, #0D0B07 100%) (dark) — page headers
+gradient-gold-shine: subtle diagonal highlight overlay (low opacity) for premium card surfaces
+Keep gradients tasteful: max one gold gradient "hero" element per screen, everything else flat surfaces.
+Semantic status colors (kept minimal so gold stays the hero)
+success: 
+#2E9E6A (soft, slightly warm green) — positive amounts, completed
+warning: 
+#C2410C (burnt orange, clearly different from gold) — over-budget, attention
+error/critical: 
+#DC2626 — only for errors and critical warnings (keep the original rule)
+info: use gold/neutral, not blue
+Never rely on color alone: always pair status with an icon and/or text label.
+Gold-only data visualization
+
+Charts and category colors must use tints and shades of gold plus warm neutrals (e.g. gold-300 → gold-800, champagne, bronze, warm gray), with distinct patterns/labels when categories are adjacent so they remain distinguishable. Status colors above are used only for true status meaning.
+
+Contrast & accessibility (non-negotiable)
+Gold text on white/ivory must use gold-700 or darker. Never gold-400/500 as text on light.
+Text on gold fills must use on-brand (dark bronze), never white.
+Body text ≥ 4.5:1, large text/icons ≥ 3:1, in BOTH light and dark themes.
+Visible gold focus ring (2px, offset) on all interactive elements.
+Typography
+Keep the current font stack if it already supports Arabic well; otherwise use Inter (Latin) + IBM Plex Sans Arabic or Noto Sans Arabic (Arabic), loaded through the existing font mechanism.
+Tabular/lining numerals for all money values (font-variant-numeric: tabular-nums) so columns align.
+Type scale: Display (balance) 36–44 / H1 28 / H2 22 / H3 18 / Body 16 / Caption 13. Weight contrast: balances semi-bold/bold, labels medium.
+Money component: currency symbol smaller and lighter than the amount; decimals slightly smaller/lighter; negative and positive amounts clearly distinguishable (sign + icon, not just color).
+Shape, elevation, spacing
+Radius: cards 20px, inputs/buttons 14px, chips full-round, bottom sheets 28px top corners.
+Elevation: light mode = soft warm shadows (rgba(120,90,20,0.08–0.14)); dark mode = 1px subtle gold-tinted borders + faint inner glow instead of heavy shadows.
+4/8 spacing system; generous whitespace; consistent 16px screen gutters on mobile.
+
+Migrate all existing Indigo/Mint/Amber usages to the new tokens. After this phase, run a search to confirm no raw hex/palette classes remain in components (only in the token definition file).
