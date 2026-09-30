@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Student Financial OS"
+description = "Student-first financial application foundation with bilingual Arabic/English navigation, accessible design system, themes, and safe money utilities. Prompt 1 only; financial features are not implemented."
+version = "1.0.0"
+id = "artifacts/student-financial-os"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22999
+
+[services.development]
+run = "pnpm --filter @workspace/student-financial-os run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/student-financial-os", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/student-financial-os/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22999"
+BASE_PATH = "/"

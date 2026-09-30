@@ -1,0 +1,148 @@
+The updated UI/UX and implementation plan is approved.
+
+Now begin implementation with Prompt 1 from the Master Specification V3.
+
+Important execution rules:
+
+1. Implement ONLY Prompt 1.
+2. Do not implement features belonging to Prompts 2–15 yet.
+3. Before changing anything, inspect the current project and preserve the existing working scaffold, API health endpoint, database connection layer, generated API/OpenAPI infrastructure, and reusable UI primitives.
+4. Extend the existing architecture rather than replacing it unnecessarily.
+5. Do not create disconnected mock financial screens or fake financial functionality.
+6. Do not hardcode dynamic financial data into UI components.
+7. Do not create placeholder pages for future features unless they are necessary for the application shell/navigation and are clearly marked as not implemented.
+8. Do not add real banking, payment, wallet, KYC, AML, or money-transfer integrations.
+
+For Prompt 1, prioritize the foundation and design system extremely carefully.
+
+The goal is not only to create technically correct scaffolding. The foundation must establish the visual and UX quality that all later prompts will inherit.
+
+Implement:
+
+* Application architecture and feature/module structure
+* Production application shell
+* Responsive navigation foundation
+* Student/Parent/Admin role-aware navigation structure
+* Routing foundation
+* Shared design tokens
+* Semantic color system from the approved V3 palette
+* Typography system using the approved Inter + Noto Sans Arabic direction
+* 4px spacing system
+* Radius and elevation system
+* Light/Dark/System theme infrastructure
+* English/Arabic i18n infrastructure
+* RTL/LTR support
+* Accessible focus states
+* Motion/reduced-motion foundation
+* Responsive layout primitives
+* Shared reusable UI primitives
+* Shared financial UI primitives that are appropriate for the foundation
+* Loading, empty, error, success, disabled, and validation state patterns
+* Accessibility foundations targeting WCAG 2.2 AA
+* Shared formatting utilities for money, dates, numbers, and percentages
+* Safe money representation utilities
+* API/client/domain architecture needed for future financial features
+* Validation and type-safe boundaries
+* Error-handling conventions
+* Authorization architecture foundations
+* Testing foundations where appropriate
+
+IMPORTANT UI/UX REQUIREMENT:
+
+Do not make Prompt 1 visually generic.
+
+Build a polished, modern fintech-grade design system and application shell that already feels intentional and production-quality.
+
+The visual direction should be:
+
+* Modern fintech
+* Premium but calm
+* Clean
+* Spacious
+* Professional but not corporate
+* Young but mature
+* Friendly but not childish
+* Highly readable
+* Low cognitive load
+* Strong information hierarchy
+* Minimal visual clutter
+
+Avoid:
+
+* Generic SaaS dashboard styling
+* Excessive cards
+* Card-inside-card layouts
+* Excessive gradients
+* Excessive rounded containers
+* Excessive shadows
+* Random colors
+* Decorative charts
+* Childish illustrations
+* Visual noise
+* Inconsistent component styles
+
+Use open layouts, typography, spacing, dividers, and restrained surfaces to create hierarchy.
+
+Do not use the approved colors simply as decorative colors. Use the semantic token system established in the approved UI/UX plan.
+
+The application shell and foundational components should feel like they belong to one coherent product.
+
+Create representative component/state examples where useful so we can visually verify:
+
+* Light mode
+* Dark mode
+* English
+* Arabic/RTL
+* Mobile
+* Desktop
+* Loading
+* Empty
+* Error
+* Success
+* Disabled
+* Focused
+* Financial amount display
+* Primary/secondary/destructive actions
+
+These examples must remain reusable foundation components, not disconnected fake feature screens.
+
+FINANCIAL FOUNDATION:
+
+Even though actual financial features are not being implemented yet, establish the architecture required for later prompts to use:
+
+* integer minor-unit money representation
+* explicit currency
+* safe amount formatting
+* no floating-point financial arithmetic
+* centralized financial calculation utilities
+* validation boundaries
+* server-side authorization boundaries
+* consistent API error conventions
+
+Do not implement the actual wallet, transactions, budgets, goals, parent allowances, campus checkout, forecasts, AI assistant, or other feature behavior yet.
+
+Before finishing Prompt 1:
+
+* Run the appropriate checks/tests/build/type checks.
+* Verify the application starts successfully.
+* Verify the existing API health endpoint still works.
+* Verify the database connection layer has not been broken.
+* Verify there are no obvious route or import regressions.
+* Verify responsive behavior.
+* Verify English/Arabic switching and RTL foundation.
+* Verify Light/Dark/System theme behavior.
+* Verify keyboard focus and basic accessibility.
+* Verify the new design system is actually being used by the application shell rather than merely defined but unused.
+
+At the end, provide a concise implementation report containing:
+
+1. What was implemented.
+2. What existing functionality was preserved.
+3. Files/modules added or changed.
+4. Any dependencies added and why.
+5. Tests/checks run and their results.
+6. Any decisions or issues that need approval before Prompt 2.
+7. Confirmation that features from Prompts 2–15 were not implemented.
+
+Do not proceed to Prompt 2 automatically.
+Stop after Prompt 1 and wait for my explicit instruction.

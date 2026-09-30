@@ -1,45 +1,26 @@
-# [Project name]
+# Student Financial OS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Student finance workspace with a shared exact-money foundation and an API skeleton; Prompt 1 contains no financial data routes or DB schema.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Managed artifact workflows run the web/API; do not start root `pnpm dev`.
+- `pnpm run typecheck` — libs first, then artifact checks; `pnpm run build` — checks and builds.
+- `pnpm --filter @workspace/finance-core run test` and `pnpm --filter @workspace/api-server run test` — foundation tests.
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate clients/Zod from OpenAPI.
+- `pnpm --filter @workspace/db run push` — apply DB schema changes in dev only (none in Prompt 1).
+- `DATABASE_URL` is required by the DB package when imported; API runtime requires workflow-provided `PORT`.
 
-## Stack
+## Map & decisions
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- `lib/finance-core` owns Money parsing, integer-minor-unit arithmetic, and Arabic/western-digit formatting; ILS/USD use 2 decimals, JOD uses 3. Use its exported `money`, `parseMoney`, `assertMoney`, `addMoney`, `subtractMoney`, `multiplyMoney`, `formatMoney`, `formatNumber`, `formatPercent`, `formatDate`. Never use floating-point arithmetic for financial amounts.
+- `artifacts/api-server/src/lib/authorization.ts` holds deny-by-default helpers for a **trusted server-side** principal. Client roles and navigation previews are not identities. No auth provider is installed yet.
+- `artifacts/api-server/src/middlewares/errors.ts` emits sanitized consistent errors after the existing health router. Unknown errors must not leak internals.
+- `lib/db` is the DB source, `lib/api-spec/openapi.yaml` the contract, `lib/api-zod` and `lib/api-client-react` generated libraries. Preserve them until a feature explicitly changes them.
+- Implement future features contract-first, validate inputs and outputs, and authorize per resource; see `docs/architecture.md` for boundaries and suggested feature-module structure.
 
-## Where things live
+## Constraints
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+Prompt 1 only: no DB tables, seeds, finance endpoints, real login, or role-based client authorization. Maintain strict integer-money validation and sanitized error messages. Node 24, pnpm workspaces, TypeScript, Express 5, PostgreSQL/Drizzle, Zod and Orval are the existing stack.
 
-## Architecture decisions
-
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
-
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+Approved UI direction: calm, spacious, premium student fintech rather than a generic dashboard; use semantic tokens from indigo `#4338CA`, mint `#34D399`, amber `#F59E0B`, off-white `#F8FAFC`, white, navy `#172033`, slate `#64748B`, and red `#EF4444` **only for errors/critical states**. Inter + Noto Sans Arabic, 4px spacing, English/Arabic LTR/RTL, Light/Dark/System, WCAG 2.2 AA focus and reduced motion are foundational constraints. Prefer open hierarchy/dividers over nested cards, gratuitous gradients, decorative charts, or hardcoded dynamic financial UI.

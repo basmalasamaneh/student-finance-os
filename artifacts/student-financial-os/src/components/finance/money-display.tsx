@@ -1,0 +1,61 @@
+import { formatMoney, type Money } from '@/lib/money';
+import { useI18n } from '@/features/i18n/i18n-provider';
+import { cn } from '@/lib/utils';
+
+type Size = 'sm' | 'md' | 'lg' | 'xl';
+type Tone = 'default' | 'muted' | 'positive' | 'negative';
+
+const sizes: Record<Size, string> = {
+  sm: 'text-sm font-medium',
+  md: 'text-base font-semibold',
+  lg: 'text-2xl font-semibold tracking-tight',
+  xl: 'text-[40px] leading-none font-semibold tracking-tight md:text-5xl',
+};
+const tones: Record<Tone, string> = {
+  default: 'text-foreground',
+  muted: 'text-muted-foreground',
+  positive: 'text-success',
+  negative: 'text-foreground',
+};
+
+/**
+ * Reusable amount display. Formatting is delegated to finance-core
+ * (integer minor units + explicit currency). `<bdi>` isolates direction
+ * so currency symbols never reorder inside Arabic sentences.
+ */
+export function MoneyDisplay({
+  value,
+  size = 'md',
+  tone = 'default',
+  showPlus = false,
+  hidden = false,
+  hiddenLabel = 'Amount hidden',
+  className,
+  testId,
+}: {
+  value: Money;
+  size?: Size;
+  tone?: Tone;
+  /** Prefix positive amounts with "+" (e.g. money in). */
+  showPlus?: boolean;
+  hidden?: boolean;
+  hiddenLabel?: string;
+  className?: string;
+  testId?: string;
+}) {
+  const { locale } = useI18n();
+  const formatted = formatMoney(value, locale);
+  const text = showPlus && value.minor > 0 ? `+${formatted}` : formatted;
+  if (hidden) {
+    return (
+      <span className={cn('tabular select-none', sizes[size], 'text-muted-foreground', className)} aria-label={hiddenLabel} data-testid={testId}>
+        <span aria-hidden>••••</span>
+      </span>
+    );
+  }
+  return (
+    <bdi dir="ltr" className={cn('tabular inline-block whitespace-nowrap', sizes[size], tones[tone], className)} data-testid={testId}>
+      {text}
+    </bdi>
+  );
+}

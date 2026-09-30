@@ -1,0 +1,1 @@
+- [Preview JSX instrumentation](preview-jsx.md) — explicit generic JSX arguments can break development preview despite a passing production build.
