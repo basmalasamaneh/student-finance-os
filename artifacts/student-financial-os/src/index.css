@@ -258,14 +258,18 @@
     font-feature-settings: 'cv11', 'ss01', 'cv05';
     text-rendering: optimizeLegibility;
   }
+  /* Arabic: Noto Sans Arabic kept (see docs/typography.md) — same 400/500/600 scale as Inter,
+     taller line-height for ascenders/descenders and dots; never a smaller font size. */
   html[lang='ar'] body {
     font-family: var(--app-font-arabic);
     font-feature-settings: normal;
-    line-height: 1.7;
+    line-height: 1.75;
   }
   html[lang='ar'] [class*='tracking-'] { letter-spacing: 0 !important; }
   html[lang='ar'] .uppercase { text-transform: none; }
-  html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { line-height: 1.45; }
+  html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { line-height: 1.5; font-weight: 600; }
+  html[lang='ar'] button, html[lang='ar'] [role='menuitem'], html[lang='ar'] [role='menuitemradio'], html[lang='ar'] label { line-height: 1.5; }
+  html[lang='ar'] .font-bold { font-weight: 600; }
   :focus-visible {
     outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
@@ -278,7 +282,29 @@
 
 .tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum', 'cv11'; }
 /* Hero financial figure: 32–48px, tabular, tight but readable. */
-.figure-hero { font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3rem); line-height: 1; font-weight: 600; letter-spacing: -0.025em; }
+.figure-hero { font-size: clamp(1.875rem, 1.2rem + 3.4vw, 3rem); line-height: 1; font-weight: 600; letter-spacing: -0.025em; }
+@layer components {
+/* ── Canonical bilingual type roles. Screens use these, never per-page Arabic hacks. ── */
+.type-display { font-size: 1.625rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
+.type-title   { font-size: 1.125rem; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; }
+.type-subtitle{ font-size: 0.9375rem; line-height: 1.45; font-weight: 600; }
+.type-body    { font-size: 0.9375rem; line-height: 1.6; font-weight: 400; }
+.type-label   { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; }
+.type-caption { font-size: 0.75rem; line-height: 1.45; font-weight: 400; }
+.type-nav     { font-size: 0.6875rem; line-height: 1.2; font-weight: 500; }
+@media (min-width: 768px) { .type-display { font-size: 2rem; } .type-title { font-size: 1.1875rem; } }
+html[lang='ar'] .type-display { line-height: 1.45; letter-spacing: 0; }
+html[lang='ar'] .type-title   { line-height: 1.55; }
+html[lang='ar'] .type-subtitle{ line-height: 1.6; }
+html[lang='ar'] .type-body    { line-height: 1.8; }
+html[lang='ar'] .type-label   { font-size: 0.84375rem; line-height: 1.6; }
+html[lang='ar'] .type-caption { font-size: 0.78125rem; line-height: 1.65; }
+html[lang='ar'] .type-nav     { font-size: 0.75rem; line-height: 1.35; }
+/* Numbers stay Latin-shaped & tabular in both scripts (amounts are isolated LTR via <bdi>). */
+html[lang='ar'] .tabular { font-family: var(--app-font-sans); }
+}
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.figure-hero.figure-long { font-size: clamp(1.5rem, 0.9rem + 3.4vw, 2.5rem); }
 .eyebrow { font-size: 12.5px; font-weight: 500; letter-spacing: 0.02em; color: hsl(var(--gold-ink)); }
 
 @keyframes sfos-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

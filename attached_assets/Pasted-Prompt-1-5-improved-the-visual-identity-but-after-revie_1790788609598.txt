@@ -1,0 +1,695 @@
+Prompt 1.5 improved the visual identity, but after reviewing the actual preview, there are still important issues that should be fixed before we begin Prompt 2.
+
+This is the FINAL foundation-level UX/UI polish before feature implementation.
+
+The goal is to make the existing foundation feel:
+
+* genuinely modern
+* premium fintech
+* extremely clear
+* easy to understand
+* comfortable to use
+* mobile-native
+* polished in both English and Arabic
+* visually consistent
+
+Do NOT implement Prompt 2 or any functionality from Prompts 2–15.
+
+Do NOT add authentication, onboarding, real financial data, transactions, budgets, goals, campus functionality, AI, family features, or other product features.
+
+Preserve the existing architecture and all working functionality.
+
+==================================================
+
+1. IMPORTANT: DO NOT JUST RECOLOR
+   ==================================================
+
+This is not another color pass.
+
+Review the actual rendered UI and improve:
+
+* typography
+* visual hierarchy
+* information density
+* spacing
+* navigation clarity
+* mobile interaction patterns
+* component proportions
+* readability
+* affordances
+* empty/loading/error states
+* financial information presentation
+
+The application should feel intentionally designed rather than assembled from generic UI components.
+
+The gold + navy + warm off-white identity from Prompt 1.5 remains the visual direction.
+
+Do not replace it with another color system.
+
+==================================================
+2. ARABIC TYPOGRAPHY — HIGH PRIORITY
+====================================
+
+The current Arabic typography does not feel polished enough.
+
+Treat Arabic typography as a first-class design requirement, not simply an RTL translation.
+
+Review the current Arabic font choice and rendering.
+
+Use a modern, highly readable Arabic UI typeface that works exceptionally well for:
+
+* navigation
+* headings
+* body text
+* forms
+* financial numbers
+* buttons
+* labels
+* dense information
+
+Noto Sans Arabic is acceptable if it genuinely renders well in the current application.
+
+If the current Noto Sans Arabic implementation looks awkward, heavy, too wide, or visually inconsistent with the English typography, evaluate a better compatible Arabic UI font.
+
+The final choice should prioritize:
+
+1. readability
+2. modern appearance
+3. excellent UI rendering
+4. compatibility with English
+5. appropriate weights
+6. Arabic numerals and punctuation behavior
+7. mobile readability
+
+Do not simply make the Arabic font smaller to solve visual problems.
+
+Tune:
+
+* font weights
+* line heights
+* letter spacing where appropriate
+* heading sizes
+* body sizes
+* navigation labels
+* button labels
+* form labels
+* financial values
+
+Arabic must feel like an intentionally designed interface.
+
+It should NOT look like:
+"English UI translated into Arabic."
+
+==================================================
+3. BILINGUAL TYPOGRAPHY SYSTEM
+==============================
+
+Create a typography system that works across both scripts.
+
+Do not assume the same font size and line-height will look identical in English and Arabic.
+
+Where necessary, use small locale-specific adjustments while keeping the underlying design system consistent.
+
+Ensure:
+
+English:
+Inter
+
+Arabic:
+selected Arabic UI font
+
+Both should share:
+
+* semantic text roles
+* weight hierarchy
+* spacing principles
+* readable contrast
+
+But allow appropriate Arabic-specific:
+
+* line-height
+* heading metrics
+* control height
+* label spacing
+
+Do not create page-specific typography hacks.
+
+Use typography tokens/classes so all future screens inherit the solution.
+
+==================================================
+4. MOBILE MUST FEEL NATIVE
+==========================
+
+The current mobile experience feels like a desktop/web application compressed into a smaller viewport.
+
+Fix this.
+
+Do not merely resize desktop layouts.
+
+Design the mobile foundation around how a modern financial mobile app behaves.
+
+Mobile should have:
+
+* clear top-level hierarchy
+* compact but comfortable navigation
+* large enough touch targets
+* comfortable spacing
+* one-column layouts
+* bottom navigation designed specifically for mobile
+* sheets for short actions
+* full-screen/page flows for complex tasks
+* appropriate safe-area handling
+* no unnecessary desktop-style panels
+* no cramped tables
+* no horizontal overflow
+* no tiny controls
+
+Minimum touch target:
+44 × 44px
+
+Prefer approximately 48px for primary interactive controls when space allows.
+
+==================================================
+5. MOBILE NAVIGATION
+====================
+
+Refine the five-item student mobile navigation.
+
+It should feel like a real native financial application.
+
+Use:
+
+* clear icon
+* short label
+* strong active state
+* subtle gold indicator/accent
+* comfortable spacing
+* safe-area padding
+* appropriate height
+
+Do not use oversized icons.
+
+Do not make the navigation look like a generic web footer.
+
+The active item should be immediately understandable without relying only on color.
+
+Use:
+
+* icon
+* label
+* subtle structural/accent treatment
+
+Do not make every item visually identical to a desktop sidebar item.
+
+==================================================
+6. MOBILE TOP BAR
+=================
+
+Create a strong mobile header foundation.
+
+It should provide a clear place for:
+
+* page/context title
+* back navigation when needed
+* profile/context access
+* notifications or future actions where appropriate
+
+Keep it visually lightweight.
+
+Avoid:
+
+* giant headers
+* excessive icons
+* crowded top bars
+
+The top of the screen should immediately tell the user where they are.
+
+==================================================
+7. MOBILE SURFACE HIERARCHY
+===========================
+
+On mobile, reduce visual nesting.
+
+Avoid:
+
+screen
+→ card
+→ card
+→ card
+→ card
+
+Instead use:
+
+screen
+→ section
+→ important content
+→ subtle divider
+
+Use raised surfaces only where they help interaction or grouping.
+
+Financial information should remain readable without excessive containers.
+
+==================================================
+8. MOBILE FINANCIAL VALUES
+==========================
+
+Financial numbers must be particularly clear on mobile.
+
+Ensure:
+
+* currency symbol and amount remain together
+* important amounts never truncate
+* tabular numerals
+* appropriate font size
+* clear distinction between primary and secondary amounts
+* sufficient whitespace
+* no unnecessary decimal clutter
+* no awkward wrapping
+
+The future balance display should feel like a major piece of information, not a random metric card.
+
+==================================================
+9. CLARITY AND INFORMATION ARCHITECTURE
+=======================================
+
+The current foundation should become easier to understand.
+
+Review every preview screen and ask:
+
+"What is the user supposed to understand first?"
+
+"Where should the user's eyes go?"
+
+"What can the user do next?"
+
+"Which information is secondary?"
+
+"Which controls are actions versus navigation?"
+
+Create a clear hierarchy:
+
+1. Context
+2. Primary information
+3. Primary action
+4. Supporting information
+5. Secondary actions
+
+Do not expose too many equally important elements.
+
+Use whitespace and typography to establish hierarchy.
+
+Do not rely on colors alone.
+
+==================================================
+10. FINTECH INTERACTION LANGUAGE
+================================
+
+The product should communicate financial information calmly.
+
+Avoid generic SaaS language such as:
+
+* Manage
+* Configure
+* Execute
+* Process
+* Module
+* KPI
+
+Prefer simple student-friendly language when appropriate.
+
+Examples of the intended tone:
+
+"Available to spend"
+
+"Upcoming"
+
+"Saved so far"
+
+"Recent activity"
+
+"Your plan"
+
+"See all"
+
+"Add money"
+
+"Move to savings"
+
+"View details"
+
+Future financial actions should always feel understandable.
+
+Do not make the interface sound like enterprise accounting software.
+
+==================================================
+11. COMPONENT PROPORTIONS
+=========================
+
+Review the actual size and proportion of:
+
+* buttons
+* inputs
+* tabs
+* navigation items
+* cards/surfaces
+* dialogs
+* progress indicators
+* badges
+* icons
+* section spacing
+
+Some generic UI libraries make controls look oversized or visually heavy.
+
+Aim for a premium product feel:
+
+* comfortable
+* compact where appropriate
+* spacious where important
+* never cramped
+
+Avoid excessive rounded corners.
+
+Avoid excessive pill shapes.
+
+Use consistent corner radii.
+
+==================================================
+12. ICONOGRAPHY
+===============
+
+Use one coherent icon family.
+
+Icons should:
+
+* have consistent stroke weight
+* be visually restrained
+* support labels
+* not dominate the UI
+
+Do not use icons as decoration everywhere.
+
+For icon-only buttons:
+
+* provide accessible names
+* use appropriate touch targets
+* ensure focus states
+
+Do not mirror directional icons incorrectly in RTL.
+
+==================================================
+13. FINANCIAL COMPONENT POLISH
+==============================
+
+Review the foundation specimens for:
+
+* balance
+* financial amount
+* transaction row
+* account
+* progress
+* upcoming payment
+* financial summary
+* status
+
+Make them look like components from the SAME real product.
+
+They should share:
+
+* typography
+* spacing
+* borders
+* iconography
+* semantic colors
+* interaction patterns
+
+Do not make each component look like a separate UI kit example.
+
+==================================================
+14. EMPTY / LOADING / ERROR / SUCCESS
+=====================================
+
+These states must feel polished and contextual.
+
+Avoid generic:
+
+"No data available."
+
+Instead, future-ready states should communicate:
+
+* what is missing
+* why it matters
+* what the user can do next
+
+Examples of tone:
+
+"No transactions yet"
+
+"When you make a payment or receive money, it will appear here."
+
+"Nothing planned yet"
+
+"Add an upcoming payment to keep track of it."
+
+However, these are foundation specimens only.
+
+Do not implement actual financial actions yet.
+
+Loading states:
+
+* use subtle skeletons/placeholders where appropriate
+* avoid excessive shimmer
+* preserve layout stability
+
+Errors:
+
+* clear
+* concise
+* actionable where possible
+* never blame the user
+
+Success:
+
+* clear confirmation
+* no excessive celebration
+
+==================================================
+15. DESKTOP / TABLET / MOBILE CONSISTENCY
+=========================================
+
+Review all three form factors together.
+
+Desktop:
+
+* refined sidebar
+* generous content area
+* constrained reading width
+* clear hierarchy
+
+Tablet:
+
+* compact rail when appropriate
+* avoid squeezed desktop layouts
+* preserve touch usability
+
+Mobile:
+
+* native-like hierarchy
+* bottom navigation
+* one-column
+* touch-friendly
+* no horizontal overflow
+
+The same design language must exist across all three.
+
+==================================================
+16. DARK MODE POLISH
+====================
+
+Review dark mode again after typography/mobile changes.
+
+It should feel intentional and premium.
+
+Use:
+
+* deep navy canvas
+* slightly raised navy surfaces
+* subtle borders
+* warm off-white text
+* restrained gold
+
+Avoid:
+
+* pure black
+* excessive glowing gold
+* excessive saturated surfaces
+* huge shadows
+
+Gold should remain an accent rather than becoming a neon effect.
+
+==================================================
+17. LIGHT MODE POLISH
+=====================
+
+Use:
+
+* warm off-white canvas
+* white surfaces where necessary
+* deep navy text
+* subtle borders
+* gold accents
+
+Maintain sufficient contrast.
+
+Do not make every section visually boxed.
+
+==================================================
+18. RESPONSIVE BEHAVIOR
+=======================
+
+Test actual transitions rather than only checking three static viewport sizes.
+
+Pay particular attention to:
+
+* 320px
+* 360px
+* 375px
+* 390px
+* 430px
+* tablet widths
+* desktop widths
+
+At narrow widths:
+
+* no text clipping
+* no horizontal scrolling
+* no broken navigation
+* no overlapping controls
+* no truncated critical financial values
+* no unusably small buttons
+* no awkward empty space
+
+==================================================
+19. ACCESSIBILITY
+=================
+
+Preserve all existing accessibility work.
+
+Verify:
+
+* keyboard navigation
+* visible focus
+* focus order
+* dialog focus trapping
+* Escape behavior
+* focus restoration
+* sufficient contrast
+* semantic headings
+* accessible names
+* screen-reader labels
+* reduced motion
+* touch targets
+
+Do not reduce accessibility to improve appearance.
+
+==================================================
+20. PERFORMANCE / ARCHITECTURE
+==============================
+
+Do not add unnecessary dependencies.
+
+Do not replace the existing stack.
+
+Do not create duplicate component systems.
+
+Do not introduce page-specific design systems.
+
+Keep the existing canonical tokens/components architecture.
+
+The result must remain easy for Prompts 2–15 to extend.
+
+==================================================
+21. IMPORTANT: REVIEW THE ACTUAL PREVIEW
+========================================
+
+Before declaring this complete:
+
+Actually inspect the rendered application.
+
+Do not rely only on code correctness.
+
+Review:
+
+* Student desktop
+* Student mobile
+* Student narrow mobile
+* Tablet
+* Parent
+* Admin
+* Components gallery
+* English
+* Arabic
+* Light
+* Dark
+
+Pay particular attention to:
+
+1. Arabic typography
+2. mobile-native feel
+3. visual hierarchy
+4. ease of understanding
+5. financial information clarity
+6. gold/navy visual identity
+7. spacing
+8. consistency
+
+If something looks generic, cramped, awkward, or unclear, fix it before finishing.
+
+==================================================
+22. DO NOT OVERENGINEER
+=======================
+
+Do not spend time building new functionality.
+
+Do not implement future product features.
+
+Do not create complex animations.
+
+Do not add external design dependencies.
+
+This is the final foundation polish.
+
+The purpose is to reduce future visual rework while keeping the implementation clean.
+
+==================================================
+23. FINAL VERIFICATION
+======================
+
+Run:
+
+* workspace type checks
+* frontend production build
+* API build
+* existing tests
+* API health check
+* relevant browser checks
+
+Confirm that Prompt 1 and Prompt 1.5 functionality remains intact.
+
+At the end, report:
+
+* Arabic typography decision and changes
+* mobile UX changes
+* navigation changes
+* information hierarchy changes
+* component changes
+* responsive changes
+* light/dark changes
+* accessibility checks
+* tests/build results
+* files changed
+* dependencies changed
+* remaining known issues
+
+Explicitly confirm:
+
+"Prompt 1.6 is complete. Prompts 2–15 were not implemented."

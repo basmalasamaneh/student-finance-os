@@ -8,13 +8,13 @@ export function AppErrorFallback({ error, resetError }: ErrorFallbackProps) {
   const { t } = useI18n();
   return (
     <div role="alert" className="mx-auto flex min-h-[60dvh] w-full max-w-2xl flex-col justify-center gap-5 px-6 py-16">
-      <p className="text-[13px] font-medium tracking-wide text-destructive">{t('err.eyebrow')}</p>
+      <p className="type-label font-medium tracking-wide text-destructive">{t('err.eyebrow')}</p>
       <h1 className="text-3xl font-semibold tracking-tight">{t('err.title')}</h1>
-      <p className="max-w-lg text-base leading-7 text-muted-foreground">{t('err.body')}</p>
+      <p className="max-w-lg type-body text-muted-foreground">{t('err.body')}</p>
       {import.meta.env.DEV ? (
-        <details className="max-w-lg text-sm text-muted-foreground">
+        <details className="max-w-lg type-label font-normal text-muted-foreground">
           <summary className="cursor-pointer">{t('err.details')}</summary>
-          <pre dir="ltr" className="mt-3 overflow-x-auto rounded-md bg-muted p-3 text-start text-xs">{error.message || String(error)}</pre>
+          <pre dir="ltr" className="mt-3 overflow-x-auto rounded-md bg-muted p-3 text-start type-caption">{error.message || String(error)}</pre>
         </details>
       ) : null}
       <div className="flex flex-wrap gap-3 pt-2">

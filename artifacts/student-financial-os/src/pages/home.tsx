@@ -30,30 +30,30 @@ export default function HomePage() {
 
   return (
     <Page className="max-w-6xl">
-      {/* Reference banner — first thing read, impossible to miss. */}
+      {/* Concise specimen disclosure: one line, still unmistakable. Full context lives in the footer. */}
       <aside
         aria-label={t('hs.banner')}
-        className="motion-fade mb-10 flex flex-col gap-3 border-b border-dashed border-input pb-5 sm:flex-row sm:items-center sm:justify-between md:mb-14"
+        className="motion-fade mb-5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[10px] border border-dashed border-input bg-surface-sunken/60 py-2 ps-3 pe-1 md:mb-10"
         data-testid="banner-design-reference"
       >
-        <p className="flex max-w-3xl flex-col gap-1 text-sm leading-6 sm:flex-row sm:items-baseline sm:gap-3">
-          <span className="flex shrink-0 items-center gap-2 font-semibold text-gold-ink">
+        <p className="type-label min-w-0 flex-1 font-normal text-muted-foreground">
+          <span className="me-1.5 inline-flex items-center gap-1.5 font-semibold text-gold-ink">
             <span aria-hidden className="size-1.5 rounded-full bg-primary" />
             {t('hs.banner')}
           </span>
-          <span className="text-muted-foreground">{t('hs.bannerBody')}</span>
+          {t('hs.bannerShort')}
         </p>
-        <Link href="/foundation" className="inline-flex min-h-11 shrink-0 items-center gap-1.5 text-sm font-medium text-foreground underline decoration-gold-ink/40 underline-offset-4 hover:decoration-gold-ink" data-testid="link-cta-foundation">
+        <Link href="/foundation" className="type-label inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-2 text-foreground underline decoration-gold-ink/40 underline-offset-4 hover:decoration-gold-ink" data-testid="link-cta-foundation">
           {t('hs.bannerLink')}
           <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
         </Link>
       </aside>
 
       {/* Greeting + dominant balance */}
-      <header className="stagger flex flex-col gap-8 pb-12 md:pb-16">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] md:text-[32px]" data-testid="text-page-title">{t('hs.greeting')}</h1>
-          <p className="text-[15px] text-muted-foreground">{t('hs.context')}</p>
+      <header className="stagger flex flex-col gap-5 pb-8 md:gap-8 md:pb-14">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="type-display" data-testid="text-page-title">{t('hs.greeting')}</h1>
+          <p className="type-body text-muted-foreground">{t('hs.context')}</p>
         </div>
         <BalanceDisplay
           label={t('hs.balanceLabel')}
@@ -66,15 +66,15 @@ export default function HomePage() {
               <Button size="lg" onClick={specimenToast} data-testid="button-home-plan">{t('hs.act.plan')}</Button>
               <Button size="lg" variant="secondary" onClick={specimenToast} data-testid="button-home-save">{t('hs.act.save')}</Button>
               <Button size="lg" variant="ghost" disabled aria-describedby="pay-note" data-testid="button-home-pay">{t('hs.act.pay')}</Button>
-              <span id="pay-note" className="basis-full text-[13px] text-muted-foreground">{t('hs.act.payNote')}</span>
+              <span id="pay-note" className="basis-full type-caption text-muted-foreground">{t('hs.act.payNote')}</span>
             </>
           }
         />
       </header>
 
       {/* Open sections: two columns on desktop, one reading column on mobile. No cards. */}
-      <div className="grid gap-x-14 gap-y-12 border-t border-divider pt-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12">
-        <div className="flex flex-col gap-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-14 gap-y-9 border-t border-divider pt-7 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12">
+        <div className="flex min-w-0 flex-col gap-9 md:gap-12">
           <section aria-labelledby="hs-period">
             <SectionHeading id="hs-period" title={t('hs.period')} meta={t('hs.periodRange')} trailing={example} />
             <FinancialSummary
@@ -93,7 +93,7 @@ export default function HomePage() {
                 status="on"
                 statusLabel={t('fd.progress.on')}
                 detail={
-                  <span className="flex items-baseline gap-2">
+                  <span className="flex flex-wrap items-baseline gap-x-2">
                     {t('hs.projected')} <MoneyDisplay value={S.period.projected} tone="projected" size="sm" />
                   </span>
                 }
@@ -120,7 +120,7 @@ export default function HomePage() {
           </section>
         </div>
 
-        <div className="flex flex-col gap-12 lg:border-s lg:border-divider lg:ps-14">
+        <div className="flex min-w-0 flex-col gap-9 md:gap-12 lg:border-s lg:border-divider lg:ps-14">
           <section aria-labelledby="hs-upcoming">
             <SectionHeading id="hs-upcoming" title={t('hs.upcoming')} trailing={example} />
             <ul className="divide-y divide-divider border-y border-divider">
@@ -150,7 +150,7 @@ export default function HomePage() {
       </div>
 
       {/* About this build — honest context, quietly at the end. */}
-      <footer className="mt-16 grid gap-8 border-t border-divider pt-10 md:grid-cols-3" aria-labelledby="hs-foot">
+      <footer className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-6 border-t border-divider pt-7 md:mt-16 md:gap-8 md:pt-10 md:grid-cols-3" aria-labelledby="hs-foot">
         <div className="flex flex-col gap-3">
           <h2 id="hs-foot" className="text-[15px] font-semibold">{t('hs.foot')}</h2>
           <dl className="flex flex-col gap-1.5 text-sm" data-testid="text-foundation-context">

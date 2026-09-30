@@ -5,8 +5,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { usePreview } from '@/features/preferences/preview-provider';
+import { useTheme, type ThemePreference } from '@/features/theme/theme-provider';
 import { Menu } from 'lucide-react';
-import { GROUP_LABEL, groupedForRole, isActive, itemsForRole, mobileItemsForRole, type NavItem } from '@/features/navigation/nav-config';
+import { GROUP_LABEL, groupedForRole, isActive, itemsForRole, mobileItemsForRole, type NavItem, type NavRole } from '@/features/navigation/nav-config';
 import type { TranslationKey } from '@/features/i18n/dictionary';
 import { LanguageToggle, RolePreviewMenu, ThemeMenu } from './shell-controls';
 import { cn } from '@/lib/utils';
@@ -141,34 +142,74 @@ function Rail() {
   );
 }
 
-/** Top bar: mobile + tablet only. On desktop, controls live in the sidebar footer. */
+/** Resolves the current destination title for the mobile header. */
+function usePageTitle() {
+  const { t } = useI18n();
+  const { role } = usePreview();
+  const [location] = useLocation();
+  const label = useLabel();
+  const match = itemsForRole(role).find((i) => isActive(i, location));
+  return match ? label(match) : t('app.name');
+}
+
+/**
+ * Top bar (<1024px). Mobile: native pattern — mark · page title · More. Preferences live in the
+ * More sheet so the bar tells you where you are. Tablet keeps the compact controls inline.
+ */
 function TopBar() {
+  const title = usePageTitle();
   return (
     <header className="sticky top-0 z-30 border-b border-divider bg-background/90 backdrop-blur-md lg:hidden">
-      <div className="flex h-14 items-center gap-2 px-4 sm:px-6 md:h-16">
+      <div className="flex h-14 items-center gap-2 ps-3 pe-1.5 sm:px-6 md:h-16">
         <div className="md:hidden">
           <Brand collapsed />
         </div>
-        <div className="ms-auto flex items-center gap-1">
-          <div className="hidden sm:block">
-            <RolePreviewMenu />
-          </div>
-          <div className="sm:hidden">
-            <RolePreviewMenu compact />
-          </div>
+        <p className="type-subtitle min-w-0 flex-1 truncate md:hidden" aria-live="polite" data-testid="text-header-title">
+          {title}
+        </p>
+        <div className="ms-auto hidden items-center gap-1 md:flex">
+          <RolePreviewMenu />
           <LanguageToggle />
           <ThemeMenu />
-          <MoreSheet />
         </div>
+        <MoreSheet />
       </div>
     </header>
   );
 }
 
-/** Mobile secondary navigation: header button opening a bottom sheet with every destination. */
+function Segmented({ label, value, options, onChange, testId }: { label: string; value: string; options: { value: string; label: string; lang?: string }[]; onChange: (v: string) => void; testId: string }) {
+  return (
+    <div className="flex flex-col gap-2" role="radiogroup" aria-label={label}>
+      <span className="type-label text-muted-foreground">{label}</span>
+      <div className="grid gap-1 rounded-[10px] bg-surface-sunken p-1" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+        {options.map((o) => {
+          const on = o.value === value;
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              lang={o.lang}
+              onClick={() => onChange(o.value)}
+              className={cn('type-label min-h-11 truncate rounded-lg px-2 transition-colors duration-150', on ? 'bg-surface font-semibold text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              data-testid={`${testId}-${o.value}`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Mobile "More": secondary destinations + preferences (language, theme, role preview). */
 function MoreSheet() {
-  const { t } = useI18n();
-  const { role } = usePreview();
+  const { t, lang, setLang } = useI18n();
+  const { role, setRole } = usePreview();
+  const { theme, setTheme } = useTheme();
   const [location] = useLocation();
   const label = useLabel();
   const [open, setOpen] = useState(false);
@@ -182,15 +223,16 @@ function MoreSheet() {
           <Menu aria-hidden />
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-2xl px-5 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-6">
+      <SheetContent side="bottom" className="max-h-[88dvh] overflow-y-auto rounded-t-2xl px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3">
+        <span aria-hidden className="mx-auto mb-3 block h-1 w-10 rounded-full bg-input" />
         <SheetHeader className="text-start">
-          <SheetTitle>{t('nav.more')}</SheetTitle>
-          <SheetDescription>{t('a11y.moreNav')}</SheetDescription>
+          <SheetTitle className="type-title">{t('nav.more')}</SheetTitle>
+          <SheetDescription className="type-caption">{t('a11y.moreNav')}</SheetDescription>
         </SheetHeader>
-        <nav aria-label={t('a11y.moreNav')} className="mt-4">
+        <nav aria-label={t('a11y.moreNav')} className="mt-2">
           {groupedForRole(role).map(([group, items]) => (
-            <div key={group} className="border-t border-divider py-3 first:border-t-0">
-              <p className="pb-1 text-xs font-medium text-muted-foreground">{t(GROUP_LABEL[group])}</p>
+            <div key={group} className="border-t border-divider py-2 first:border-t-0">
+              <p className="type-caption pb-0.5 pt-1 text-muted-foreground">{t(GROUP_LABEL[group])}</p>
               <ul>
                 {items.map((item) => {
                   const active = isActive(item, location);
@@ -200,10 +242,10 @@ function MoreSheet() {
                       <Link
                         href={item.path}
                         aria-current={active ? 'page' : undefined}
-                        className={cn('flex min-h-12 items-center gap-3 rounded-lg px-2 text-[15px]', active ? 'font-semibold text-gold-ink' : 'text-foreground')}
+                        className={cn('type-body flex min-h-12 items-center gap-3 rounded-lg px-2', active ? 'bg-primary-soft font-semibold text-foreground' : 'text-foreground')}
                         data-testid={`link-more-${item.id}`}
                       >
-                        <Icon className="size-5 text-muted-foreground" aria-hidden />
+                        <Icon className={cn('size-5', active ? 'text-gold-ink' : 'text-muted-foreground')} strokeWidth={1.75} aria-hidden />
                         {label(item)}
                         <PendingDot item={item} />
                       </Link>
@@ -214,8 +256,35 @@ function MoreSheet() {
             </div>
           ))}
         </nav>
-        <div className="mt-2 flex justify-end">
-          <Button variant="ghost" onClick={() => setOpen(false)} data-testid="button-close-more">
+        <section aria-label={t('shell.preferences')} className="mt-2 flex flex-col gap-4 border-t border-divider pt-4">
+          <h2 className="type-subtitle">{t('shell.preferences')}</h2>
+          <Segmented
+            label={t('lang.label')}
+            value={lang}
+            onChange={(v) => setLang(v as 'en' | 'ar')}
+            options={[{ value: 'en', label: 'English', lang: 'en' }, { value: 'ar', label: 'العربية', lang: 'ar' }]}
+            testId="option-sheet-lang"
+          />
+          <Segmented
+            label={t('theme.label')}
+            value={theme}
+            onChange={(v) => setTheme(v as ThemePreference)}
+            options={(['light', 'dark', 'system'] as const).map((o) => ({ value: o, label: t(`theme.${o}`) }))}
+            testId="option-sheet-theme"
+          />
+          <div className="flex flex-col gap-1">
+            <Segmented
+              label={t('preview.label')}
+              value={role}
+              onChange={(v) => setRole(v as NavRole)}
+              options={(['student', 'parent', 'admin'] as const).map((r) => ({ value: r, label: t(`role.${r}`) }))}
+              testId="option-sheet-role"
+            />
+            <p className="type-caption text-muted-foreground">{t('preview.hint')}</p>
+          </div>
+        </section>
+        <div className="mt-4">
+          <Button variant="secondary" size="lg" className="w-full" onClick={() => setOpen(false)} data-testid="button-close-more">
             {t('a11y.close')}
           </Button>
         </div>
@@ -224,7 +293,7 @@ function MoreSheet() {
   );
 }
 
-/** Mobile (<768px): up to five primary destinations. Secondary destinations live in the header sheet. */
+/** Mobile (<768px): five primary destinations. Active = gold pill behind icon + bold label + aria-current. */
 function BottomNav() {
   const { t } = useI18n();
   const { role } = usePreview();
@@ -233,8 +302,8 @@ function BottomNav() {
   const primary = mobileItemsForRole(role);
 
   return (
-    <nav aria-label={t('a11y.mobileNav')} className="fixed inset-x-0 bottom-0 z-40 border-t border-divider bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
-      <ul className="grid" style={{ gridTemplateColumns: `repeat(${primary.length}, minmax(0, 1fr))` }}>
+    <nav aria-label={t('a11y.mobileNav')} className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-divider bg-background/95 backdrop-blur-md md:hidden">
+      <ul className="grid px-1" style={{ gridTemplateColumns: `repeat(${primary.length}, minmax(0, 1fr))` }}>
         {primary.map((item) => {
           const active = isActive(item, location);
           const Icon = item.icon;
@@ -244,11 +313,12 @@ function BottomNav() {
                 href={item.path}
                 aria-current={active ? 'page' : undefined}
                 aria-label={label(item)}
-                className={cn('relative flex min-h-[60px] flex-col items-center justify-center gap-1 px-1 text-[11px] transition-colors duration-150 active:bg-primary-soft/50', active ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground')}
+                className={cn('type-nav flex min-h-16 flex-col items-center justify-center gap-1 px-0.5 transition-colors duration-150', active ? 'font-semibold text-foreground' : 'text-muted-foreground')}
                 data-testid={`link-tab-${item.id}`}
               >
-                <span aria-hidden className={cn('absolute inset-x-[30%] top-0 h-0.5 rounded-b-full bg-primary transition-transform duration-150', active ? 'scale-x-100' : 'scale-x-0')} />
-                <Icon className={cn('size-[22px]', active ? 'text-gold-ink' : '')} strokeWidth={active ? 2 : 1.75} aria-hidden />
+                <span aria-hidden className={cn('grid h-8 w-14 max-w-full place-items-center rounded-full transition-colors duration-150', active ? 'bg-primary-soft ring-1 ring-inset ring-primary/40' : '')}>
+                  <Icon className={cn('size-5', active ? 'text-gold-ink' : '')} strokeWidth={active ? 2 : 1.75} />
+                </span>
                 <span aria-hidden className="max-w-full truncate">{item.mobileLabelKey ? t(item.mobileLabelKey) : label(item)}</span>
               </Link>
             </li>
@@ -288,7 +358,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Rail />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none" key={location}>
+        <main id="main" ref={mainRef} tabIndex={-1} className="min-w-0 flex-1 outline-none" key={location}>
           <div className="motion-fade">{children}</div>
         </main>
       </div>

@@ -50,7 +50,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'home', path: '/', icon: Home, labelKey: 'nav.home', group: 'money', roles: ALL, implemented: true, mobile: { student: 1, parent: 1, admin: 1 } },
   // Student
   { id: 'money', path: '/money', icon: Wallet, labelKey: 'nav.money', group: 'money', roles: ['student'], implemented: false, mobile: { student: 2 } },
-  { id: 'transactions', path: '/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', group: 'money', roles: ['student'], implemented: false, mobile: { student: 3 } },
+  { id: 'transactions', path: '/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', mobileLabelKey: 'nav.m.activity', group: 'money', roles: ['student'], implemented: false, mobile: { student: 3 } },
   { id: 'upcoming', path: '/upcoming', icon: CalendarClock, labelKey: 'nav.upcoming', group: 'money', roles: ['student'], implemented: false },
   { id: 'plan', path: '/plan', icon: MapIcon, labelKey: 'nav.plan', group: 'plan', roles: ['student'], implemented: false, mobile: { student: 4 } },
   { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: false, mobile: { student: 5 } },
@@ -68,7 +68,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'admin-users', path: '/admin/users', icon: UserRound, labelKey: 'nav.users', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 3 } },
   { id: 'admin-students', path: '/admin/students', icon: GraduationCap, labelKey: 'nav.students', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 4 } },
   { id: 'admin-parents', path: '/admin/parents', icon: Users, labelKey: 'nav.parents', group: 'oversight', roles: ['admin'], implemented: false },
-  { id: 'admin-transactions', path: '/admin/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 5 } },
+  { id: 'admin-transactions', path: '/admin/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', mobileLabelKey: 'nav.m.activity', group: 'oversight', roles: ['admin'], implemented: false, mobile: { admin: 5 } },
   { id: 'admin-institutions', path: '/admin/institutions', icon: Building2, labelKey: 'nav.institutions', schoolLabelKey: 'nav.institutions.school', group: 'oversight', roles: ['admin'], implemented: false },
   { id: 'admin-categories', path: '/admin/categories', icon: Tags, labelKey: 'nav.categories', group: 'oversight', roles: ['admin'], implemented: false },
   { id: 'admin-settings', path: '/admin/settings', icon: Settings, labelKey: 'nav.settings', group: 'oversight', roles: ['admin'], implemented: false },

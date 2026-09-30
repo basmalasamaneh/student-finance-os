@@ -43,9 +43,9 @@ export function ProgressMeter({
           : kind === 'budget' ? 'bg-foreground/80' : 'bg-primary';
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex items-baseline justify-between gap-4">
-        <span className="text-[15px] font-medium">{label}</span>
-        <span className="tabular text-sm font-medium">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+        <span className="type-body font-medium">{label}</span>
+        <span className="tabular type-label font-medium">
           <bdi>{formatPercent(shown, locale)}</bdi>
         </span>
       </div>
@@ -64,8 +64,8 @@ export function ProgressMeter({
         />
       </div>
       {detail || statusLabel ? (
-        <div className="flex items-baseline justify-between gap-4 text-[13px] text-muted-foreground">
-          <span className="tabular">{detail}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 type-label font-normal text-muted-foreground">
+          <span className="tabular min-w-0">{detail}</span>
           {statusLabel ? <span className={cn(status === 'over' && 'font-medium text-warning', status === 'near' && kind === 'budget' && 'text-warning', status === 'done' && 'text-success')}>{statusLabel}</span> : null}
         </div>
       ) : null}

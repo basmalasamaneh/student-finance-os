@@ -101,34 +101,34 @@ function Group({ index, children }: { index: number; children: ReactNode }) {
   return (
     <section id={g.id} aria-labelledby={`${g.id}-title`} className="scroll-mt-20 pb-6 pt-14 first:pt-2 md:pt-20">
       <header className="flex flex-col gap-2 pb-4">
-        <span className="tabular text-[13px] font-medium text-gold-ink" aria-hidden>
+        <span className="tabular type-label font-medium text-gold-ink" aria-hidden>
           <bdi>{formatNumber(index + 1, locale).padStart(2, '0')}</bdi>
         </span>
-        <h2 id={`${g.id}-title`} className="text-2xl font-semibold tracking-[-0.02em] md:text-[28px]">{t(g.key)}</h2>
-        <p className="max-w-xl text-[15px] leading-7 text-muted-foreground">{t(g.body)}</p>
+        <h2 id={`${g.id}-title`} className="type-display">{t(g.key)}</h2>
+        <p className="max-w-xl type-body text-muted-foreground">{t(g.body)}</p>
       </header>
-      <div>{children}</div>
+      <div className="@container min-w-0">{children}</div>
     </section>
   );
 }
 
 function Specimen({ id, title, description, aside, children }: { id?: string; title: string; description?: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <div id={id} className="grid scroll-mt-20 gap-5 border-t border-divider py-8 md:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] md:gap-10">
+    <div id={id} className="grid-cols-[minmax(0,1fr)] grid scroll-mt-20 gap-5 border-t border-divider py-8 @3xl:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] @3xl:gap-10">
       <div className="flex flex-col gap-1.5">
-        <h3 className="text-[15px] font-semibold">{title}</h3>
-        {description ? <p className="text-[13px] leading-5 text-muted-foreground">{description}</p> : null}
+        <h3 className="type-body font-semibold">{title}</h3>
+        {description ? <p className="type-label font-normal text-muted-foreground">{description}</p> : null}
         {aside}
       </div>
-      <div className="min-w-0">{children}</div>
+      <div className="@container min-w-0">{children}</div>
     </div>
   );
 }
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid items-center gap-2 py-3 sm:grid-cols-[7rem_1fr] sm:gap-6">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
+    <div className="grid-cols-[minmax(0,1fr)] grid items-center gap-2 py-3 @lg:grid-cols-[7rem_minmax(0,1fr)] @lg:gap-6">
+      <span className="type-label font-normal text-muted-foreground">{label}</span>
       <div className="flex flex-wrap items-center gap-3">{children}</div>
     </div>
   );
@@ -137,12 +137,12 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 function Swatch({ token, label, ink }: { token: string; label: string; ink?: boolean }) {
   return (
     <li className="flex items-center gap-3 py-2">
-      <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-divider" style={{ background: ink ? 'transparent' : `hsl(var(${token}))` }} aria-hidden>
-        {ink ? <span className="text-base font-semibold" style={{ color: `hsl(var(${token}))` }}>Aa</span> : null}
+      <span className="grid-cols-[minmax(0,1fr)] grid size-10 shrink-0 place-items-center rounded-lg border border-divider" style={{ background: ink ? 'transparent' : `hsl(var(${token}))` }} aria-hidden>
+        {ink ? <span className="type-body font-semibold" style={{ color: `hsl(var(${token}))` }}>Aa</span> : null}
       </span>
       <div className="flex min-w-0 flex-col">
-        <span className="text-sm font-medium">{label}</span>
-        <code dir="ltr" className="text-start font-mono text-xs text-muted-foreground">{token}</code>
+        <span className="type-label font-medium">{label}</span>
+        <code dir="ltr" className="break-all text-start font-mono type-caption text-muted-foreground">{token}</code>
       </div>
     </li>
   );
@@ -213,7 +213,7 @@ function ActionsSpecimen() {
         <Button disabled data-testid="button-specimen-disabled">{t('fd.act.disabled')}</Button>
         <Button variant="secondary" disabled>{t('fd.act.disabled')}</Button>
       </Row>
-      <p className="pt-4 text-[13px] text-muted-foreground">{t('fd.act.simulate')}</p>
+      <p className="pt-4 type-label font-normal text-muted-foreground">{t('fd.act.simulate')}</p>
     </div>
   );
 }
@@ -242,7 +242,7 @@ function DestructiveConfirm({ label }: { label?: string }) {
           <AlertDialogTitle>{t('fd.dlg.title')}</AlertDialogTitle>
           <AlertDialogDescription className="leading-6">{t('fd.dlg.body')}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2 sm:gap-2">
+        <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:gap-2">
           <AlertDialogCancel data-testid="button-dialog-cancel">{t('fd.dlg.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -296,7 +296,7 @@ function FormSpecimen() {
             </FormItem>
           )}
         />
-        <div className="grid gap-5 sm:grid-cols-[1fr_9rem]">
+        <div className="grid-cols-[minmax(0,1fr)] grid gap-5 @lg:grid-cols-[minmax(0,1fr)_9rem]">
           <FormField
             control={form.control}
             name="amount"
@@ -333,14 +333,14 @@ function FormSpecimen() {
             )}
           />
         </div>
-        <div className="flex items-center justify-between gap-4 border-y border-divider py-3 text-sm" aria-live="polite">
+        <div className="flex items-center justify-between gap-4 border-y border-divider py-3 type-label font-normal" aria-live="polite">
           <span className="flex items-center gap-2 text-muted-foreground">
             {t('fd.form.preview')} <SpecimenTag label={t('spec.tag')} />
           </span>
           {parsed ? (
             <span className="flex flex-col items-end">
               <MoneyDisplay value={parsed} size="md" testId="text-parsed-amount" />
-              <span className="tabular text-xs text-muted-foreground">{t('fd.form.minor', { minor: formatNumber(parsed.minor, 'en-US') })}</span>
+              <span className="tabular type-caption text-muted-foreground">{t('fd.form.minor', { minor: formatNumber(parsed.minor, 'en-US') })}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
@@ -360,19 +360,21 @@ function ChoiceSpecimen() {
   const [roundUp, setRoundUp] = useState(false);
   return (
     <div className="flex max-w-lg flex-col divide-y divide-divider border-y border-divider">
-      <div className="flex min-h-14 items-start gap-3 py-3">
-        <Checkbox id="spec-remind" checked={remind} onCheckedChange={(v) => setRemind(v === true)} className="mt-0.5" data-testid="checkbox-specimen-remind" />
-        <div className="flex flex-col gap-0.5">
-          <Label htmlFor="spec-remind" className="text-[15px] font-medium leading-6">{t('i.check')}</Label>
-          <span className="text-[13px] text-muted-foreground">{t('i.checkHint')}</span>
+      <div className="relative flex min-h-14 items-start gap-3 py-3">
+        <span className="grid-cols-[minmax(0,1fr)] grid size-11 shrink-0 -m-3 place-items-center">
+          <Checkbox id="spec-remind" checked={remind} onCheckedChange={(v) => setRemind(v === true)} className="after:absolute after:-inset-3" data-testid="checkbox-specimen-remind" />
+        </span>
+        <div className="flex flex-col gap-0.5 ps-3">
+          <Label htmlFor="spec-remind" className="type-body flex min-h-6 cursor-pointer items-center font-medium">{t('i.check')}</Label>
+          <span className="type-label font-normal text-muted-foreground">{t('i.checkHint')}</span>
         </div>
       </div>
       <div className="flex min-h-14 items-center justify-between gap-4 py-3">
-        <Label htmlFor="spec-roundup" className="text-[15px] font-medium">{t('i.switch')}</Label>
+        <Label htmlFor="spec-roundup" className="flex min-h-11 flex-1 cursor-pointer items-center type-body font-medium">{t('i.switch')}</Label>
         <Switch id="spec-roundup" checked={roundUp} onCheckedChange={setRoundUp} data-testid="switch-specimen-roundup" />
       </div>
       <div className="flex min-h-14 items-center justify-between gap-4 py-3 opacity-100">
-        <Label htmlFor="spec-disabled-switch" className="text-[15px] text-muted-foreground">{t('fd.act.disabled')}</Label>
+        <Label htmlFor="spec-disabled-switch" className="flex min-h-11 flex-1 cursor-pointer items-center type-body text-muted-foreground">{t('fd.act.disabled')}</Label>
         <Switch id="spec-disabled-switch" disabled checked />
       </div>
     </div>
@@ -382,16 +384,16 @@ function ChoiceSpecimen() {
 function ValidationSpecimen() {
   const { t } = useI18n();
   return (
-    <div className="grid max-w-2xl gap-6 sm:grid-cols-3">
+    <div className="grid-cols-[minmax(0,1fr)] grid max-w-2xl gap-6 @lg:grid-cols-3">
       <div className="flex flex-col gap-2">
         <Label htmlFor="spec-invalid" className="text-destructive">{t('fd.form.amount')}</Label>
         <Input id="spec-invalid" aria-invalid="true" aria-describedby="spec-invalid-msg" defaultValue="0" dir="ltr" inputMode="decimal" className="tabular text-start" data-testid="input-specimen-invalid" />
-        <p id="spec-invalid-msg" className="text-[13px] font-medium text-destructive">{t('i.invalidMsg')}</p>
+        <p id="spec-invalid-msg" className="type-label font-medium text-destructive">{t('i.invalidMsg')}</p>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="spec-valid">{t('fd.form.name')}</Label>
         <Input id="spec-valid" aria-describedby="spec-valid-msg" defaultValue={t('hs.sv.laptop')} className="border-success/60" data-testid="input-specimen-valid" />
-        <p id="spec-valid-msg" className="text-[13px] text-success">{t('i.valid')}</p>
+        <p id="spec-valid-msg" className="type-label font-normal text-success">{t('i.valid')}</p>
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="specimen-disabled" className="text-muted-foreground">{t('fd.form.disabled')}</Label>
@@ -449,17 +451,17 @@ function SheetSpecimen() {
       <SheetTrigger asChild>
         <Button variant="secondary" data-testid="button-open-sheet">{t('fd.sheet.open')}</Button>
       </SheetTrigger>
-      <SheetContent side={side} className={isMobile ? 'rounded-t-2xl' : 'w-full sm:max-w-md'}>
+      <SheetContent side={side} className={isMobile ? 'max-h-[88dvh] overflow-y-auto rounded-t-2xl px-4 pb-[calc(env(safe-area-inset-bottom)+20px)]' : 'w-full overflow-y-auto sm:max-w-md'}>
         <SheetHeader className="text-start">
           <SheetTitle>{t('fd.sheet.title')}</SheetTitle>
           <SheetDescription className="leading-6">{t('fd.sheet.body')}</SheetDescription>
         </SheetHeader>
-        <dl className="my-6 divide-y divide-divider border-y border-divider text-sm">
+        <dl className="my-6 divide-y divide-divider border-y border-divider type-label font-normal">
           <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row1')}</dt><dd className="font-medium">{t('fd.sheet.row1v')}</dd></div>
           <div className="flex flex-col gap-1 py-3"><dt className="text-muted-foreground">{t('fd.sheet.row2')}</dt><dd className="font-medium">{t('fd.sheet.row2v')}</dd></div>
         </dl>
         <SheetFooter>
-          <SheetClose asChild><Button data-testid="button-sheet-done">{t('fd.sheet.done')}</Button></SheetClose>
+          <SheetClose asChild><Button size="lg" className="w-full sm:w-auto" data-testid="button-sheet-done">{t('fd.sheet.done')}</Button></SheetClose>
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -489,14 +491,14 @@ function ReviewSpecimen() {
           <AlertDialogDescription className="leading-6">{t('ov.reviewBody')}</AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex flex-col items-start gap-1 border-t border-divider pt-4">
-          <span className="text-[13px] text-muted-foreground">{t('ov.amount')}</span>
+          <span className="type-label font-normal text-muted-foreground">{t('ov.amount')}</span>
           <MoneyDisplay value={SPECIMEN.planned} size="xl" testId="text-review-amount" />
         </div>
-        <dl className="divide-y divide-divider border-y border-divider text-sm">
-          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.from')}</dt><dd className="font-medium">{t('ov.fromV')}</dd></div>
-          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.to')}</dt><dd className="font-medium">{t('ov.toV')}</dd></div>
+        <dl className="divide-y divide-divider border-y border-divider type-label font-normal">
+          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.from')}</dt><dd className="min-w-0 break-words text-end font-medium">{t('ov.fromV')}</dd></div>
+          <div className="flex justify-between gap-4 py-3"><dt className="text-muted-foreground">{t('ov.to')}</dt><dd className="min-w-0 break-words text-end font-medium">{t('ov.toV')}</dd></div>
         </dl>
-        <AlertDialogFooter className="gap-2 sm:gap-2">
+        <AlertDialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:gap-2">
           <AlertDialogCancel data-testid="button-review-back">{t('ov.back')}</AlertDialogCancel>
           <AlertDialogAction onClick={() => toast({ title: t('ov.done'), description: t('ov.doneBody') })} data-testid="button-review-confirm">
             {t('ov.confirm')}
@@ -588,7 +590,7 @@ function TabsSpecimen() {
         ))}
       </TabsList>
       {views.map((v) => (
-        <TabsContent key={v} value={v} className="pt-3 text-sm text-muted-foreground">{t('nv.tabPanel', { view: t(`nv.tab.${v}`) })}</TabsContent>
+        <TabsContent key={v} value={v} className="pt-3 type-label font-normal text-muted-foreground">{t('nv.tabPanel', { view: t(`nv.tab.${v}`) })}</TabsContent>
       ))}
     </Tabs>
   );
@@ -598,7 +600,7 @@ function CrumbsSpecimen() {
   const { t } = useI18n();
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-sm">
+      <BreadcrumbList className="type-label font-normal">
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link href="/" className="inline-flex min-h-11 items-center" data-testid="link-crumb-home">{t('nav.home')}</Link>
@@ -638,18 +640,18 @@ export default function FoundationPage() {
     <Page className="max-w-6xl">
       <PageHeader eyebrow={t('fd.eyebrow')} title={t('fd.title')} lede={t('fd.lede')} />
 
-      <div className="grid gap-10 lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-14">
-        <nav aria-label={t('fd.toc')} className="lg:sticky lg:top-10 lg:self-start">
-          <p className="hidden pb-3 text-xs font-medium text-muted-foreground lg:block">{t('g.index')}</p>
-          <ol className="-mx-1 flex gap-1 overflow-x-auto pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:border-s lg:border-divider">
+      <div className="grid-cols-[minmax(0,1fr)] grid gap-10 xl:grid-cols-[10rem_minmax(0,1fr)] xl:gap-14">
+        <nav aria-label={t('fd.toc')} className="min-w-0 xl:sticky xl:top-10 xl:self-start">
+          <p className="hidden pb-3 type-caption font-medium text-muted-foreground xl:block">{t('g.index')}</p>
+          <ol className="-mx-1 flex flex-wrap gap-1 pb-1 xl:mx-0 xl:flex-col xl:flex-nowrap xl:border-s xl:border-divider">
             {GROUPS.map((g, i) => (
-              <li key={g.id} className="shrink-0">
+              <li key={g.id} className="min-w-0">
                 <a
                   href={`#${g.id}`}
-                  className="flex min-h-11 items-center gap-2.5 whitespace-nowrap rounded-md px-3 text-sm text-muted-foreground transition-colors duration-150 hover:bg-primary-soft/50 hover:text-foreground lg:-ms-px lg:min-h-9 lg:rounded-none lg:border-s-2 lg:border-transparent lg:hover:border-primary lg:hover:bg-transparent"
+                  className="flex min-h-11 items-center gap-2 rounded-md px-2.5 type-label font-normal text-muted-foreground transition-colors duration-150 hover:bg-primary-soft/50 hover:text-foreground xl:-ms-px xl:min-h-9 xl:rounded-none xl:border-s-2 xl:border-transparent xl:hover:border-primary xl:hover:bg-transparent"
                   data-testid={`link-toc-${g.id}`}
                 >
-                  <span className="tabular text-xs text-gold-ink" aria-hidden><bdi>{formatNumber(i + 1, locale).padStart(2, '0')}</bdi></span>
+                  <span className="tabular type-caption text-gold-ink" aria-hidden><bdi>{formatNumber(i + 1, locale).padStart(2, '0')}</bdi></span>
                   {t(g.key)}
                 </a>
               </li>
@@ -661,7 +663,7 @@ export default function FoundationPage() {
           {/* 01 FOUNDATIONS */}
           <Group index={0}>
             <Specimen id="color" title={t('fd.color')} description={t('fd.colorBody')}>
-              <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+              <div className="grid-cols-[minmax(0,1fr)] grid gap-x-10 gap-y-6 @2xl:grid-cols-2">
                 {[
                   { k: 'f.color.brand' as const, items: [
                     { token: '--primary', label: t('f.color.gold') },
@@ -684,7 +686,7 @@ export default function FoundationPage() {
                   ] },
                 ].map((grp) => (
                   <div key={grp.k}>
-                    <p className="pb-1 text-xs font-medium text-muted-foreground">{t(grp.k)}</p>
+                    <p className="pb-1 type-caption font-medium text-muted-foreground">{t(grp.k)}</p>
                     <ul className="divide-y divide-divider">
                       {grp.items.map((s) => <Swatch key={s.token} {...s} />)}
                     </ul>
@@ -695,37 +697,37 @@ export default function FoundationPage() {
 
             <Specimen id="type" title={t('fd.type')} description={t('fd.typeBody')}>
               <dl className="divide-y divide-divider">
-                <div className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
-                  <dt className="flex flex-col text-xs text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.hero')}</span><span dir="ltr" className="tabular text-start">32–48 / 600 / tnum</span></dt>
+                <div className="grid-cols-[minmax(0,1fr)] grid gap-2 py-4 @lg:grid-cols-[8rem_minmax(0,1fr)] @lg:items-baseline">
+                  <dt className="flex flex-col type-caption text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.hero')}</span><span dir="ltr" className="tabular text-start">32–48 / 600 / tnum</span></dt>
                   <dd><MoneyDisplay value={SPECIMEN.primary} size="hero" /></dd>
                 </div>
                 {[
-                  { k: 'fd.type.title' as const, cls: 'text-[28px] md:text-[32px] font-semibold tracking-[-0.02em] leading-tight', spec: '28–32 / 600', txt: t('fd.type.sample') },
-                  { k: 'fd.type.heading' as const, cls: 'text-lg md:text-[19px] font-semibold', spec: '18–20 / 600', txt: t('fd.type.sample') },
-                  { k: 'fd.type.body' as const, cls: 'text-base leading-7', spec: '16 / 400', txt: t('fd.type.bodySample') },
-                  { k: 'fd.type.caption' as const, cls: 'text-sm text-muted-foreground leading-6', spec: '14 / 400', txt: t('fd.type.bodySample') },
+                  { k: 'fd.type.title' as const, cls: 'type-display', spec: 'type-display · 26–32 / 600', txt: t('fd.type.sample') },
+                  { k: 'fd.type.heading' as const, cls: 'type-title', spec: 'type-title · 18–19 / 600', txt: t('fd.type.sample') },
+                  { k: 'fd.type.body' as const, cls: 'type-body', spec: 'type-body · 15 / 400', txt: t('fd.type.bodySample') },
+                  { k: 'fd.type.caption' as const, cls: 'type-label font-normal text-muted-foreground', spec: 'type-label / type-caption', txt: t('fd.type.bodySample') },
                 ].map((r) => (
-                  <div key={r.k} className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
-                    <dt className="flex flex-col text-xs text-muted-foreground">
+                  <div key={r.k} className="grid-cols-[minmax(0,1fr)] grid gap-2 py-4 @lg:grid-cols-[8rem_minmax(0,1fr)] @lg:items-baseline">
+                    <dt className="flex flex-col type-caption text-muted-foreground">
                       <span className="font-medium text-foreground">{t(r.k)}</span>
                       <span dir="ltr" className="tabular text-start">{r.spec}</span>
                     </dt>
                     <dd className={r.cls}>{r.txt}</dd>
                   </div>
                 ))}
-                <div className="grid gap-2 py-4 sm:grid-cols-[8rem_1fr] sm:items-baseline">
-                  <dt className="flex flex-col text-xs text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.arabic')}</span><span dir="ltr" className="text-start">Noto Sans Arabic · 1.7</span></dt>
-                  <dd lang="ar" dir="rtl" className="font-arabic text-lg leading-[1.8]">رصيدك المتاح يكفي حتى نهاية الشهر، ويبقى منه <bdi dir="ltr" className="tabular">₪415.30</bdi> تقريبًا.</dd>
+                <div className="grid-cols-[minmax(0,1fr)] grid gap-2 py-4 @lg:grid-cols-[8rem_minmax(0,1fr)] @lg:items-baseline">
+                  <dt className="flex flex-col type-caption text-muted-foreground"><span className="font-medium text-foreground">{t('f.type.arabic')}</span><span dir="ltr" className="text-start">Noto Sans Arabic · 1.7</span></dt>
+                  <dd lang="ar" dir="rtl" className="font-arabic type-title font-normal">رصيدك المتاح يكفي حتى نهاية الشهر، ويبقى منه <bdi dir="ltr" className="tabular">₪415.30</bdi> تقريبًا.</dd>
                 </div>
               </dl>
             </Specimen>
 
             <Specimen id="spacing" title={t('fd.spacing')} description={t('fd.spacingBody')}>
-              <div className="flex items-end gap-3" dir="ltr">
+              <div className="flex flex-wrap items-end gap-3" dir="ltr">
                 {[1, 2, 3, 4, 6, 8, 12, 16].map((n) => (
                   <div key={n} className="flex flex-col items-center gap-2">
                     <span className="rounded-[3px] bg-foreground/15" style={{ width: n * 4, height: n * 4 }} aria-hidden />
-                    <span className="tabular text-[11px] text-muted-foreground">{n * 4}</span>
+                    <span className="tabular type-caption text-muted-foreground">{n * 4}</span>
                   </div>
                 ))}
               </div>
@@ -736,18 +738,18 @@ export default function FoundationPage() {
                 {[{ r: 'rounded-sm', l: '8' }, { r: 'rounded-[10px]', l: '10' }, { r: 'rounded-lg', l: '12' }, { r: 'rounded-xl', l: '16' }, { r: 'rounded-full', l: 'pill' }].map((x) => (
                   <div key={x.l} className="flex flex-col items-center gap-2">
                     <div className={cn('size-14 border border-input bg-surface', x.r)} aria-hidden />
-                    <span className="tabular text-[11px] text-muted-foreground">{x.l}</span>
+                    <span className="tabular type-caption text-muted-foreground">{x.l}</span>
                   </div>
                 ))}
               </div>
             </Specimen>
 
             <Specimen id="elevation" title={t('f.elevation')} description={t('f.elevationBody')}>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <div className="flex h-20 items-end rounded-lg bg-background p-3 text-xs text-muted-foreground ring-1 ring-inset ring-divider">{t('f.elev.canvas')}</div>
-                <div className="flex h-20 items-end border-t border-divider p-3 text-xs text-muted-foreground">{t('f.elev.section')}</div>
-                <div className="flex h-20 items-end rounded-lg border border-card-border bg-surface p-3 text-xs text-muted-foreground">{t('f.elev.raised')}</div>
-                <div className="flex h-20 items-end rounded-lg border border-popover-border bg-popover p-3 text-xs text-muted-foreground shadow-lg">{t('f.elev.overlay')}</div>
+              <div className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-4 @xl:grid-cols-[repeat(4,minmax(0,1fr))]">
+                <div className="flex h-20 items-end rounded-lg bg-background p-3 type-caption text-muted-foreground ring-1 ring-inset ring-divider">{t('f.elev.canvas')}</div>
+                <div className="flex h-20 items-end border-t border-divider p-3 type-caption text-muted-foreground">{t('f.elev.section')}</div>
+                <div className="flex h-20 items-end rounded-lg border border-card-border bg-surface p-3 type-caption text-muted-foreground">{t('f.elev.raised')}</div>
+                <div className="flex h-20 items-end rounded-lg border border-popover-border bg-popover p-3 type-caption text-muted-foreground shadow-lg">{t('f.elev.overlay')}</div>
               </div>
             </Specimen>
 
@@ -772,10 +774,10 @@ export default function FoundationPage() {
 
           {/* 04 FINANCIAL */}
           <Group index={3}>
-            <div className="flex items-center justify-between gap-4 border-t border-divider py-4">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-divider py-3">
               <SpecimenTag label={t('spec.note')} />
               <div className="flex items-center gap-3">
-                <Label htmlFor="hide-amounts" className="text-sm">{t('fd.money.hidden')}</Label>
+                <Label htmlFor="hide-amounts" className="type-label flex min-h-11 cursor-pointer items-center font-normal">{t('fd.money.hidden')}</Label>
                 <Switch id="hide-amounts" checked={hidden} onCheckedChange={setHidden} data-testid="switch-hide-amounts" />
               </div>
             </div>
@@ -792,7 +794,7 @@ export default function FoundationPage() {
                 actions={
                   <>
                     <Button data-testid="button-specimen-fin-primary" disabled>{t('hs.act.save')}</Button>
-                    <span className="text-[13px] text-muted-foreground">{t('hs.act.payNote')}</span>
+                    <span className="type-label font-normal text-muted-foreground">{t('hs.act.payNote')}</span>
                   </>
                 }
               />
@@ -808,18 +810,18 @@ export default function FoundationPage() {
                   { k: 'fin.planned' as const, v: SPECIMEN.planned, tone: 'planned' as const },
                   { k: 'fin.projected' as const, v: SPECIMEN.projected, tone: 'projected' as const },
                 ].map((r) => (
-                  <div key={r.k} className="flex min-h-12 items-center justify-between gap-4 py-2.5">
-                    <dt className="text-sm text-muted-foreground">{t(r.k)}</dt>
-                    <dd><MoneyDisplay value={r.v} size="md" className="text-[17px]" tone={r.tone} showPlus={r.plus} hidden={hidden} hiddenLabel={hiddenLabel} /></dd>
+                  <div key={r.k} className="flex min-h-12 flex-wrap items-center justify-between gap-x-4 gap-y-0.5 py-2.5">
+                    <dt className="type-label font-normal text-muted-foreground">{t(r.k)}</dt>
+                    <dd className="shrink-0"><MoneyDisplay value={r.v} size="md" className="text-[17px]" tone={r.tone} showPlus={r.plus} hidden={hidden} hiddenLabel={hiddenLabel} /></dd>
                   </div>
                 ))}
               </dl>
               <div className="flex flex-col gap-2 pt-6">
-                <span className="text-[13px] text-muted-foreground">{t('fd.money.currencies')}</span>
+                <span className="type-label font-normal text-muted-foreground">{t('fd.money.currencies')}</span>
                 <ul className="flex flex-wrap gap-x-8 gap-y-2">
                   {CURRENCIES.map((c) => (
                     <li key={c} className="flex items-baseline gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">{c}</span>
+                      <span className="font-mono type-caption text-muted-foreground">{c}</span>
                       <MoneyDisplay value={SPECIMEN.perCurrency[c]} hidden={hidden} hiddenLabel={hiddenLabel} />
                     </li>
                   ))}
@@ -862,14 +864,14 @@ export default function FoundationPage() {
                 <ProgressMeter kind="budget" value={1.12} status="over" label={t('fin.budget')} statusLabel={t('fin.over')} />
                 <div className="flex flex-col gap-4 border-t border-divider pt-6">
                   <ProgressMeter kind="savings" value={p} label={t('fd.progress.label')} status={status} statusLabel={statusLabel} />
-                  <Label id="progress-adjust" className="text-[13px] text-muted-foreground">{t('fd.progress.adjust')}</Label>
+                  <Label id="progress-adjust" className="type-label font-normal text-muted-foreground">{t('fd.progress.adjust')}</Label>
                   <Slider aria-labelledby="progress-adjust" value={[progress]} min={0} max={100} step={1} onValueChange={([v]) => setProgress(v)} data-testid="slider-progress" />
                 </div>
               </div>
             </Specimen>
 
             <Specimen id="account" title={t('fd.account')} description={t('fd.accountBody')}>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid-cols-[minmax(0,1fr)] grid gap-4 @2xl:grid-cols-2">
                 <AccountSurface name={t('fd.account.name')} kind={t('fd.account.kind')} amount={SPECIMEN.account} meta={t('fd.account.meta', { date: specimenDate })} badge={<SpecimenTag label={t('spec.tag')} />} icon={<Landmark />} hidden={hidden} hiddenLabel={hiddenLabel} emphasis testId="surface-specimen-account-1" />
                 <AccountSurface name={t('fd.account.name')} kind={t('fd.account.kind2')} amount={SPECIMEN.account2} meta={t('fd.account.meta', { date: specimenDate })} badge={<SpecimenTag label={t('spec.tag')} />} icon={<PiggyBank />} hidden={hidden} hiddenLabel={hiddenLabel} testId="surface-specimen-account-2" />
               </div>
@@ -889,7 +891,7 @@ export default function FoundationPage() {
           {/* 05 FEEDBACK */}
           <Group index={4}>
             <Specimen title={t('fb.notices')}>
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid-cols-[minmax(0,1fr)] grid gap-6 @2xl:grid-cols-2">
                 <Notice tone="success" title={t('fb.success')} body={t('fb.successBody')} />
                 <Notice tone="warning" title={t('fb.warning')} body={t('fb.warningBody')} />
                 <Notice tone="error" title={t('fb.error')} body={t('fb.errorBody')} />

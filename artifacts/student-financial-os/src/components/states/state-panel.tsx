@@ -37,8 +37,8 @@ export function StatePanel({
     >
       <span className={cn('grid size-10 place-items-center rounded-full', ring, tone === 'success' && 'motion-pop')}>{icon ?? <Icon className="size-[18px]" aria-hidden />}</span>
       <div className="flex max-w-md flex-col gap-1.5">
-        <p className="text-base font-semibold">{title}</p>
-        <p className="text-sm leading-6 text-muted-foreground">{body}</p>
+        <p className="type-body font-semibold">{title}</p>
+        <p className="type-label font-normal text-muted-foreground">{body}</p>
       </div>
       {action}
     </div>
@@ -61,8 +61,8 @@ export function Notice({ tone, title, body, className }: { tone: NoticeTone; tit
       <span aria-hidden className={cn('absolute inset-y-0 start-0 w-0.5 rounded-full', bar)} />
       <Icon className={cn('mt-0.5 size-4 shrink-0', ink)} aria-hidden strokeWidth={2.2} />
       <div className="flex flex-col gap-0.5">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="text-sm leading-6 text-muted-foreground">{body}</p>
+        <p className="type-label font-semibold">{title}</p>
+        <p className="type-label font-normal text-muted-foreground">{body}</p>
       </div>
     </div>
   );

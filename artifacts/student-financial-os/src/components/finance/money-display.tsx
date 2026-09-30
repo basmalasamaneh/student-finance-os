@@ -21,6 +21,11 @@ const sizes: Record<Size, string> = {
   xl: 'text-[32px] leading-none font-semibold tracking-[-0.02em] md:text-[40px]',
   hero: 'figure-hero',
 };
+/** Long figures step down one size so hero/xl amounts never clip at 320px (no truncation, no overflow hiding). */
+const longSizes: Partial<Record<Size, string>> = {
+  hero: 'figure-hero figure-long',
+  xl: 'text-[26px] leading-none font-semibold md:text-[34px]',
+};
 const tones: Record<MoneyTone, string> = {
   default: 'text-foreground',
   muted: 'text-muted-foreground',
@@ -59,6 +64,8 @@ export function MoneyDisplay({
 }) {
   const { locale } = useI18n();
   const formatted = formatMoney(value, locale);
+  const text = `${formatted}`;
+  const sizeClass = text.length > 11 && longSizes[size] ? longSizes[size] : sizes[size];
   const prefix = tone === 'projected' ? '≈ ' : showPlus && value.minor > 0 ? '+' : '';
   if (hidden) {
     return (
@@ -68,7 +75,7 @@ export function MoneyDisplay({
     );
   }
   return (
-    <bdi dir="ltr" className={cn('tabular inline-block whitespace-nowrap', sizes[size], tones[tone], className)} data-testid={testId}>
+    <bdi dir="ltr" className={cn('tabular inline-block whitespace-nowrap', sizeClass, tones[tone], className)} data-testid={testId}>
       {prefix}
       {formatted}
     </bdi>

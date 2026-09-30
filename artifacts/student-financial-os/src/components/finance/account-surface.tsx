@@ -36,27 +36,27 @@ export function AccountSurface({
   return (
     <article
       className={cn(
-        'relative flex flex-col gap-8 overflow-hidden rounded-xl border border-card-border bg-surface p-5 transition-colors duration-150 hover:border-input md:p-6',
+        'relative flex min-w-0 flex-col gap-6 rounded-xl border border-card-border bg-surface p-5 transition-colors duration-150 hover:border-input md:p-6',
         className,
       )}
       data-testid={testId}
     >
-      {emphasis ? <span aria-hidden className="absolute inset-x-0 top-0 h-0.5 bg-primary" /> : null}
-      <div className="flex items-start justify-between gap-3">
+      {emphasis ? <span aria-hidden className="absolute inset-x-3 top-0 h-0.5 rounded-b-full bg-primary" /> : null}
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="grid size-9 place-items-center rounded-lg bg-surface-sunken text-foreground/80 [&_svg]:size-[18px]" aria-hidden>
             {icon}
           </span>
           <div className="flex flex-col">
-            <span className="text-sm font-medium">{name}</span>
-            <span className="text-[13px] text-muted-foreground">{kind}</span>
+            <span className="type-label font-medium">{name}</span>
+            <span className="type-caption text-muted-foreground">{kind}</span>
           </div>
         </div>
         {badge}
       </div>
       <div className="flex flex-col gap-1.5">
         <MoneyDisplay value={amount} size="lg" hidden={hidden} hiddenLabel={hiddenLabel} />
-        {meta ? <span className="text-[13px] text-muted-foreground">{meta}</span> : null}
+        {meta ? <span className="type-label font-normal text-muted-foreground">{meta}</span> : null}
       </div>
     </article>
   );

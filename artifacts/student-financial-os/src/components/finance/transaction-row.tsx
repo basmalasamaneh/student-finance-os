@@ -34,7 +34,7 @@ export function TransactionRow({
   const { locale } = useI18n();
   const Icon = direction === 'in' ? ArrowDownLeft : direction === 'out' ? ArrowUpRight : Clock;
   return (
-    <li className="flex min-h-16 items-center gap-4 py-3" data-testid={testId}>
+    <li className="flex min-h-16 items-center gap-3 py-3 sm:gap-4" data-testid={testId}>
       <span
         className={cn(
           'grid size-9 shrink-0 place-items-center rounded-full',
@@ -47,12 +47,12 @@ export function TransactionRow({
         <Icon className="size-4 rtl:-scale-x-100" strokeWidth={1.9} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-[15px] font-medium">{title}</span>
-        <span className="truncate text-[13px] text-muted-foreground">
+        <span className="type-subtitle truncate font-medium">{title}</span>
+        <span className="type-caption truncate text-muted-foreground">
           {meta} · <time dateTime={date.toISOString()}>{formatDate(date, locale)}</time>
         </span>
       </div>
-      <div className="flex flex-col items-end">
+      <div className="flex shrink-0 flex-col items-end">
         <span className="sr-only">{directionLabel}</span>
         <MoneyDisplay value={amount} size="sm" className="text-[15px]" tone={direction === 'in' ? 'positive' : direction === 'pending' ? 'muted' : 'default'} showPlus={direction === 'in'} hidden={hidden} hiddenLabel={hiddenLabel} />
       </div>

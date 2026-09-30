@@ -55,7 +55,7 @@ export default function AppearancePage() {
             { value: 'system', label: t('theme.system'), icon: <Monitor /> },
           ]}
         />
-        {theme === 'system' ? <p className="mt-3 text-sm text-muted-foreground" aria-live="polite">{t('theme.systemNow', { mode: t(`theme.${resolved}`) })}</p> : null}
+        {theme === 'system' ? <p className="mt-3 type-label font-normal text-muted-foreground" aria-live="polite">{t('theme.systemNow', { mode: t(`theme.${resolved}`) })}</p> : null}
       </Section>
 
       <Section id="language" title={t('ap.lang')} description={t('ap.langBody')}>
@@ -109,7 +109,7 @@ export default function AppearancePage() {
       </Section>
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-divider pt-8">
-        <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+        <p className="inline-flex items-center gap-2 type-label font-normal text-muted-foreground">
           <Check className="size-4 text-success" aria-hidden />
           {t('ap.saved')}
         </p>
