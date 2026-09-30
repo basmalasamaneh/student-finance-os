@@ -14,7 +14,228 @@ tags:
     description: App-owned credentials and sessions
   - name: profile
     description: Owner-only onboarding
+  - name: finance
+    description: Simulated student finance
+  - name: campus
+    description: Simulated campus catalog
 paths:
+  /finance/accounts:
+    get:
+      operationId: listFinanceAccounts
+      tags: [finance]
+      responses:
+        "200":
+          description: Owner accounts
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/FinanceAccount" } }
+    post:
+      operationId: createFinanceAccount
+      tags: [finance]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinanceAccountInput" } } } }
+      responses:
+        "201":
+          description: Zero-balance account
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceAccount" } } }
+  /finance/accounts/{id}:
+    get:
+      operationId: getFinanceAccount
+      tags: [finance]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200":
+          description: Account details
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceAccount" } } }
+  /finance/recipients/{id}:
+    get:
+      operationId: lookupFinanceRecipient
+      tags: [finance]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200":
+          description: Minimal verified recipient identity; never reveals balances
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceRecipient" } } }
+  /finance/transactions:
+    get:
+      operationId: listFinanceTransactions
+      tags: [finance]
+      responses:
+        "200":
+          description: Recent owner ledger entries
+          content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } } } }
+  /finance/transactions/{id}:
+    get:
+      operationId: getFinanceTransaction
+      tags: [finance]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200":
+          description: Immutable owner receipt
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceTransaction" } } }
+  /finance/movements:
+    post:
+      operationId: createFinanceMovement
+      tags: [finance]
+      description: Simulated external receive/deposit/add or send/withdrawal, or atomic transfer to an exact account identifier. All require a unique Idempotency-Key header.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FinanceMovementInput" } } } }
+      responses:
+        "201":
+          description: Immutable receipt
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceTransaction" } } }
+  /finance/requests:
+    get:
+      operationId: listMoneyRequests
+      tags: [finance]
+      responses:
+        "200":
+          description: Requests issued or addressed to owner
+          content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/MoneyRequest" } } } }
+    post:
+      operationId: createMoneyRequest
+      tags: [finance]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MoneyRequestInput" } } } }
+      responses:
+        "201":
+          description: Pending request
+          content: { application/json: { schema: { $ref: "#/components/schemas/MoneyRequest" } } }
+  /finance/requests/{id}/decision:
+    post:
+      operationId: decideMoneyRequest
+      tags: [finance]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MoneyRequestDecision" } } } }
+      responses:
+        "200":
+          description: Updated request
+          content: { application/json: { schema: { $ref: "#/components/schemas/MoneyRequest" } } }
+  /finance/summary:
+    get:
+      operationId: getFinanceSummary
+      tags: [finance]
+      responses:
+        "200":
+          description: Derived per-currency monthly cashflow and category totals, not a budget or forecast
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceSummary" } } }
+  /campus/catalog:
+    get:
+      operationId: listCampusCatalog
+      tags: [campus]
+      responses:
+        "200":
+          description: Configured campuses and services
+          content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/CampusUniversity" } } } }
+  /campus/demo/install:
+    post:
+      operationId: installCampusDemo
+      tags: [campus]
+      description: Authenticated student opt-in install of a global fictional demo catalog. Idempotent; no credentials or balance seeds.
+      responses:
+        "200":
+          description: Current catalog including persisted demo
+          content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/CampusUniversity" } } } }
+  /campus/admin/universities:
+    post:
+      operationId: createCampusUniversity
+      tags: [campus]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusUniversityInput" } } } }
+      responses:
+        "201":
+          description: Created university
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusUniversity" } } }
+  /campus/admin/universities/{id}:
+    put:
+      operationId: updateCampusUniversity
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusUniversityInput" } } } }
+      responses:
+        "200":
+          description: Updated university
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusUniversity" } } }
+  /campus/admin/campuses:
+    post:
+      operationId: createCampus
+      tags: [campus]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusInput" } } } }
+      responses:
+        "201":
+          description: Created campus
+          content: { application/json: { schema: { $ref: "#/components/schemas/Campus" } } }
+  /campus/admin/campuses/{id}:
+    put:
+      operationId: updateCampus
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusInput" } } } }
+      responses:
+        "200":
+          description: Updated campus
+          content: { application/json: { schema: { $ref: "#/components/schemas/Campus" } } }
+  /campus/admin/services:
+    post:
+      operationId: createCampusService
+      tags: [campus]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusServiceInput" } } } }
+      responses:
+        "201":
+          description: Created merchant/service
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusService" } } }
+  /campus/admin/services/{id}:
+    put:
+      operationId: updateCampusService
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusServiceInput" } } } }
+      responses:
+        "200":
+          description: Updated service
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusService" } } }
+    delete:
+      operationId: archiveCampusService
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "204": { description: "Archived from payments; retained for historical receipts" }
+  /campus/admin/products:
+    post:
+      operationId: createCampusProduct
+      tags: [campus]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusProductInput" } } } }
+      responses:
+        "201":
+          description: Created price
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusProduct" } } }
+  /campus/admin/products/{id}:
+    put:
+      operationId: updateCampusProduct
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusProductInput" } } } }
+      responses:
+        "200":
+          description: Updated price
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusProduct" } } }
+    delete:
+      operationId: archiveCampusProduct
+      tags: [campus]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "204": { description: "Archived from payments; retained for historical receipts" }
+  /campus/payments:
+    post:
+      operationId: createCampusPayment
+      tags: [campus]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CampusPaymentInput" } } } }
+      responses:
+        "201":
+          description: Simulated payment receipt with server-priced items
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceTransaction" } } }
   /auth/signup:
     post:
       operationId: signUp
@@ -193,7 +414,213 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 components:
+  parameters:
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    FinanceRecipient:
+      type: object
+      required: [accountId, name, currency]
+      properties:
+        accountId: { type: string, format: uuid }
+        name: { type: string }
+        currency: { type: string, enum: [ILS, USD, JOD] }
+    FinanceAccountInput:
+      type: object
+      additionalProperties: false
+      required: [type, name, currency]
+      properties:
+        type: { type: string, enum: [wallet, bank, cash, other] }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        currency: { type: string, enum: [ILS, USD, JOD] }
+    FinanceAccount:
+      allOf:
+        - { $ref: "#/components/schemas/FinanceAccountInput" }
+        - type: object
+          required: [id, balance]
+          properties:
+            id: { type: string, format: uuid }
+            balance: { $ref: "#/components/schemas/Amount" }
+    FinanceMovementInput:
+      type: object
+      additionalProperties: false
+      required: [kind, accountId, amount]
+      properties:
+        kind: { type: string, enum: [add, receive, deposit, withdrawal, send, transfer, payment] }
+        accountId: { type: string, format: uuid }
+        recipientAccountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/Amount" }
+        note: { type: string, maxLength: 300 }
+    MoneyRequestInput:
+      type: object
+      additionalProperties: false
+      required: [recipientAccountId, payerAccountId, amount]
+      properties:
+        recipientAccountId: { type: string, format: uuid }
+        payerAccountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/Amount" }
+        note: { type: string, maxLength: 300 }
+    MoneyRequestDecision:
+      type: object
+      additionalProperties: false
+      required: [action]
+      properties:
+        action: { type: string, enum: [fulfill, decline, cancel] }
+    MoneyRequest:
+      allOf:
+        - { $ref: "#/components/schemas/MoneyRequestInput" }
+        - type: object
+          required: [id, issuerId, payerId, status, createdAt]
+          properties:
+            id: { type: string, format: uuid }
+            issuerId: { type: string, format: uuid }
+            payerId: { type: string, format: uuid }
+            status: { type: string, enum: [pending, fulfilled, declined, cancelled] }
+            transactionId: { type: string, format: uuid }
+            createdAt: { type: string, format: date-time }
+    FinanceReceiptItem:
+      type: object
+      required: [productId, name, quantity, unitPrice, lineTotal]
+      properties:
+        productId: { type: string, format: uuid }
+        name: { type: string }
+        quantity: { type: integer }
+        unitPrice: { $ref: "#/components/schemas/Amount" }
+        lineTotal: { $ref: "#/components/schemas/Amount" }
+    FinanceTransaction:
+      type: object
+      required: [id, accountId, kind, category, direction, amount, balanceAfter, status, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        accountId: { type: string, format: uuid }
+        kind: { type: string }
+        category: { type: string }
+        direction: { type: string, enum: [credit, debit] }
+        amount: { $ref: "#/components/schemas/Amount" }
+        balanceAfter: { $ref: "#/components/schemas/Amount" }
+        status: { type: string, enum: [simulated, simulated_payment] }
+        counterpartyAccountId: { type: string, format: uuid }
+        serviceId: { type: string, format: uuid }
+        merchantName: { type: string }
+        items: { type: array, items: { $ref: "#/components/schemas/FinanceReceiptItem" } }
+        note: { type: string }
+        createdAt: { type: string, format: date-time }
+    FinanceCategoryTotal:
+      type: object
+      required: [currency, category, spending]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        category: { type: string }
+        spending: { $ref: "#/components/schemas/Amount" }
+    FinanceCashflow:
+      type: object
+      required: [currency, balance, monthlyIncome, monthlySpending]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        balance: { $ref: "#/components/schemas/Amount" }
+        monthlyIncome: { $ref: "#/components/schemas/Amount" }
+        monthlySpending: { $ref: "#/components/schemas/Amount" }
+    FinanceSummary:
+      type: object
+      required: [cashflow, categoryTotals, upcomingRequests, recentTransactions, campusActivity]
+      properties:
+        cashflow: { type: array, items: { $ref: "#/components/schemas/FinanceCashflow" } }
+        categoryTotals: { type: array, items: { $ref: "#/components/schemas/FinanceCategoryTotal" } }
+        upcomingRequests: { type: array, items: { $ref: "#/components/schemas/MoneyRequest" } }
+        recentTransactions: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } }
+        campusActivity: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } }
+    CampusUniversityInput:
+      type: object
+      additionalProperties: false
+      required: [name, arabicName]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 160 }
+        arabicName: { type: string, minLength: 1, maxLength: 160 }
+    CampusUniversity:
+      allOf:
+        - { $ref: "#/components/schemas/CampusUniversityInput" }
+        - type: object
+          required: [id, campuses]
+          properties:
+            id: { type: string, format: uuid }
+            campuses: { type: array, items: { $ref: "#/components/schemas/Campus" } }
+    CampusInput:
+      type: object
+      additionalProperties: false
+      required: [universityId, name, arabicName]
+      properties:
+        universityId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        arabicName: { type: string, minLength: 1, maxLength: 160 }
+    Campus:
+      allOf:
+        - { $ref: "#/components/schemas/CampusInput" }
+        - type: object
+          required: [id, services]
+          properties:
+            id: { type: string, format: uuid }
+            services: { type: array, items: { $ref: "#/components/schemas/CampusService" } }
+    CampusServiceInput:
+      type: object
+      additionalProperties: false
+      required: [campusId, name, arabicName, category, description, location, active, paymentEnabled]
+      properties:
+        campusId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        arabicName: { type: string, minLength: 1, maxLength: 160 }
+        category: { type: string, enum: [food, books, printing, transportation, fees, other] }
+        description: { type: string, maxLength: 500 }
+        location: { type: string, maxLength: 300 }
+        active: { type: boolean }
+        paymentEnabled: { type: boolean }
+    CampusService:
+      allOf:
+        - { $ref: "#/components/schemas/CampusServiceInput" }
+        - type: object
+          required: [id, universityId, integrationStatus, products]
+          properties:
+            id: { type: string, format: uuid }
+            universityId: { type: string, format: uuid }
+            integrationStatus: { type: string, enum: [simulated] }
+            products: { type: array, items: { $ref: "#/components/schemas/CampusProduct" } }
+    CampusProductInput:
+      type: object
+      additionalProperties: false
+      required: [serviceId, name, arabicName, price, active]
+      properties:
+        serviceId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        arabicName: { type: string, minLength: 1, maxLength: 160 }
+        price: { $ref: "#/components/schemas/Amount" }
+        active: { type: boolean }
+    CampusProduct:
+      allOf:
+        - { $ref: "#/components/schemas/CampusProductInput" }
+        - type: object
+          required: [id]
+          properties:
+            id: { type: string, format: uuid }
+    CampusPaymentInput:
+      type: object
+      additionalProperties: false
+      required: [accountId, serviceId, items]
+      properties:
+        accountId: { type: string, format: uuid }
+        serviceId: { type: string, format: uuid }
+        items:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: object
+            additionalProperties: false
+            required: [productId, quantity]
+            properties:
+              productId: { type: string, format: uuid }
+              quantity: { type: integer, minimum: 1, maximum: 100 }
     SignUpInput:
       type: object
       additionalProperties: false

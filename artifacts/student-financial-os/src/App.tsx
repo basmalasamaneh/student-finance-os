@@ -19,6 +19,9 @@ import FoundationPage from '@/pages/foundation';
 import AppearancePage from '@/pages/appearance';
 import NotImplementedPage from '@/pages/not-implemented';
 import NotFound from '@/pages/not-found';
+import MoneyPage from '@/pages/money';
+import CampusPage from '@/pages/campus';
+import AdminCampusPage from '@/pages/admin-campus';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -36,6 +39,9 @@ function Router() {
         <Route path="/foundation/home" component={HomePage} />
         <Route path="/foundation" component={FoundationPage} />
         <Route path="/appearance" component={AppearancePage} />
+        <Route path="/money" component={MoneyPage} />
+        <Route path="/campus" component={CampusPage} />
+        <Route path="/admin/institutions" component={AdminCampusPage} />
         {FUTURE_ROUTES.map((item) => (
           <Route key={item.id} path={item.path}>
             <NotImplementedPage item={item} />

@@ -8,6 +8,1308 @@
 import * as zod from 'zod';
 
 
+export const listFinanceAccountsResponseOneNameMax = 120;
+
+export const listFinanceAccountsResponseTwoBalanceMinorMin = 0;
+export const listFinanceAccountsResponseTwoBalanceMinorMax = 9007199254740991;
+
+
+
+export const ListFinanceAccountsResponseItem = zod.object({
+  "type": zod.enum(['wallet', 'bank', 'cash', 'other']),
+  "name": zod.string().min(1).max(listFinanceAccountsResponseOneNameMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "balance": zod.object({
+  "minor": zod.number().int().min(listFinanceAccountsResponseTwoBalanceMinorMin).max(listFinanceAccountsResponseTwoBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}))
+export const ListFinanceAccountsResponse = zod.array(ListFinanceAccountsResponseItem)
+
+
+export const createFinanceAccountHeaderIdempotencyKeyMin = 8;
+export const createFinanceAccountHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateFinanceAccountHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createFinanceAccountHeaderIdempotencyKeyMin).max(createFinanceAccountHeaderIdempotencyKeyMax)
+})
+
+export const createFinanceAccountBodyNameMax = 120;
+
+
+
+export const CreateFinanceAccountBody = zod.object({
+  "type": zod.enum(['wallet', 'bank', 'cash', 'other']),
+  "name": zod.string().min(1).max(createFinanceAccountBodyNameMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+
+export const createFinanceAccountResponseOneNameMax = 120;
+
+export const createFinanceAccountResponseTwoBalanceMinorMin = 0;
+export const createFinanceAccountResponseTwoBalanceMinorMax = 9007199254740991;
+
+
+
+export const CreateFinanceAccountResponse = zod.object({
+  "type": zod.enum(['wallet', 'bank', 'cash', 'other']),
+  "name": zod.string().min(1).max(createFinanceAccountResponseOneNameMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "balance": zod.object({
+  "minor": zod.number().int().min(createFinanceAccountResponseTwoBalanceMinorMin).max(createFinanceAccountResponseTwoBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}))
+
+
+export const GetFinanceAccountParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getFinanceAccountResponseOneNameMax = 120;
+
+export const getFinanceAccountResponseTwoBalanceMinorMin = 0;
+export const getFinanceAccountResponseTwoBalanceMinorMax = 9007199254740991;
+
+
+
+export const GetFinanceAccountResponse = zod.object({
+  "type": zod.enum(['wallet', 'bank', 'cash', 'other']),
+  "name": zod.string().min(1).max(getFinanceAccountResponseOneNameMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "balance": zod.object({
+  "minor": zod.number().int().min(getFinanceAccountResponseTwoBalanceMinorMin).max(getFinanceAccountResponseTwoBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}))
+
+
+export const LookupFinanceRecipientParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const LookupFinanceRecipientResponse = zod.object({
+  "accountId": zod.string().uuid(),
+  "name": zod.string(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+
+
+export const listFinanceTransactionsResponseAmountMinorMin = 0;
+export const listFinanceTransactionsResponseAmountMinorMax = 9007199254740991;
+
+export const listFinanceTransactionsResponseBalanceAfterMinorMin = 0;
+export const listFinanceTransactionsResponseBalanceAfterMinorMax = 9007199254740991;
+
+export const listFinanceTransactionsResponseItemsItemUnitPriceMinorMin = 0;
+export const listFinanceTransactionsResponseItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const listFinanceTransactionsResponseItemsItemLineTotalMinorMin = 0;
+export const listFinanceTransactionsResponseItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const ListFinanceTransactionsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(listFinanceTransactionsResponseAmountMinorMin).max(listFinanceTransactionsResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(listFinanceTransactionsResponseBalanceAfterMinorMin).max(listFinanceTransactionsResponseBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(listFinanceTransactionsResponseItemsItemUnitPriceMinorMin).max(listFinanceTransactionsResponseItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(listFinanceTransactionsResponseItemsItemLineTotalMinorMin).max(listFinanceTransactionsResponseItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+export const ListFinanceTransactionsResponse = zod.array(ListFinanceTransactionsResponseItem)
+
+
+export const GetFinanceTransactionParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getFinanceTransactionResponseAmountMinorMin = 0;
+export const getFinanceTransactionResponseAmountMinorMax = 9007199254740991;
+
+export const getFinanceTransactionResponseBalanceAfterMinorMin = 0;
+export const getFinanceTransactionResponseBalanceAfterMinorMax = 9007199254740991;
+
+export const getFinanceTransactionResponseItemsItemUnitPriceMinorMin = 0;
+export const getFinanceTransactionResponseItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const getFinanceTransactionResponseItemsItemLineTotalMinorMin = 0;
+export const getFinanceTransactionResponseItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const GetFinanceTransactionResponse = zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getFinanceTransactionResponseAmountMinorMin).max(getFinanceTransactionResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(getFinanceTransactionResponseBalanceAfterMinorMin).max(getFinanceTransactionResponseBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(getFinanceTransactionResponseItemsItemUnitPriceMinorMin).max(getFinanceTransactionResponseItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(getFinanceTransactionResponseItemsItemLineTotalMinorMin).max(getFinanceTransactionResponseItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+/**
+ * Simulated external receive/deposit/add or send/withdrawal, or atomic transfer to an exact account identifier. All require a unique Idempotency-Key header.
+ */
+export const createFinanceMovementHeaderIdempotencyKeyMin = 8;
+export const createFinanceMovementHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateFinanceMovementHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createFinanceMovementHeaderIdempotencyKeyMin).max(createFinanceMovementHeaderIdempotencyKeyMax)
+})
+
+export const createFinanceMovementBodyAmountMinorMin = 0;
+export const createFinanceMovementBodyAmountMinorMax = 9007199254740991;
+
+export const createFinanceMovementBodyNoteMax = 300;
+
+
+
+export const CreateFinanceMovementBody = zod.object({
+  "kind": zod.enum(['add', 'receive', 'deposit', 'withdrawal', 'send', 'transfer', 'payment']),
+  "accountId": zod.string().uuid(),
+  "recipientAccountId": zod.string().uuid().optional(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createFinanceMovementBodyAmountMinorMin).max(createFinanceMovementBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(createFinanceMovementBodyNoteMax).optional()
+})
+
+export const createFinanceMovementResponseAmountMinorMin = 0;
+export const createFinanceMovementResponseAmountMinorMax = 9007199254740991;
+
+export const createFinanceMovementResponseBalanceAfterMinorMin = 0;
+export const createFinanceMovementResponseBalanceAfterMinorMax = 9007199254740991;
+
+export const createFinanceMovementResponseItemsItemUnitPriceMinorMin = 0;
+export const createFinanceMovementResponseItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const createFinanceMovementResponseItemsItemLineTotalMinorMin = 0;
+export const createFinanceMovementResponseItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const CreateFinanceMovementResponse = zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createFinanceMovementResponseAmountMinorMin).max(createFinanceMovementResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(createFinanceMovementResponseBalanceAfterMinorMin).max(createFinanceMovementResponseBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(createFinanceMovementResponseItemsItemUnitPriceMinorMin).max(createFinanceMovementResponseItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(createFinanceMovementResponseItemsItemLineTotalMinorMin).max(createFinanceMovementResponseItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
+export const listMoneyRequestsResponseOneAmountMinorMin = 0;
+export const listMoneyRequestsResponseOneAmountMinorMax = 9007199254740991;
+
+export const listMoneyRequestsResponseOneNoteMax = 300;
+
+
+
+export const ListMoneyRequestsResponseItem = zod.object({
+  "recipientAccountId": zod.string().uuid(),
+  "payerAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(listMoneyRequestsResponseOneAmountMinorMin).max(listMoneyRequestsResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(listMoneyRequestsResponseOneNoteMax).optional()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "issuerId": zod.string().uuid(),
+  "payerId": zod.string().uuid(),
+  "status": zod.enum(['pending', 'fulfilled', 'declined', 'cancelled']),
+  "transactionId": zod.string().uuid().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+export const ListMoneyRequestsResponse = zod.array(ListMoneyRequestsResponseItem)
+
+
+export const createMoneyRequestHeaderIdempotencyKeyMin = 8;
+export const createMoneyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateMoneyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createMoneyRequestHeaderIdempotencyKeyMin).max(createMoneyRequestHeaderIdempotencyKeyMax)
+})
+
+export const createMoneyRequestBodyAmountMinorMin = 0;
+export const createMoneyRequestBodyAmountMinorMax = 9007199254740991;
+
+export const createMoneyRequestBodyNoteMax = 300;
+
+
+
+export const CreateMoneyRequestBody = zod.object({
+  "recipientAccountId": zod.string().uuid(),
+  "payerAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createMoneyRequestBodyAmountMinorMin).max(createMoneyRequestBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(createMoneyRequestBodyNoteMax).optional()
+})
+
+export const createMoneyRequestResponseOneAmountMinorMin = 0;
+export const createMoneyRequestResponseOneAmountMinorMax = 9007199254740991;
+
+export const createMoneyRequestResponseOneNoteMax = 300;
+
+
+
+export const CreateMoneyRequestResponse = zod.object({
+  "recipientAccountId": zod.string().uuid(),
+  "payerAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createMoneyRequestResponseOneAmountMinorMin).max(createMoneyRequestResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(createMoneyRequestResponseOneNoteMax).optional()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "issuerId": zod.string().uuid(),
+  "payerId": zod.string().uuid(),
+  "status": zod.enum(['pending', 'fulfilled', 'declined', 'cancelled']),
+  "transactionId": zod.string().uuid().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const DecideMoneyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const decideMoneyRequestHeaderIdempotencyKeyMin = 8;
+export const decideMoneyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const DecideMoneyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(decideMoneyRequestHeaderIdempotencyKeyMin).max(decideMoneyRequestHeaderIdempotencyKeyMax)
+})
+
+export const DecideMoneyRequestBody = zod.object({
+  "action": zod.enum(['fulfill', 'decline', 'cancel'])
+})
+
+export const decideMoneyRequestResponseOneAmountMinorMin = 0;
+export const decideMoneyRequestResponseOneAmountMinorMax = 9007199254740991;
+
+export const decideMoneyRequestResponseOneNoteMax = 300;
+
+
+
+export const DecideMoneyRequestResponse = zod.object({
+  "recipientAccountId": zod.string().uuid(),
+  "payerAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(decideMoneyRequestResponseOneAmountMinorMin).max(decideMoneyRequestResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(decideMoneyRequestResponseOneNoteMax).optional()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "issuerId": zod.string().uuid(),
+  "payerId": zod.string().uuid(),
+  "status": zod.enum(['pending', 'fulfilled', 'declined', 'cancelled']),
+  "transactionId": zod.string().uuid().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+
+
+export const getFinanceSummaryResponseCashflowItemBalanceMinorMin = 0;
+export const getFinanceSummaryResponseCashflowItemBalanceMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMin = 0;
+export const getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCashflowItemMonthlySpendingMinorMin = 0;
+export const getFinanceSummaryResponseCashflowItemMonthlySpendingMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCategoryTotalsItemSpendingMinorMin = 0;
+export const getFinanceSummaryResponseCategoryTotalsItemSpendingMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseUpcomingRequestsItemOneAmountMinorMin = 0;
+export const getFinanceSummaryResponseUpcomingRequestsItemOneAmountMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseUpcomingRequestsItemOneNoteMax = 300;
+
+export const getFinanceSummaryResponseRecentTransactionsItemAmountMinorMin = 0;
+export const getFinanceSummaryResponseRecentTransactionsItemAmountMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseRecentTransactionsItemBalanceAfterMinorMin = 0;
+export const getFinanceSummaryResponseRecentTransactionsItemBalanceAfterMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseRecentTransactionsItemItemsItemUnitPriceMinorMin = 0;
+export const getFinanceSummaryResponseRecentTransactionsItemItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseRecentTransactionsItemItemsItemLineTotalMinorMin = 0;
+export const getFinanceSummaryResponseRecentTransactionsItemItemsItemLineTotalMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCampusActivityItemAmountMinorMin = 0;
+export const getFinanceSummaryResponseCampusActivityItemAmountMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCampusActivityItemBalanceAfterMinorMin = 0;
+export const getFinanceSummaryResponseCampusActivityItemBalanceAfterMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCampusActivityItemItemsItemUnitPriceMinorMin = 0;
+export const getFinanceSummaryResponseCampusActivityItemItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const getFinanceSummaryResponseCampusActivityItemItemsItemLineTotalMinorMin = 0;
+export const getFinanceSummaryResponseCampusActivityItemItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const GetFinanceSummaryResponse = zod.object({
+  "cashflow": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "balance": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemBalanceMinorMin).max(getFinanceSummaryResponseCashflowItemBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "monthlyIncome": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMin).max(getFinanceSummaryResponseCashflowItemMonthlyIncomeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "monthlySpending": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCashflowItemMonthlySpendingMinorMin).max(getFinanceSummaryResponseCashflowItemMonthlySpendingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})),
+  "categoryTotals": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "category": zod.string(),
+  "spending": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCategoryTotalsItemSpendingMinorMin).max(getFinanceSummaryResponseCategoryTotalsItemSpendingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})),
+  "upcomingRequests": zod.array(zod.object({
+  "recipientAccountId": zod.string().uuid(),
+  "payerAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseUpcomingRequestsItemOneAmountMinorMin).max(getFinanceSummaryResponseUpcomingRequestsItemOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "note": zod.string().max(getFinanceSummaryResponseUpcomingRequestsItemOneNoteMax).optional()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "issuerId": zod.string().uuid(),
+  "payerId": zod.string().uuid(),
+  "status": zod.enum(['pending', 'fulfilled', 'declined', 'cancelled']),
+  "transactionId": zod.string().uuid().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))),
+  "recentTransactions": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseRecentTransactionsItemAmountMinorMin).max(getFinanceSummaryResponseRecentTransactionsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseRecentTransactionsItemBalanceAfterMinorMin).max(getFinanceSummaryResponseRecentTransactionsItemBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseRecentTransactionsItemItemsItemUnitPriceMinorMin).max(getFinanceSummaryResponseRecentTransactionsItemItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseRecentTransactionsItemItemsItemLineTotalMinorMin).max(getFinanceSummaryResponseRecentTransactionsItemItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+})),
+  "campusActivity": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCampusActivityItemAmountMinorMin).max(getFinanceSummaryResponseCampusActivityItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCampusActivityItemBalanceAfterMinorMin).max(getFinanceSummaryResponseCampusActivityItemBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCampusActivityItemItemsItemUnitPriceMinorMin).max(getFinanceSummaryResponseCampusActivityItemItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(getFinanceSummaryResponseCampusActivityItemItemsItemLineTotalMinorMin).max(getFinanceSummaryResponseCampusActivityItemItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+}))
+})
+
+
+export const listCampusCatalogResponseOneNameMax = 160;
+
+export const listCampusCatalogResponseOneArabicNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemOneNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneArabicNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneDescriptionMax = 500;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneLocationMax = 300;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const ListCampusCatalogResponseItem = zod.object({
+  "name": zod.string().min(1).max(listCampusCatalogResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "campuses": zod.array(zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin).max(listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+})))
+}))
+export const ListCampusCatalogResponse = zod.array(ListCampusCatalogResponseItem)
+
+
+/**
+ * Authenticated student opt-in install of a global fictional demo catalog. Idempotent; no credentials or balance seeds.
+ */
+export const installCampusDemoResponseOneNameMax = 160;
+
+export const installCampusDemoResponseOneArabicNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemOneNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemOneArabicNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemOneDescriptionMax = 500;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemOneLocationMax = 300;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const InstallCampusDemoResponseItem = zod.object({
+  "name": zod.string().min(1).max(installCampusDemoResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "campuses": zod.array(zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(installCampusDemoResponseTwoCampusesItemTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(installCampusDemoResponseTwoCampusesItemTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin).max(installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+})))
+}))
+export const InstallCampusDemoResponse = zod.array(InstallCampusDemoResponseItem)
+
+
+export const createCampusUniversityBodyNameMax = 160;
+
+export const createCampusUniversityBodyArabicNameMax = 160;
+
+
+
+export const CreateCampusUniversityBody = zod.object({
+  "name": zod.string().min(1).max(createCampusUniversityBodyNameMax),
+  "arabicName": zod.string().min(1).max(createCampusUniversityBodyArabicNameMax)
+})
+
+export const createCampusUniversityResponseOneNameMax = 160;
+
+export const createCampusUniversityResponseOneArabicNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemOneNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneArabicNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneDescriptionMax = 500;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneLocationMax = 300;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusUniversityResponse = zod.object({
+  "name": zod.string().min(1).max(createCampusUniversityResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "campuses": zod.array(zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin).max(createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+})))
+}))
+
+
+export const UpdateCampusUniversityParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateCampusUniversityBodyNameMax = 160;
+
+export const updateCampusUniversityBodyArabicNameMax = 160;
+
+
+
+export const UpdateCampusUniversityBody = zod.object({
+  "name": zod.string().min(1).max(updateCampusUniversityBodyNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusUniversityBodyArabicNameMax)
+})
+
+export const updateCampusUniversityResponseOneNameMax = 160;
+
+export const updateCampusUniversityResponseOneArabicNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneArabicNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneDescriptionMax = 500;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneLocationMax = 300;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const UpdateCampusUniversityResponse = zod.object({
+  "name": zod.string().min(1).max(updateCampusUniversityResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "campuses": zod.array(zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMin).max(updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+})))
+}))
+
+
+export const createCampusBodyNameMax = 160;
+
+export const createCampusBodyArabicNameMax = 160;
+
+
+
+export const CreateCampusBody = zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusBodyNameMax),
+  "arabicName": zod.string().min(1).max(createCampusBodyArabicNameMax)
+})
+
+export const createCampusResponseOneNameMax = 160;
+
+export const createCampusResponseOneArabicNameMax = 160;
+
+export const createCampusResponseTwoServicesItemOneNameMax = 160;
+
+export const createCampusResponseTwoServicesItemOneArabicNameMax = 160;
+
+export const createCampusResponseTwoServicesItemOneDescriptionMax = 500;
+
+export const createCampusResponseTwoServicesItemOneLocationMax = 300;
+
+export const createCampusResponseTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const createCampusResponseTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const createCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const createCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusResponse = zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusResponseTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusResponseTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(createCampusResponseTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(createCampusResponseTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusResponseTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusResponseTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(createCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMin).max(createCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+}))
+
+
+export const UpdateCampusParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateCampusBodyNameMax = 160;
+
+export const updateCampusBodyArabicNameMax = 160;
+
+
+
+export const UpdateCampusBody = zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusBodyNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusBodyArabicNameMax)
+})
+
+export const updateCampusResponseOneNameMax = 160;
+
+export const updateCampusResponseOneArabicNameMax = 160;
+
+export const updateCampusResponseTwoServicesItemOneNameMax = 160;
+
+export const updateCampusResponseTwoServicesItemOneArabicNameMax = 160;
+
+export const updateCampusResponseTwoServicesItemOneDescriptionMax = 500;
+
+export const updateCampusResponseTwoServicesItemOneLocationMax = 300;
+
+export const updateCampusResponseTwoServicesItemTwoProductsItemOneNameMax = 160;
+
+export const updateCampusResponseTwoServicesItemTwoProductsItemOneArabicNameMax = 160;
+
+export const updateCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMin = 0;
+export const updateCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const UpdateCampusResponse = zod.object({
+  "universityId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusResponseOneArabicNameMax)
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "services": zod.array(zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusResponseTwoServicesItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusResponseTwoServicesItemOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(updateCampusResponseTwoServicesItemOneDescriptionMax),
+  "location": zod.string().max(updateCampusResponseTwoServicesItemOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusResponseTwoServicesItemTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusResponseTwoServicesItemTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(updateCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMin).max(updateCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+})))
+}))
+
+
+export const createCampusServiceBodyNameMax = 160;
+
+export const createCampusServiceBodyArabicNameMax = 160;
+
+export const createCampusServiceBodyDescriptionMax = 500;
+
+export const createCampusServiceBodyLocationMax = 300;
+
+
+
+export const CreateCampusServiceBody = zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusServiceBodyNameMax),
+  "arabicName": zod.string().min(1).max(createCampusServiceBodyArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(createCampusServiceBodyDescriptionMax),
+  "location": zod.string().max(createCampusServiceBodyLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+})
+
+export const createCampusServiceResponseOneNameMax = 160;
+
+export const createCampusServiceResponseOneArabicNameMax = 160;
+
+export const createCampusServiceResponseOneDescriptionMax = 500;
+
+export const createCampusServiceResponseOneLocationMax = 300;
+
+export const createCampusServiceResponseTwoProductsItemOneNameMax = 160;
+
+export const createCampusServiceResponseTwoProductsItemOneArabicNameMax = 160;
+
+export const createCampusServiceResponseTwoProductsItemOnePriceMinorMin = 0;
+export const createCampusServiceResponseTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusServiceResponse = zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusServiceResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusServiceResponseOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(createCampusServiceResponseOneDescriptionMax),
+  "location": zod.string().max(createCampusServiceResponseOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusServiceResponseTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusServiceResponseTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(createCampusServiceResponseTwoProductsItemOnePriceMinorMin).max(createCampusServiceResponseTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+}))
+
+
+export const UpdateCampusServiceParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateCampusServiceBodyNameMax = 160;
+
+export const updateCampusServiceBodyArabicNameMax = 160;
+
+export const updateCampusServiceBodyDescriptionMax = 500;
+
+export const updateCampusServiceBodyLocationMax = 300;
+
+
+
+export const UpdateCampusServiceBody = zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusServiceBodyNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusServiceBodyArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(updateCampusServiceBodyDescriptionMax),
+  "location": zod.string().max(updateCampusServiceBodyLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+})
+
+export const updateCampusServiceResponseOneNameMax = 160;
+
+export const updateCampusServiceResponseOneArabicNameMax = 160;
+
+export const updateCampusServiceResponseOneDescriptionMax = 500;
+
+export const updateCampusServiceResponseOneLocationMax = 300;
+
+export const updateCampusServiceResponseTwoProductsItemOneNameMax = 160;
+
+export const updateCampusServiceResponseTwoProductsItemOneArabicNameMax = 160;
+
+export const updateCampusServiceResponseTwoProductsItemOnePriceMinorMin = 0;
+export const updateCampusServiceResponseTwoProductsItemOnePriceMinorMax = 9007199254740991;
+
+
+
+export const UpdateCampusServiceResponse = zod.object({
+  "campusId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusServiceResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusServiceResponseOneArabicNameMax),
+  "category": zod.enum(['food', 'books', 'printing', 'transportation', 'fees', 'other']),
+  "description": zod.string().max(updateCampusServiceResponseOneDescriptionMax),
+  "location": zod.string().max(updateCampusServiceResponseOneLocationMax),
+  "active": zod.boolean(),
+  "paymentEnabled": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "integrationStatus": zod.enum(['simulated']),
+  "products": zod.array(zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusServiceResponseTwoProductsItemOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusServiceResponseTwoProductsItemOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(updateCampusServiceResponseTwoProductsItemOnePriceMinorMin).max(updateCampusServiceResponseTwoProductsItemOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+})))
+}))
+
+
+export const ArchiveCampusServiceParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const ArchiveCampusServiceResponse = zod.void()
+
+
+export const createCampusProductBodyNameMax = 160;
+
+export const createCampusProductBodyArabicNameMax = 160;
+
+export const createCampusProductBodyPriceMinorMin = 0;
+export const createCampusProductBodyPriceMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusProductBody = zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusProductBodyNameMax),
+  "arabicName": zod.string().min(1).max(createCampusProductBodyArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(createCampusProductBodyPriceMinorMin).max(createCampusProductBodyPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+})
+
+export const createCampusProductResponseOneNameMax = 160;
+
+export const createCampusProductResponseOneArabicNameMax = 160;
+
+export const createCampusProductResponseOnePriceMinorMin = 0;
+export const createCampusProductResponseOnePriceMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusProductResponse = zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(createCampusProductResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(createCampusProductResponseOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(createCampusProductResponseOnePriceMinorMin).max(createCampusProductResponseOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+}))
+
+
+export const UpdateCampusProductParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateCampusProductBodyNameMax = 160;
+
+export const updateCampusProductBodyArabicNameMax = 160;
+
+export const updateCampusProductBodyPriceMinorMin = 0;
+export const updateCampusProductBodyPriceMinorMax = 9007199254740991;
+
+
+
+export const UpdateCampusProductBody = zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusProductBodyNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusProductBodyArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(updateCampusProductBodyPriceMinorMin).max(updateCampusProductBodyPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+})
+
+export const updateCampusProductResponseOneNameMax = 160;
+
+export const updateCampusProductResponseOneArabicNameMax = 160;
+
+export const updateCampusProductResponseOnePriceMinorMin = 0;
+export const updateCampusProductResponseOnePriceMinorMax = 9007199254740991;
+
+
+
+export const UpdateCampusProductResponse = zod.object({
+  "serviceId": zod.string().uuid(),
+  "name": zod.string().min(1).max(updateCampusProductResponseOneNameMax),
+  "arabicName": zod.string().min(1).max(updateCampusProductResponseOneArabicNameMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(updateCampusProductResponseOnePriceMinorMin).max(updateCampusProductResponseOnePriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "active": zod.boolean()
+}).and(zod.object({
+  "id": zod.string().uuid()
+}))
+
+
+export const ArchiveCampusProductParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const ArchiveCampusProductResponse = zod.void()
+
+
+export const createCampusPaymentHeaderIdempotencyKeyMin = 8;
+export const createCampusPaymentHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateCampusPaymentHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createCampusPaymentHeaderIdempotencyKeyMin).max(createCampusPaymentHeaderIdempotencyKeyMax)
+})
+
+export const createCampusPaymentBodyItemsItemQuantityMax = 100;
+
+export const createCampusPaymentBodyItemsMax = 50;
+
+
+
+export const CreateCampusPaymentBody = zod.object({
+  "accountId": zod.string().uuid(),
+  "serviceId": zod.string().uuid(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "quantity": zod.number().int().min(1).max(createCampusPaymentBodyItemsItemQuantityMax)
+})).min(1).max(createCampusPaymentBodyItemsMax)
+})
+
+export const createCampusPaymentResponseAmountMinorMin = 0;
+export const createCampusPaymentResponseAmountMinorMax = 9007199254740991;
+
+export const createCampusPaymentResponseBalanceAfterMinorMin = 0;
+export const createCampusPaymentResponseBalanceAfterMinorMax = 9007199254740991;
+
+export const createCampusPaymentResponseItemsItemUnitPriceMinorMin = 0;
+export const createCampusPaymentResponseItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const createCampusPaymentResponseItemsItemLineTotalMinorMin = 0;
+export const createCampusPaymentResponseItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const CreateCampusPaymentResponse = zod.object({
+  "id": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createCampusPaymentResponseAmountMinorMin).max(createCampusPaymentResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(createCampusPaymentResponseBalanceAfterMinorMin).max(createCampusPaymentResponseBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(createCampusPaymentResponseItemsItemUnitPriceMinorMin).max(createCampusPaymentResponseItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(createCampusPaymentResponseItemsItemLineTotalMinorMin).max(createCampusPaymentResponseItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true})
+})
+
+
 export const signUpBodyNameMax = 120;
 
 export const signUpBodyEmailMax = 254;

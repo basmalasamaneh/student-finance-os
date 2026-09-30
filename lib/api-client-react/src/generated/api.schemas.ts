@@ -5,6 +5,338 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type FinanceRecipientCurrency = typeof FinanceRecipientCurrency[keyof typeof FinanceRecipientCurrency];
+
+
+export const FinanceRecipientCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FinanceRecipient {
+  accountId: string;
+  name: string;
+  currency: FinanceRecipientCurrency;
+}
+
+export type FinanceAccountInputType = typeof FinanceAccountInputType[keyof typeof FinanceAccountInputType];
+
+
+export const FinanceAccountInputType = {
+  wallet: 'wallet',
+  bank: 'bank',
+  cash: 'cash',
+  other: 'other',
+} as const;
+
+export type FinanceAccountInputCurrency = typeof FinanceAccountInputCurrency[keyof typeof FinanceAccountInputCurrency];
+
+
+export const FinanceAccountInputCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FinanceAccountInput {
+  type: FinanceAccountInputType;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  currency: FinanceAccountInputCurrency;
+}
+
+export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
+
+
+export const AmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface Amount {
+  /**
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: AmountCurrency;
+}
+
+export type FinanceAccount = FinanceAccountInput & {
+  id: string;
+  balance: Amount;
+};
+
+export type FinanceMovementInputKind = typeof FinanceMovementInputKind[keyof typeof FinanceMovementInputKind];
+
+
+export const FinanceMovementInputKind = {
+  add: 'add',
+  receive: 'receive',
+  deposit: 'deposit',
+  withdrawal: 'withdrawal',
+  send: 'send',
+  transfer: 'transfer',
+  payment: 'payment',
+} as const;
+
+export interface FinanceMovementInput {
+  kind: FinanceMovementInputKind;
+  accountId: string;
+  recipientAccountId?: string;
+  amount: Amount;
+  /** @maxLength 300 */
+  note?: string;
+}
+
+export interface MoneyRequestInput {
+  recipientAccountId: string;
+  payerAccountId: string;
+  amount: Amount;
+  /** @maxLength 300 */
+  note?: string;
+}
+
+export type MoneyRequestDecisionAction = typeof MoneyRequestDecisionAction[keyof typeof MoneyRequestDecisionAction];
+
+
+export const MoneyRequestDecisionAction = {
+  fulfill: 'fulfill',
+  decline: 'decline',
+  cancel: 'cancel',
+} as const;
+
+export interface MoneyRequestDecision {
+  action: MoneyRequestDecisionAction;
+}
+
+export type MoneyRequestStatus = typeof MoneyRequestStatus[keyof typeof MoneyRequestStatus];
+
+
+export const MoneyRequestStatus = {
+  pending: 'pending',
+  fulfilled: 'fulfilled',
+  declined: 'declined',
+  cancelled: 'cancelled',
+} as const;
+
+export type MoneyRequest = MoneyRequestInput & {
+  id: string;
+  issuerId: string;
+  payerId: string;
+  status: MoneyRequestStatus;
+  transactionId?: string;
+  createdAt: string;
+};
+
+export interface FinanceReceiptItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPrice: Amount;
+  lineTotal: Amount;
+}
+
+export type FinanceTransactionDirection = typeof FinanceTransactionDirection[keyof typeof FinanceTransactionDirection];
+
+
+export const FinanceTransactionDirection = {
+  credit: 'credit',
+  debit: 'debit',
+} as const;
+
+export type FinanceTransactionStatus = typeof FinanceTransactionStatus[keyof typeof FinanceTransactionStatus];
+
+
+export const FinanceTransactionStatus = {
+  simulated: 'simulated',
+  simulated_payment: 'simulated_payment',
+} as const;
+
+export interface FinanceTransaction {
+  id: string;
+  accountId: string;
+  kind: string;
+  category: string;
+  direction: FinanceTransactionDirection;
+  amount: Amount;
+  balanceAfter: Amount;
+  status: FinanceTransactionStatus;
+  counterpartyAccountId?: string;
+  serviceId?: string;
+  merchantName?: string;
+  items?: FinanceReceiptItem[];
+  note?: string;
+  createdAt: string;
+}
+
+export type FinanceCategoryTotalCurrency = typeof FinanceCategoryTotalCurrency[keyof typeof FinanceCategoryTotalCurrency];
+
+
+export const FinanceCategoryTotalCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FinanceCategoryTotal {
+  currency: FinanceCategoryTotalCurrency;
+  category: string;
+  spending: Amount;
+}
+
+export type FinanceCashflowCurrency = typeof FinanceCashflowCurrency[keyof typeof FinanceCashflowCurrency];
+
+
+export const FinanceCashflowCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FinanceCashflow {
+  currency: FinanceCashflowCurrency;
+  balance: Amount;
+  monthlyIncome: Amount;
+  monthlySpending: Amount;
+}
+
+export interface FinanceSummary {
+  cashflow: FinanceCashflow[];
+  categoryTotals: FinanceCategoryTotal[];
+  upcomingRequests: MoneyRequest[];
+  recentTransactions: FinanceTransaction[];
+  campusActivity: FinanceTransaction[];
+}
+
+export interface CampusUniversityInput {
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  arabicName: string;
+}
+
+export interface CampusInput {
+  universityId: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  arabicName: string;
+}
+
+export type CampusServiceInputCategory = typeof CampusServiceInputCategory[keyof typeof CampusServiceInputCategory];
+
+
+export const CampusServiceInputCategory = {
+  food: 'food',
+  books: 'books',
+  printing: 'printing',
+  transportation: 'transportation',
+  fees: 'fees',
+  other: 'other',
+} as const;
+
+export interface CampusServiceInput {
+  campusId: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  arabicName: string;
+  category: CampusServiceInputCategory;
+  /** @maxLength 500 */
+  description: string;
+  /** @maxLength 300 */
+  location: string;
+  active: boolean;
+  paymentEnabled: boolean;
+}
+
+export type CampusServiceIntegrationStatus = typeof CampusServiceIntegrationStatus[keyof typeof CampusServiceIntegrationStatus];
+
+
+export const CampusServiceIntegrationStatus = {
+  simulated: 'simulated',
+} as const;
+
+export interface CampusProductInput {
+  serviceId: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  arabicName: string;
+  price: Amount;
+  active: boolean;
+}
+
+export type CampusProduct = CampusProductInput & {
+  id: string;
+};
+
+export type CampusService = CampusServiceInput & {
+  id: string;
+  universityId: string;
+  integrationStatus: CampusServiceIntegrationStatus;
+  products: CampusProduct[];
+};
+
+export type Campus = CampusInput & {
+  id: string;
+  services: CampusService[];
+};
+
+export type CampusUniversity = CampusUniversityInput & {
+  id: string;
+  campuses: Campus[];
+};
+
+export type CampusPaymentInputItemsItem = {
+  productId: string;
+  /**
+     * @minimum 1
+     * @maximum 100
+     */
+  quantity: number;
+};
+
+export interface CampusPaymentInput {
+  accountId: string;
+  serviceId: string;
+  /**
+     * @minItems 1
+     * @maxItems 50
+     */
+  items: CampusPaymentInputItemsItem[];
+}
+
 export type SignUpInputRole = typeof SignUpInputRole[keyof typeof SignUpInputRole];
 
 
@@ -54,24 +386,6 @@ export interface Account {
 
 export interface LogoutResult {
   ok: boolean;
-}
-
-export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
-
-
-export const AmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface Amount {
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: AmountCurrency;
 }
 
 export type EducationStudentType = typeof EducationStudentType[keyof typeof EducationStudentType];
@@ -310,4 +624,6 @@ export interface Profile {
 export interface HealthStatus {
   status: string;
 }
+
+export type IdempotencyKeyParameter = string;
 

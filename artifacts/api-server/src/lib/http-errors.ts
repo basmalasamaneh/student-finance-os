@@ -1,4 +1,4 @@
-export type ErrorCode = "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "INTERNAL_ERROR" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "RATE_LIMITED";
+export type ErrorCode = "BAD_REQUEST" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "INTERNAL_ERROR" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "RATE_LIMITED" | "CONFLICT" | "INSUFFICIENT_FUNDS";
 
 const publicErrors: Record<ErrorCode, { status: number; message: string }> = {
   BAD_REQUEST: { status: 400, message: "Invalid request" },
@@ -9,6 +9,8 @@ const publicErrors: Record<ErrorCode, { status: number; message: string }> = {
   INVALID_CREDENTIALS: { status: 401, message: "Invalid email or password" },
   EMAIL_TAKEN: { status: 409, message: "Email already registered" },
   RATE_LIMITED: { status: 429, message: "Too many attempts. Try again later" },
+  CONFLICT: { status: 409, message: "Conflicting request or unavailable resource" },
+  INSUFFICIENT_FUNDS: { status: 409, message: "Insufficient simulated funds" },
 };
 
 export class ApiError extends Error {
