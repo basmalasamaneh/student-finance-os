@@ -5,10 +5,10 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 /*
  * Canonical button. Gold is reserved for the single primary action per view.
- * Restrained 10px radius (not pills). Controls animate 150ms; pressed = darker gold + 1px settle.
+ * Restrained 14px radius (not pills). Controls animate 150ms; pressed = darker gold + 1px settle.
  */
 const buttonVariants = cva(
-  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-medium transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[14px] text-sm font-medium transition-[background-color,border-color,color,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {

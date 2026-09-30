@@ -71,6 +71,31 @@
   --color-primary-pressed: hsl(var(--primary-pressed));
   --color-surface-sunken: hsl(var(--surface-sunken));
   --color-divider: hsl(var(--divider));
+  --color-gold-50: hsl(var(--gold-50));
+  --color-gold-100: hsl(var(--gold-100));
+  --color-gold-200: hsl(var(--gold-200));
+  --color-gold-300: hsl(var(--gold-300));
+  --color-gold-400: hsl(var(--gold-400));
+  --color-gold-500: hsl(var(--gold-500));
+  --color-gold-600: hsl(var(--gold-600));
+  --color-gold-700: hsl(var(--gold-700));
+  --color-gold-800: hsl(var(--gold-800));
+  --color-gold-900: hsl(var(--gold-900));
+  --color-brand: hsl(var(--brand));
+  --color-brand-pressed: hsl(var(--brand-pressed));
+  --color-on-brand: hsl(var(--on-brand));
+  --color-bg-app: hsl(var(--bg-app));
+  --color-bg-surface: hsl(var(--bg-surface));
+  --color-bg-surface-2: hsl(var(--bg-surface-2));
+  --color-border-subtle: hsl(var(--border-subtle));
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-muted: hsl(var(--text-muted));
+  --color-text-muted-accessible: hsl(var(--text-muted-accessible));
+  --color-scrim: hsl(var(--scrim));
+  --color-success-base: hsl(var(--success-base));
+  --color-warning-base: hsl(var(--warning-base));
+  --color-error-base: hsl(var(--error-base));
   --font-arabic: var(--app-font-arabic);
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
@@ -83,87 +108,125 @@
 }
 
 /*
- * Student Financial OS — semantic tokens (Prompt 1.5 · Gold signature).
- * Raw palette: Gold #D4A72C, Deep navy #111827, Warm off-white #FAF9F5, White #FFFFFF,
- * Text #172033, Slate #64748B, Success #22A06B, Error #EF4444.
- * Gold is a FILL colour (primary actions, selection bars, progress). For gold TEXT use
- * --gold-ink, an accessible derived shade (≥4.5:1 on canvas). Components consume only these tokens.
+ * Student Financial OS — semantic tokens (Gold visual migration · Phase 1).
+ * SINGLE SOURCE of every colour in the app. Components consume semantic classes only.
+ * Values are space-separated HSL (compatible with hsl(var(--x)) and @theme inline); the
+ * hex each value was derived from is noted inline.
+ *
+ * Gold scale: 50 #FFFBEB · 100 #FDF3CF · 200 #F8E3A0 · 300 #F0CE6B · 400 #E3B644 ·
+ *             500 #D4AF37 · 600 #B8902A · 700 #8F6B1C · 800 #6B4F16 · 900 #3F2E0D
+ * Light: app #FBF8F1 · surface #FFFFFF · surface-2 #F5F0E3 · border #E9E0C8 ·
+ *        text #1C1608 / #5E5640 / muted #8C8468 (raw, fills/decoration only) · on-brand #2A1F05
+ * Dark:  app #0D0B07 · surface #17130B · surface-2 #211B0F · border #33291A ·
+ *        text #F8F1DC / #CDBF96 / muted #8F8465 · brand #E3B644 · on-brand #1A1204
+ * Status: success #2E9E6A · warning #C2410C · error #DC2626 (bases used for fills; accessible
+ *         text aliases below where the base fails 4.5:1 — see docs/gold-visual-migration.md).
+ * Gold is a FILL/accent (≈10%). Gold TEXT on light uses --gold-ink (gold-800) or gold-700.
  */
 :root {
-  --button-outline: hsl(40 14% 80%);
-  --badge-outline: hsl(220 38% 15% / 0.08);
-  --opaque-button-border-intensity: -6;
-  --elevate-1: hsl(44 66% 50% / 0.06);
-  --elevate-2: hsl(44 66% 50% / 0.12);
+  --gold-50: 48 100% 96.1%;   --gold-100: 47 92% 90.2%;   --gold-200: 46 86.3% 80%;
+  --gold-300: 45 81.6% 68%;   --gold-400: 43 74% 57.8%;   --gold-500: 46 64.6% 52.4%;
+  --gold-600: 43 62.8% 44.3%; --gold-700: 41 67.3% 33.5%; --gold-800: 40 65.9% 25.3%;
+  --gold-900: 40 65.8% 14.9%;
+  --bronze: 40 69.1% 39.2%;   /* #A97C1F gradient end */
+  --scrim: 40 60% 4%;         /* warm near-black overlay base */
 
-  --navy: 221 39% 11%;                /* #111827 */
-  --background: 45 33% 97%;           /* #FAF9F5 warm canvas */
-  --foreground: 221 39% 15%;          /* #172033 */
-  --surface: 0 0% 100%;               /* white — only where grouping is useful */
-  --surface-sunken: 43 24% 94%;
-  --divider: 40 18% 89%;
-  --border: 40 14% 86%;
-  --card: 0 0% 100%;
-  --card-foreground: 221 39% 15%;
-  --card-border: 40 16% 88%;
-  --sidebar: 44 28% 95.5%;
-  --sidebar-foreground: 221 39% 15%;
-  --sidebar-border: 40 16% 88%;
-  --sidebar-primary: 44 66% 50%;
-  --sidebar-primary-foreground: 221 39% 11%;
-  --sidebar-accent: 44 60% 90%;
-  --sidebar-accent-foreground: 221 39% 13%;
-  --sidebar-ring: 38 80% 34%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 221 39% 15%;
-  --popover-border: 40 16% 86%;
-  --primary: 44 66% 50%;              /* #D4A72C signature gold (fill) */
-  --primary-hover: 43 68% 46%;
-  --primary-pressed: 42 70% 41%;
-  --primary-foreground: 221 39% 11%;  /* navy on gold ≈ 8.6:1 */
-  --primary-soft: 45 72% 93%;
-  --gold-ink: 38 80% 29%;             /* gold for text/icons ≈ 5.6:1 on canvas */
-  --secondary: 43 24% 94%;
-  --secondary-foreground: 221 39% 15%;
-  --muted: 43 22% 93%;
-  --muted-foreground: 216 20% 38%;    /* slate, deepened for AA on warm canvas */
-  --accent: 45 72% 93%;
-  --accent-foreground: 221 39% 13%;
-  --success: 155 70% 28%;             /* from #22A06B, text-safe */
+  --bg-app: 42 55.6% 96.5%;         /* #FBF8F1 */
+  --bg-surface: 0 0% 100%;          /* #FFFFFF */
+  --bg-surface-2: 43 47.4% 92.5%;   /* #F5F0E3 */
+  --border-subtle: 44 42.9% 84.9%;  /* #E9E0C8 */
+  --text-primary: 42 55.6% 7.1%;    /* #1C1608 */
+  --text-secondary: 44 19% 31%;     /* #5E5640 */
+  --text-muted: 47 14.8% 47.8%;     /* #8C8468 raw — 3.53:1 on app: NOT for body text */
+  --text-muted-accessible: 46 15.8% 37.3%; /* #6E6750 — 5.32:1 app / 4.96:1 surface-2 */
+  --brand: var(--gold-500);
+  --brand-pressed: var(--gold-600);
+  --on-brand: 42 78.7% 9.2%;        /* #2A1F05 — 7.7:1 on gold-500 */
+  --success-base: 152 54.9% 40%;    /* #2E9E6A raw (3.38:1 on white: fills/icons ≥3:1 only) */
+  --warning-base: 17 88.3% 40.4%;   /* #C2410C */
+  --error-base: 0 72.2% 50.6%;      /* #DC2626 */
+
+  --gradient-gold: linear-gradient(135deg, hsl(var(--gold-300)) 0%, hsl(var(--gold-500)) 45%, hsl(var(--bronze)) 100%);
+  --gradient-gold-soft: linear-gradient(180deg, hsl(var(--gold-100)) 0%, hsl(var(--bg-app)) 100%);
+  --gradient-gold-shine: linear-gradient(115deg, hsl(var(--gold-50) / 0) 30%, hsl(var(--gold-50) / 0.22) 48%, hsl(var(--gold-50) / 0) 62%);
+
+  --button-outline: hsl(var(--border-subtle));
+  --badge-outline: hsl(var(--text-primary) / 0.08);
+  --opaque-button-border-intensity: -6;
+  --elevate-1: hsl(var(--gold-500) / 0.07);
+  --elevate-2: hsl(var(--gold-500) / 0.13);
+
+  --navy: var(--text-primary);        /* legacy name kept: now deep ink #1C1608 */
+  --background: var(--bg-app);
+  --foreground: var(--text-primary);
+  --surface: var(--bg-surface);
+  --surface-sunken: var(--bg-surface-2);
+  --divider: 44 40% 88%;
+  --border: var(--border-subtle);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --card-border: var(--border-subtle);
+  --sidebar: 43 50% 95%;
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-border: var(--border-subtle);
+  --sidebar-primary: var(--gold-500);
+  --sidebar-primary-foreground: var(--on-brand);
+  --sidebar-accent: var(--gold-100);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-ring: var(--gold-700);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --popover-border: var(--border-subtle);
+  --primary: var(--gold-500);
+  --primary-hover: 45 62% 48%;
+  --primary-pressed: var(--gold-600);
+  --primary-foreground: var(--on-brand);
+  --primary-soft: var(--gold-50);
+  --gold-ink: var(--gold-800);        /* 7.5:1 app, 6.9:1 surface-2 */
+  --secondary: var(--bg-surface-2);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-surface-2);
+  --muted-foreground: var(--text-muted-accessible);
+  --accent: var(--gold-100);
+  --accent-foreground: var(--text-primary);
+  --success: 152 59.5% 30%;           /* #1F7A50 text alias of #2E9E6A — 5.0:1 app */
   --success-foreground: 0 0% 100%;
-  --success-soft: 150 42% 92%;
-  --warning: 33 88% 31%;              /* deep amber, distinct from brand gold */
+  --success-soft: 150 40% 93%;
+  --warning: var(--warning-base);     /* #C2410C — 4.88:1 app */
   --warning-foreground: 0 0% 100%;
-  --warning-soft: 40 82% 91%;
-  --destructive: 0 72% 47%;           /* from #EF4444, text-safe */
+  --warning-soft: 24 90% 94%;
+  --destructive: var(--error-base);   /* #DC2626 — 4.55:1 app */
   --destructive-foreground: 0 0% 100%;
-  --destructive-soft: 0 80% 96%;
-  --input: 38 12% 76%;
-  --ring: 38 80% 34%;                 /* gold-derived focus ring ≥3:1 */
-  --chart-1: 44 66% 50%;
-  --chart-2: 155 60% 38%;
-  --chart-3: 221 39% 15%;
-  --chart-4: 216 20% 55%;
-  --chart-5: 33 88% 40%;
+  --destructive-soft: 0 86% 96%;
+  --input: 44 30% 76%;
+  --ring: var(--gold-700);            /* focus ring 4.62:1 on app */
+  /* Gold-only data palette (no status colours). */
+  --chart-1: var(--gold-500);
+  --chart-2: var(--gold-800);
+  --chart-3: var(--gold-300);
+  --chart-4: 44 22% 56%;              /* warm gray #A89C78 */
+  --chart-5: var(--bronze);
 
   --app-font-sans: 'Inter', 'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
   --app-font-arabic: 'Noto Sans Arabic', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
   --app-font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
-  --radius: 0.75rem; /* 12px — lg; sm 8, md 10, xl 16 */
+  --radius: 0.875rem; /* 14px controls — sm 10, md 12, lg 14, xl 18 */
+  --radius-card: 1.25rem;  /* 20px */
+  --radius-sheet: 1.75rem; /* 28px bottom sheet top corners */
   --shadow-2xs: 0 0 0 0 transparent;
-  --shadow-xs: 0 1px 0 0 hsl(221 39% 15% / 0.04);
-  --shadow-sm: 0 1px 2px 0 hsl(221 39% 15% / 0.05);
-  --shadow: 0 1px 2px 0 hsl(221 39% 15% / 0.05);
-  --shadow-md: 0 6px 16px -8px hsl(221 39% 15% / 0.12);
-  --shadow-lg: 0 18px 40px -16px hsl(221 39% 15% / 0.2);
-  --shadow-xl: 0 24px 56px -20px hsl(221 39% 15% / 0.24);
-  --shadow-2xl: 0 32px 64px -24px hsl(221 39% 15% / 0.26);
+  --shadow-xs: 0 1px 0 0 hsl(41 71% 27% / 0.05);
+  --shadow-sm: 0 1px 3px 0 hsl(41 71% 27% / 0.08);
+  --shadow: 0 2px 6px -2px hsl(41 71% 27% / 0.08);
+  --shadow-md: 0 8px 20px -10px hsl(41 71% 27% / 0.12);
+  --shadow-lg: 0 18px 40px -18px hsl(41 71% 27% / 0.14);
+  --shadow-xl: 0 24px 56px -22px hsl(41 71% 27% / 0.14);
+  --shadow-2xl: 0 32px 64px -24px hsl(41 71% 27% / 0.14);
   --tracking-normal: 0em;
-  --spacing: 0.25rem; /* 4px rhythm */
+  --spacing: 0.25rem; /* 4/8 rhythm */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 150ms;   /* controls 120–180 */
-  --duration-base: 210ms;   /* overlays 180–240 */
+  --duration-fast: 150ms;
+  --duration-base: 210ms;
   --duration-slow: 240ms;
 
   --sidebar-primary-border: hsl(var(--sidebar-primary));
@@ -175,72 +238,68 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* Dark — "premium financial app at night": deep navy canvas, warm off-white text, controlled gold. */
+/* Dark — black-gold, designed (not inverted): warm near-black, gold-tinted borders, no heavy shadows. */
 .dark {
-  --button-outline: hsl(222 18% 26%);
-  --badge-outline: hsl(42 30% 94% / 0.08);
-  --opaque-button-border-intensity: 6;
-  --elevate-1: hsl(43 70% 58% / 0.06);
-  --elevate-2: hsl(43 70% 58% / 0.12);
+  --bg-app: 40 30% 3.9%;            /* #0D0B07 */
+  --bg-surface: 40 35.3% 6.7%;      /* #17130B */
+  --bg-surface-2: 40 37.5% 9.4%;    /* #211B0F */
+  --border-subtle: 36 32.5% 15.1%;  /* #33291A */
+  --text-primary: 45 66.7% 91.8%;   /* #F8F1DC */
+  --text-secondary: 45 35.5% 69.6%; /* #CDBF96 */
+  --text-muted: 44 17.2% 47.8%;     /* #8F8465 — 4.99:1 surface, 4.6:1 surface-2 */
+  --text-muted-accessible: 45 20.7% 57.5%; /* #A99E7C — 6.4:1+ */
+  --brand: var(--gold-400);
+  --brand-pressed: var(--gold-500);
+  --on-brand: 38 73.3% 5.9%;        /* #1A1204 — 9.75:1 on gold-400 */
 
-  --navy: 221 39% 11%;
-  --background: 223 38% 7%;
-  --foreground: 42 30% 94%;
-  --surface: 223 30% 10.5%;
-  --surface-sunken: 223 36% 6%;
-  --divider: 223 22% 15.5%;
-  --border: 223 20% 19%;
-  --card: 223 30% 10.5%;
-  --card-foreground: 42 30% 94%;
-  --card-border: 223 22% 16%;
-  --sidebar: 223 36% 8.5%;
-  --sidebar-foreground: 42 30% 94%;
-  --sidebar-border: 223 22% 14%;
-  --sidebar-primary: 43 70% 57%;
-  --sidebar-primary-foreground: 223 40% 8%;
-  --sidebar-accent: 42 32% 14%;
-  --sidebar-accent-foreground: 42 30% 96%;
-  --sidebar-ring: 43 78% 62%;
-  --popover: 223 28% 12%;
-  --popover-foreground: 42 30% 94%;
-  --popover-border: 223 20% 20%;
-  --primary: 43 70% 57%;
-  --primary-hover: 43 74% 63%;
-  --primary-pressed: 42 64% 50%;
-  --primary-foreground: 223 40% 8%;
-  --primary-soft: 42 34% 13%;
-  --gold-ink: 43 80% 66%;
-  --secondary: 223 24% 14%;
-  --secondary-foreground: 42 30% 94%;
-  --muted: 223 24% 13%;
-  --muted-foreground: 220 14% 68%;
-  --accent: 42 34% 13%;
-  --accent-foreground: 42 30% 96%;
-  --success: 152 48% 56%;
-  --success-foreground: 223 40% 8%;
-  --success-soft: 155 36% 12%;
-  --warning: 38 86% 63%;
-  --warning-foreground: 223 40% 8%;
-  --warning-soft: 36 44% 12%;
-  --destructive: 0 84% 68%;
-  --destructive-foreground: 223 40% 8%;
-  --destructive-soft: 0 42% 14%;
-  --input: 223 16% 30%;
-  --ring: 43 78% 62%;
-  --chart-1: 43 70% 57%;
-  --chart-2: 152 48% 56%;
-  --chart-3: 42 30% 94%;
-  --chart-4: 220 14% 60%;
-  --chart-5: 38 86% 63%;
+  --gradient-gold-soft: linear-gradient(180deg, hsl(39 40% 11.8%) 0%, hsl(var(--bg-app)) 100%); /* #2A2112 → #0D0B07 */
+  --gradient-gold-shine: linear-gradient(115deg, hsl(var(--gold-300) / 0) 30%, hsl(var(--gold-300) / 0.1) 48%, hsl(var(--gold-300) / 0) 62%);
+
+  --button-outline: hsl(var(--border-subtle));
+  --badge-outline: hsl(var(--text-primary) / 0.08);
+  --opaque-button-border-intensity: 6;
+  --elevate-1: hsl(var(--gold-400) / 0.07);
+  --elevate-2: hsl(var(--gold-400) / 0.13);
+
+  --navy: 40 30% 3.9%;
+  --divider: 38 30% 12.5%;
+  --sidebar: 40 32% 5.3%;
+  --sidebar-primary: var(--gold-400);
+  --sidebar-accent: 40 40% 12%;
+  --sidebar-ring: var(--gold-400);
+  --popover: var(--bg-surface-2);
+  --primary: var(--gold-400);
+  --primary-hover: var(--gold-300);
+  --primary-pressed: var(--gold-500);
+  --primary-soft: 40 45% 11%;
+  --gold-ink: var(--gold-400);        /* 9.7:1 on surface */
+  --muted-foreground: var(--text-muted);
+  --accent: 40 45% 12%;
+  --success: var(--success-base);     /* #2E9E6A — 5.48:1 on surface */
+  --success-foreground: var(--on-brand);
+  --success-soft: 152 35% 11%;
+  --warning: 18 83.1% 65.3%;          /* #F08A5D alias of #C2410C — 7.5:1 */
+  --warning-foreground: var(--on-brand);
+  --warning-soft: 18 45% 11%;
+  --destructive: 0 90.6% 70.8%;       /* #F87171 alias of #DC2626 — 6.7:1 */
+  --destructive-foreground: var(--on-brand);
+  --destructive-soft: 0 40% 12%;
+  --input: 38 28% 22%;
+  --ring: var(--gold-400);
+  --chart-1: var(--gold-400);
+  --chart-2: var(--gold-200);
+  --chart-3: var(--gold-600);
+  --chart-4: 45 20.7% 57.5%;
+  --chart-5: var(--gold-300);
 
   --shadow-2xs: 0 0 0 0 transparent;
   --shadow-xs: 0 0 0 0 transparent;
-  --shadow-sm: 0 1px 2px 0 hsl(223 60% 2% / 0.4);
-  --shadow: 0 1px 2px 0 hsl(223 60% 2% / 0.4);
-  --shadow-md: 0 8px 20px -8px hsl(223 60% 2% / 0.6);
-  --shadow-lg: 0 20px 44px -16px hsl(223 60% 2% / 0.7);
-  --shadow-xl: 0 24px 56px -16px hsl(223 60% 2% / 0.75);
-  --shadow-2xl: 0 32px 72px -24px hsl(223 60% 2% / 0.8);
+  --shadow-sm: 0 0 0 1px hsl(var(--gold-400) / 0.06), inset 0 1px 0 0 hsl(var(--gold-300) / 0.04);
+  --shadow: 0 0 0 1px hsl(var(--gold-400) / 0.06), inset 0 1px 0 0 hsl(var(--gold-300) / 0.04);
+  --shadow-md: 0 0 0 1px hsl(var(--gold-400) / 0.08), 0 8px 20px -10px hsl(40 60% 1% / 0.6);
+  --shadow-lg: 0 0 0 1px hsl(var(--gold-400) / 0.1), 0 20px 44px -18px hsl(40 60% 1% / 0.7);
+  --shadow-xl: 0 0 0 1px hsl(var(--gold-400) / 0.1), 0 24px 56px -18px hsl(40 60% 1% / 0.75);
+  --shadow-2xl: 0 0 0 1px hsl(var(--gold-400) / 0.1), 0 32px 72px -24px hsl(40 60% 1% / 0.8);
 }
 
 
@@ -281,31 +340,63 @@
 }
 
 .tabular { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum', 'cv11'; }
-/* Hero financial figure: 32–48px, tabular, tight but readable. */
-.figure-hero { font-size: clamp(1.875rem, 1.2rem + 3.4vw, 3rem); line-height: 1; font-weight: 600; letter-spacing: -0.025em; }
+/* Hero financial figure (display): 36–44px, tabular, tight but readable. */
+.figure-hero { font-size: clamp(2.25rem, 1.6rem + 2.4vw, 2.75rem); line-height: 1; font-weight: 600; letter-spacing: -0.025em; }
 @layer components {
 /* ── Canonical bilingual type roles. Screens use these, never per-page Arabic hacks. ── */
-.type-display { font-size: 1.625rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
-.type-title   { font-size: 1.125rem; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; }
-.type-subtitle{ font-size: 0.9375rem; line-height: 1.45; font-weight: 600; }
-.type-body    { font-size: 0.9375rem; line-height: 1.6; font-weight: 400; }
-.type-label   { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; }
-.type-caption { font-size: 0.75rem; line-height: 1.45; font-weight: 400; }
+.type-display { font-size: 1.75rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }   /* H1 28 */
+.type-title   { font-size: 1.125rem; line-height: 1.35; font-weight: 600; letter-spacing: -0.01em; } /* H3 18 */
+.type-h2      { font-size: 1.375rem; line-height: 1.3; font-weight: 600; letter-spacing: -0.015em; } /* H2 22 */
+.type-subtitle{ font-size: 1rem; line-height: 1.45; font-weight: 600; }
+.type-body    { font-size: 1rem; line-height: 1.6; font-weight: 400; }                                /* body 16 */
+.type-label   { font-size: 0.875rem; line-height: 1.4; font-weight: 500; }
+.type-caption { font-size: 0.8125rem; line-height: 1.45; font-weight: 400; }                          /* caption 13 */
 .type-nav     { font-size: 0.6875rem; line-height: 1.2; font-weight: 500; }
-@media (min-width: 768px) { .type-display { font-size: 2rem; } .type-title { font-size: 1.1875rem; } }
+html[lang='ar'] .type-h2 { line-height: 1.5; letter-spacing: 0; }
 html[lang='ar'] .type-display { line-height: 1.45; letter-spacing: 0; }
 html[lang='ar'] .type-title   { line-height: 1.55; }
 html[lang='ar'] .type-subtitle{ line-height: 1.6; }
 html[lang='ar'] .type-body    { line-height: 1.8; }
 html[lang='ar'] .type-label   { font-size: 0.84375rem; line-height: 1.6; }
-html[lang='ar'] .type-caption { font-size: 0.78125rem; line-height: 1.65; }
+html[lang='ar'] .type-caption { font-size: 0.84375rem; line-height: 1.65; }
 html[lang='ar'] .type-nav     { font-size: 0.75rem; line-height: 1.35; }
 /* Numbers stay Latin-shaped & tabular in both scripts (amounts are isolated LTR via <bdi>). */
 html[lang='ar'] .tabular { font-family: var(--app-font-sans); }
 }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-.figure-hero.figure-long { font-size: clamp(1.5rem, 0.9rem + 3.4vw, 2.5rem); }
-.eyebrow { font-size: 12.5px; font-weight: 500; letter-spacing: 0.02em; color: hsl(var(--gold-ink)); }
+.figure-hero.figure-long { font-size: clamp(1.625rem, 1rem + 2.8vw, 2.5rem); }
+/* Money parts: currency symbol and decimals smaller/lighter than the integer amount (presentation only). */
+/* Hierarchy by size + weight only (no opacity) so every tone keeps its measured contrast. */
+.money-currency { font-size: 0.72em; font-weight: 500; }
+.money-decimal { font-size: 0.78em; font-weight: 500; }
+.money-sign { font-weight: 600; }
+/* Gradient tokens as utilities. Max ONE .surface-gold hero per screen. */
+/* Gold hero: children inherit safe local tokens. --on-gold #1A1204 is ≥4.94:1 across the whole
+   gradient (12.1 on #F0CE6B, 8.8 on #D4AF37, 4.94 on #A97C1F) in BOTH themes (gradient is theme-invariant).
+   Muted/status/gold-ink/links collapse to on-gold; secondary hierarchy is by weight/size, never lighter ink. */
+.surface-gold {
+  --on-gold: 38 73.3% 5.9%;
+  --foreground: var(--on-gold); --card-foreground: var(--on-gold);
+  --muted-foreground: var(--on-gold); --gold-ink: var(--on-gold);
+  --success: var(--on-gold); --warning: var(--on-gold); --destructive: var(--on-gold);
+  --primary: var(--on-gold); --primary-foreground: var(--gold-50); --primary-hover: var(--gold-900); --primary-pressed: var(--gold-900);
+  --ring: var(--on-gold); --border: var(--gold-700); --divider: var(--gold-600);
+  background-image: var(--gradient-gold-shine), var(--gradient-gold);
+  color: hsl(var(--on-gold));
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+}
+.surface-gold-soft { background-image: var(--gradient-gold-soft); }
+.rounded-card { border-radius: var(--radius-card); }
+.rounded-sheet { border-top-left-radius: var(--radius-sheet); border-top-right-radius: var(--radius-sheet); }
+.gutter-x { padding-inline: 1rem; }
+@media (min-width: 768px) { .gutter-x { padding-inline: 1.5rem; } }
+.eyebrow { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; color: hsl(var(--gold-ink)); }
+
+/* Recharts default stroke selectors (moved from chart.tsx so raw colours live only here). */
+.chart-surface .recharts-cartesian-grid line[stroke='#ccc'] { stroke: hsl(var(--border) / 0.5); }
+.chart-surface .recharts-polar-grid [stroke='#ccc'], .chart-surface .recharts-reference-line [stroke='#ccc'] { stroke: hsl(var(--border)); }
+.chart-surface .recharts-dot[stroke='#fff'], .chart-surface .recharts-sector[stroke='#fff'] { stroke: transparent; }
 
 @keyframes sfos-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @keyframes sfos-fade { from { opacity: 0; } to { opacity: 1; } }

@@ -7,7 +7,8 @@ and no extra dependency (already loaded via Google Fonts). Previous awkwardness 
 line-heights, not the face. Both families now load **only 400/500/600**; bold maps to 600 in Arabic.
 
 ## Canonical type roles (`src/index.css`)
-`type-display`, `type-title`, `type-subtitle`, `type-body`, `type-label`, `type-caption`, `type-nav`.
+`type-display`, `type-h2`, `type-title`, `type-subtitle`, `type-body`, `type-label`, `type-caption`, `type-nav`.
+Gold Phase 1 scale: display figure `.figure-hero` 36–44px · H1 `type-display` 24→28px · H2 `type-h2` 22px · H3 `type-title` 18px · body 16px · label 14px · caption 13px. Money: `MoneyDisplay` wraps currency (`.money-currency`, 0.72em, lighter), decimals (`.money-decimal`, 0.78em) and sign (`.money-sign`) in spans; text content stays identical to `formatMoney` output.
 Same sizes/weights in both scripts; `html[lang='ar']` raises line-height (body 1.75–1.8, headings 1.45–1.55) and
 nudges labels/captions/nav up ~0.5px — never smaller. Tracking is zeroed in Arabic. Amounts (`.tabular`) render in Inter
 tabular figures inside LTR `<bdi>` in both locales. Do not add per-page Arabic overrides; use the roles.

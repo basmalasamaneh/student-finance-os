@@ -14,7 +14,7 @@ export function AppErrorFallback({ error, resetError }: ErrorFallbackProps) {
       {import.meta.env.DEV ? (
         <details className="max-w-lg type-label font-normal text-muted-foreground">
           <summary className="cursor-pointer">{t('err.details')}</summary>
-          <pre dir="ltr" className="mt-3 overflow-x-auto rounded-md bg-muted p-3 text-start type-caption">{error.message || String(error)}</pre>
+          <pre dir="ltr" className="mt-3 overflow-x-auto rounded-lg bg-muted p-3 text-start type-caption">{error.message || String(error)}</pre>
         </details>
       ) : null}
       <div className="flex flex-wrap gap-3 pt-2">

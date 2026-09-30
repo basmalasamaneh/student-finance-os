@@ -113,7 +113,7 @@ function Redeem({ t }: { t: Tx }) {
     });
   };
   return (
-    <section aria-labelledby="redeem-title" className="flex flex-col gap-3 rounded-2xl border border-card-border bg-card p-4 md:p-6">
+    <section aria-labelledby="redeem-title" className="flex flex-col gap-3 rounded-card border border-card-border bg-card p-4 md:p-6">
       <h2 id="redeem-title" className="type-title flex items-center gap-2"><KeyRound className="size-4 text-gold-ink" aria-hidden />{t('Enter an invitation code', 'أدخل رمز دعوة')}</h2>
       <form onSubmit={submit} className="flex flex-col gap-3" noValidate autoComplete="off">
         <Field id="redeem-token" label={t('Code from the student', 'الرمز من الطالب')} error={clean && !shapeOk ? t('That doesn’t look like a complete code.', 'لا يبدو هذا رمزاً كاملاً.') : undefined}>
@@ -155,7 +155,7 @@ export default function ParentFundPage() {
                 : (
                   <ul className="flex flex-col gap-3" data-testid="list-parent-goals">
                     {goals.map((g) => (
-                      <li key={g.id} className="flex flex-col gap-3 rounded-2xl border border-card-border bg-card p-4 md:p-5" data-testid={`card-parent-goal-${g.id}`}>
+                      <li key={g.id} className="flex flex-col gap-3 rounded-card border border-card-border bg-card p-4 md:p-5" data-testid={`card-parent-goal-${g.id}`}>
                         <div className="flex items-start justify-between gap-3"><p className="type-subtitle break-words">{g.name}</p><StatusPill status={g.status} t={t} /></div>
                         <GoalProgress goal={{ ...g, percentage: g.target.minor ? Math.floor(Number((BigInt(g.current.minor) * BigInt(10000)) / BigInt(g.target.minor))) / 100 : 0 }} t={t} compact />
                         <p className="type-caption text-muted-foreground">{t('Remaining', 'المتبقي')}: <MoneyDisplay value={g.remaining} size="sm" className="inline !text-xs" /> · {g.targetDate ? `${t('By', 'بحلول')} ${fmtDate(g.targetDate, locale)}` : t('No target date', 'بلا تاريخ مستهدف')}</p>

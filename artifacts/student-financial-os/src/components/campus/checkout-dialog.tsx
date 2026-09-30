@@ -59,7 +59,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
                   {eligible.map((a) => {
                     const ok = a.balance.minor >= total.minor;
                     return (
-                      <label key={a.id} className={cn('flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-3 transition-colors', accountId === a.id ? 'border-primary bg-primary-soft' : 'border-input hover:bg-muted')}>
+                      <label key={a.id} className={cn('flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border px-3 transition-colors', accountId === a.id ? 'border-primary bg-primary-soft' : 'border-input hover:bg-muted')}>
                         <input type="radio" name="pay-account" checked={accountId === a.id} onChange={() => setAccountId(a.id)} className="accent-[hsl(var(--primary))]" data-testid={`radio-account-${a.id}`} />
                         <span className="flex min-w-0 flex-1 flex-col"><span className="type-label truncate">{accountName(a, t)}</span>
                           {!ok ? <span className="type-caption text-destructive">{t('Insufficient balance', 'رصيد غير كافٍ')}</span> : null}</span>

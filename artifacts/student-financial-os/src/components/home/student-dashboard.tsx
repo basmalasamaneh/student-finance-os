@@ -89,7 +89,7 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
 
       {/* 9 Insight */}
       <HomeBlock id="insight" title={t('Financial insight', 'ملاحظة مالية')} meta={t('From your profile only', 'من ملفك فقط')}>
-        <div className="flex items-start gap-3 rounded-xl bg-primary-soft p-4 md:p-5" data-testid="text-insight">
+        <div className="flex items-start gap-3 rounded-card bg-primary-soft p-4 md:p-5" data-testid="text-insight">
           <Lightbulb className="mt-1 size-4 shrink-0 text-gold-ink" aria-hidden />
           <p className="type-body text-foreground"><InsightText insight={insight} t={t} /></p>
         </div>

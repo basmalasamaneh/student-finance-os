@@ -92,7 +92,7 @@ export default function MoneyPage() {
 
               <nav aria-label={t('Money actions', 'إجراءات المال')} className="grid grid-cols-3 gap-2 min-[400px]:grid-cols-5 lg:grid-cols-9" data-testid="grid-actions">
                 {ACTIONS.map(({ kind, icon: Icon, en, ar }) => {
-                  const cls = 'flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-center transition-colors hover:bg-muted active:bg-surface-sunken';
+                  const cls = 'flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-lg px-1 text-center transition-colors hover:bg-muted active:bg-surface-sunken';
                   const inner = <><span className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground"><Icon className="size-[18px]" aria-hidden /></span><span className="type-nav leading-tight">{t(en, ar)}</span></>;
                   return kind === 'campus'
                     ? <Link key={kind} href="/campus" className={cls} data-testid="link-action-campus">{inner}</Link>
@@ -111,7 +111,7 @@ export default function MoneyPage() {
                   <div role="group" aria-label={t('Filter requests', 'تصفية الطلبات')} className="flex gap-1 rounded-lg bg-muted p-0.5">
                     {(['pending', 'all'] as const).map((f) => (
                       <button key={f} type="button" aria-pressed={reqFilter === f} onClick={() => setReqFilter(f)}
-                        className={`type-caption min-h-8 rounded-md px-2.5 ${reqFilter === f ? 'bg-surface font-medium shadow-xs' : 'text-muted-foreground'}`} data-testid={`button-filter-${f}`}>
+                        className={`type-caption min-h-8 rounded-lg px-2.5 ${reqFilter === f ? 'bg-surface font-medium shadow-xs' : 'text-muted-foreground'}`} data-testid={`button-filter-${f}`}>
                         {f === 'pending' ? t('Pending', 'معلّقة') : t('All', 'الكل')}
                       </button>
                     ))}

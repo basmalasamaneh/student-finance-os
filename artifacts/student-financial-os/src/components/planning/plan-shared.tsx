@@ -101,7 +101,7 @@ export function SubmitButton({ pending, editing, t, testId }: { pending: boolean
 
 export function EmptyRow({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-input px-4 py-5" data-testid="state-empty">
+    <div className="flex flex-col items-start gap-3 rounded-card border border-dashed border-input px-4 py-5" data-testid="state-empty">
       <div><p className="type-label">{title}</p><p className="type-caption max-w-prose text-muted-foreground">{body}</p></div>
       {action}
     </div>

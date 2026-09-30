@@ -15,8 +15,8 @@ import { HousingCommuteSection } from '@/components/planning/housing-commute';
 function PlanSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-busy data-testid="state-loading">
-      <div className="grid gap-4 md:grid-cols-2"><div className="skeleton-shimmer h-64 rounded-2xl" /><div className="skeleton-shimmer h-64 rounded-2xl" /></div>
-      {[0, 1, 2].map((i) => <div key={i} className="skeleton-shimmer h-24 rounded-xl" />)}
+      <div className="grid gap-4 md:grid-cols-2"><div className="skeleton-shimmer h-64 rounded-card" /><div className="skeleton-shimmer h-64 rounded-2xl" /></div>
+      {[0, 1, 2].map((i) => <div key={i} className="skeleton-shimmer h-24 rounded-card" />)}
     </div>
   );
 }

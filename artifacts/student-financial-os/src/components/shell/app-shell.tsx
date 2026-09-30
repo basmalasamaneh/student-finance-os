@@ -241,7 +241,7 @@ function MoreSheet() {
         <Menu aria-hidden />
       </Button>
       {open && createPortal(<>
-        <div className="fixed inset-0 z-[70] bg-black/60 md:hidden" aria-hidden onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-[70] bg-scrim/60 md:hidden" aria-hidden onClick={() => setOpen(false)} />
         <div id="sfos-mobile-more" role="dialog" aria-modal="true" aria-labelledby="sfos-mobile-more-title" onKeyDown={(event) => {
           if (event.key !== 'Tab') return;
           const focusable = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select'));
@@ -249,7 +249,7 @@ function MoreSheet() {
           if (!first || !last) return;
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
           if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-        }} className="fixed inset-x-0 bottom-0 z-[71] max-h-[88dvh] overflow-y-auto rounded-t-2xl border-t border-divider bg-background px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 shadow-xl md:hidden">
+        }} className="fixed inset-x-0 bottom-0 z-[71] max-h-[88dvh] overflow-y-auto rounded-sheet border-t border-divider bg-background px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 shadow-xl md:hidden">
         <span aria-hidden className="mx-auto mb-3 block h-1 w-10 rounded-full bg-input" />
         <div className="text-start">
           <h2 id="sfos-mobile-more-title" className="type-title">{t('nav.more')}</h2>

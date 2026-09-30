@@ -32,7 +32,7 @@ export function BalanceBlock({ summary, t }: { summary: Q<FinanceSummary>; t: T 
     <Link href="/money" className={linkCls} data-testid="link-create-account">{t('Create a Student Wallet', 'أنشئ محفظة طلابية')}</Link>
   </>;
   return (
-    <div className="flex flex-col gap-2" data-testid="text-balance">
+    <div className="surface-gold flex min-w-0 flex-col gap-2 p-5 md:p-6" data-testid="text-balance">
       {rows.map((c) => (
         <div key={c.currency} className="flex flex-col gap-1">
           <MoneyDisplay value={c.balance} size={rows.length > 1 ? 'xl' : 'hero'} />

@@ -41,7 +41,7 @@ function ServiceBlock({ s, onEdit, t }: { s: CampusService; onEdit: (target: Adm
           <Button size="sm" variant="outline" onClick={() => onEdit({ kind: 'service', campusId: s.campusId, service: s })} data-testid={`button-edit-service-${s.id}`}><Pencil aria-hidden />{t('Edit', 'تعديل')}</Button>
         </div>
       </div>
-      <ul className="divide-y divide-divider rounded-xl bg-surface-sunken px-3">
+      <ul className="divide-y divide-divider rounded-card bg-surface-sunken px-3">
         {s.products.map((p) => (
           <li key={p.id} className="flex min-w-0 items-center gap-3 py-2" data-testid={`row-admin-product-${p.id}`}>
             <span className={cn('type-label min-w-0 flex-1', !p.active && 'text-muted-foreground line-through')}>{p.name} <span className="text-muted-foreground" lang="ar" dir="rtl">· {p.arabicName}</span></span>

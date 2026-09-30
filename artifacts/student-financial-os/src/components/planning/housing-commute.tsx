@@ -43,7 +43,7 @@ function CommuteOverrideForm({ plan, t }: { plan: FinancialPlan; t: Tx }) {
   }
 
   return (
-    <form className="flex flex-col gap-3 rounded-xl border border-card-border p-4" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }} data-testid="form-commute-override">
+    <form className="flex flex-col gap-3 rounded-card border border-card-border p-4" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }} data-testid="form-commute-override">
       <label className="type-label flex min-h-11 items-center justify-between gap-3">
         <span>{t('Manual monthly commute override', 'تجاوز يدوي لتكلفة التنقل الشهرية')}<span className="type-caption block font-normal text-muted-foreground">{t('Replaces the profile estimate in the plan. Never charges an account.', 'يحلّ محل تقدير الملف في الخطة. لا يخصم من أي حساب.')}</span></span>
         <Switch checked={enabled} onCheckedChange={(v) => { setEnabled(v); setSaved(false); }} data-testid="switch-commute-override" />

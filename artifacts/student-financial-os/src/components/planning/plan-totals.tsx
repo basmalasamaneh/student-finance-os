@@ -19,7 +19,7 @@ function Term({ label, children, op }: { label: string; children: React.ReactNod
 export function EquationCard({ tot, t }: { tot: PlanTotals; t: Tx }) {
   const neg = tot.projectedRemaining.minor < 0;
   return (
-    <div className="min-w-0 rounded-2xl border border-card-border bg-card p-5 shadow-sm md:p-6" data-testid={`card-totals-${tot.currency}`}>
+    <div className="min-w-0 rounded-card border border-card-border bg-card p-5 shadow-sm md:p-6" data-testid={`card-totals-${tot.currency}`}>
       <div className="flex items-baseline justify-between pb-2">
         <p className="eyebrow">{t('Monthly plan', 'الخطة الشهرية')} · {tot.currency}</p>
         <span className="type-caption rounded-full bg-primary-soft px-2 py-0.5 text-gold-ink">{t('Estimate', 'تقدير')}</span>
@@ -44,7 +44,7 @@ export function EquationCard({ tot, t }: { tot: PlanTotals; t: Tx }) {
 export function PolicyPanel({ plan, t }: { plan: FinancialPlan; t: Tx }) {
   const h = plan.housing;
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-primary-soft p-4 md:p-5" data-testid="panel-policy">
+    <div className="flex flex-col gap-3 rounded-card bg-primary-soft p-4 md:p-5" data-testid="panel-policy">
       <p className="type-label">{t('How this plan is built', 'كيف تُبنى هذه الخطة')}</p>
       <ol className="type-caption flex list-decimal flex-col gap-1 ps-5 text-foreground">
         <li>{t('Manual plan lines win for their category and currency.', 'البنود اليدوية لها الأولوية في فئتها وعملتها.')}</li>
@@ -60,7 +60,7 @@ export function PolicyPanel({ plan, t }: { plan: FinancialPlan; t: Tx }) {
 
 export function CostSources({ plan, t }: { plan: FinancialPlan; t: Tx }) {
   return (
-    <Collapsible className="rounded-xl border border-card-border" data-testid="panel-sources">
+    <Collapsible className="rounded-card border border-card-border" data-testid="panel-sources">
       <CollapsibleTrigger className="group type-label flex min-h-12 w-full items-center justify-between gap-3 px-4 text-start" data-testid="button-toggle-sources">
         {t(`Show the math · ${plan.costs.length} expense source${plan.costs.length === 1 ? '' : 's'}`, `اعرض الحساب · مصادر المصاريف: ${plan.costs.length}`)}
         <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" aria-hidden />
@@ -96,7 +96,7 @@ export function GoalSavingsPanel({ plan, t }: { plan: FinancialPlan; t: Tx }) {
   const rows = plan.goalSavings ?? [];
   if (!rows.length) return null;
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-card-border bg-card p-4 md:p-5" data-testid="panel-goal-savings">
+    <div className="flex flex-col gap-3 rounded-card border border-card-border bg-card p-4 md:p-5" data-testid="panel-goal-savings">
       <p className="type-label">{t('Savings: manual plan vs goal requirements', 'الادخار: الخطة اليدوية مقابل متطلبات الأهداف')}</p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {rows.map((r) => {

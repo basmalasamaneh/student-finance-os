@@ -55,7 +55,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.classList.toggle('dark', resolved === 'dark');
     const meta = document.querySelector('meta[name="theme-color"]') ?? Object.assign(document.createElement('meta'), { name: 'theme-color' });
-    meta.setAttribute('content', resolved === 'dark' ? '#0c111d' : '#f8fafc');
+    const bg = getComputedStyle(root).getPropertyValue('--background').trim();
+    meta.setAttribute('content', bg ? `hsl(${bg})` : 'Canvas');
     if (!meta.parentNode) document.head.appendChild(meta);
   }, [resolved]);
 

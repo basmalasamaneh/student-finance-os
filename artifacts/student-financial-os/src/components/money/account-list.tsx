@@ -10,7 +10,7 @@ function CopyId({ id, t }: { id: string; t: Tx }) {
   const [copied, setCopied] = useState(false);
   return (
     <button type="button" onClick={() => { void navigator.clipboard?.writeText(id).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1600); }); }}
-      className="type-caption inline-flex min-h-8 items-center gap-1 rounded-md px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+      className="type-caption inline-flex min-h-8 items-center gap-1 rounded-lg px-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
       aria-label={t(`Copy account ID ${id}`, `نسخ معرّف الحساب ${id}`)} data-testid={`button-copy-id-${id}`}>
       <bdi className="tabular">{shortId(id)}</bdi>{copied ? <Check className="size-3.5 text-success" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
       <span className="sr-only" aria-live="polite">{copied ? t('Copied', 'تم النسخ') : ''}</span>

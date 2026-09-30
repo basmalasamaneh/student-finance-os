@@ -38,7 +38,7 @@ export default function AuthPage({ signup }: { signup: boolean }) {
         <p className="type-body max-w-md text-muted-foreground">{text('Make space for your plans. Your profile is yours to shape, at any time.', 'خطط لمستقبلك براحتك. يمكنك تعديل ملفك الشخصي في أي وقت.')}</p>
         <div className="h-1 w-16 rounded-full bg-primary" aria-hidden />
       </div>
-      <div className="min-w-0 rounded-2xl border border-divider bg-surface p-5 shadow-sm sm:p-8">
+      <div className="min-w-0 rounded-card border border-divider bg-surface p-5 shadow-sm sm:p-8">
         <h2 className="type-title mb-6">{signup ? text('Create your account', 'أنشئ حسابك') : text('Sign in', 'تسجيل الدخول')}</h2>
         <Form {...form}><form className="space-y-5" onSubmit={form.handleSubmit((values) => {
           if (signup) register.mutate({ data: { name: values.name.trim(), email: values.email.trim(), password: values.password, role: values.role } });

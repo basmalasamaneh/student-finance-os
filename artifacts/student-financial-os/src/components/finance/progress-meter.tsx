@@ -9,7 +9,7 @@ type Kind = 'default' | 'savings' | 'budget';
 /**
  * Progress with the number always visible — never colour alone. value is 0..1.
  * savings: gold fill → calm green when complete (the gold/mint relationship).
- * budget:  navy fill → amber when close or over plan (red is reserved for errors).
+ * budget:  ink fill → amber when close or over plan (red is reserved for errors).
  * value may exceed 1: the label shows the real percentage, the bar clamps.
  */
 export function ProgressMeter({

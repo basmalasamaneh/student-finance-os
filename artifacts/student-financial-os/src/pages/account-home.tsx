@@ -13,7 +13,7 @@ function HomeSkeleton({ t }: { t: T }) {
     <div role="status" aria-live="polite" className="flex flex-col gap-6" data-testid="status-loading">
       <span className="sr-only">{t('Loading your home…', 'جارٍ تحميل الصفحة…')}</span>
       <div className="skeleton-shimmer h-4 w-32 rounded" /><div className="skeleton-shimmer h-9 w-64 max-w-full rounded" />
-      {[0, 1, 2].map((i) => <div key={i} className="skeleton-shimmer h-24 w-full rounded-xl" />)}
+      {[0, 1, 2].map((i) => <div key={i} className="skeleton-shimmer h-24 w-full rounded-card" />)}
     </div>
   );
 }

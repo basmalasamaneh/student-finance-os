@@ -17,7 +17,7 @@ export default function NotFound() {
           {t('nf.path')}: <code dir="ltr" className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">{location}</code>
         </p>
         <div className="pt-3">
-          <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" data-testid="link-nf-home">
+          <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground" data-testid="link-nf-home">
             <ArrowLeft className="size-4 rtl:-scale-x-100" aria-hidden />
             {t('ni.back')}
           </Link>

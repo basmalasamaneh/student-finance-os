@@ -36,7 +36,7 @@ export function AccountSurface({
   return (
     <article
       className={cn(
-        'relative flex min-w-0 flex-col gap-6 rounded-xl border border-card-border bg-surface p-5 transition-colors duration-150 hover:border-input md:p-6',
+        'relative flex min-w-0 flex-col gap-6 rounded-card border border-card-border bg-surface p-5 transition-colors duration-150 hover:border-input md:p-6',
         className,
       )}
       data-testid={testId}

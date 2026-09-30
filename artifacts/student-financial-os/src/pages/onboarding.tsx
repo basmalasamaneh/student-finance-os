@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Page, PageHeader, Section } from '@/components/layout/page';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useAccount } from '@/features/auth/account';
+import { cn } from '@/lib/utils';
 
 type Text = (en: string, ar: string) => string;
 const study = [['school','School student','طالب مدرسة'],['university','University student','طالب جامعة']] as const;
@@ -33,7 +34,7 @@ function Field({ label, children, hint }: { label: string; children: ReactNode; 
   const id=useId();
   return <div className="min-w-0 space-y-2"><Label id={id} className="block">{label}</Label><div role="group" aria-labelledby={id}>{children}</div>{hint && <p className="text-xs text-muted-foreground">{hint}</p>}</div>;
 }
-const inputClass = 'flex min-h-11 w-full min-w-0 rounded-[10px] border border-input bg-surface px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+const inputClass = 'flex min-h-11 w-full min-w-0 rounded-lg border border-input bg-surface px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 function Select({ value, onChange, options, t }: { value: string; onChange: (v: string) => void; options: readonly (readonly [string,string,string])[]; t: Text }) {
   return <select className={inputClass} value={value} onChange={e => onChange(e.target.value)}><Options values={options} t={t} /></select>;
 }
@@ -61,7 +62,7 @@ function AmountField({ label, value, onChange, t, optional = false }: { label: s
       try { const m = parseMoney(next, currency); if (m.minor < 0) throw new RangeError(); setInvalid(false); onChange(m); }
       catch { setInvalid(true); onChange(undefined); }
     }} pattern={optional ? '[0-9]+(\\.[0-9]+)?|^$' : '[0-9]+(\\.[0-9]+)?'} />
-    <select className={`${inputClass} w-24 shrink-0`} aria-label={t('Currency','العملة')} value={currency} onChange={e => {
+    <select className={cn(inputClass, 'w-24 shrink-0')} aria-label={t('Currency','العملة')} value={currency} onChange={e => {
       const c = e.target.value as Currency;
       setTouched(true); setCurrency(c);
       try { const m=raw ? parseMoney(raw,c) : optional ? undefined : { minor: 0, currency: c }; setInvalid(false); onChange(m); }
@@ -178,12 +179,12 @@ export default function OnboardingPage({ editing = false }: { editing?: boolean 
             data.scholarships.map(s=>`${s.name} ${currencyDisplay(s.amount,locale)}${s.percentage!==undefined?' · '+s.percentage+'%':''}`).join(' · ') || t('No scholarships yet','لا توجد منح بعد')}
           </div></section>)}
           {!data.onboardingCompleted && <Button disabled={complete.isPending} onClick={()=>complete.mutate()}>{t('Finish setup','إنهاء الإعداد')}</Button>}
-          {data.onboardingCompleted && <Link href="/" className="inline-block min-h-11 rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">{t('Back home','العودة للرئيسية')}</Link>}
+          {data.onboardingCompleted && <Link href="/" className="inline-block min-h-11 rounded-[14px] bg-primary px-5 py-3 font-semibold text-primary-foreground">{t('Back home','العودة للرئيسية')}</Link>}
           {complete.isError && <InlineError>{t('Complete the required education, residence, and commute details first.','أكمل بيانات التعليم والسكن والتنقل المطلوبة أولاً.')}</InlineError>}
         </div>}
         {save.isError && <InlineError>{t('Could not save. Check all required fields, amounts, and currencies.','تعذّر الحفظ. تحقق من الحقول المطلوبة والمبالغ والعملات.')}</InlineError>}
         {localError && <InlineError>{localError}</InlineError>}
-        {message && <p role="status" className="mt-4 text-sm text-emerald-700 dark:text-emerald-400">{message}</p>}
+        {message && <p role="status" className="mt-4 text-sm text-success">{message}</p>}
       </div>
     </>}
   </Page>;
@@ -209,7 +210,7 @@ function IncomeSection({t,locale,profile,onRefresh,onNext}:{t:Text;locale:string
   };
   return <div className="space-y-7"><h2 className="type-title">{t('Income sources','مصادر الدخل')}</h2><p className="text-sm text-muted-foreground">{t('Planning information only; no income is posted to a wallet.','معلومات للتخطيط فقط، لا يضاف دخل إلى أي محفظة.')}</p>
     <div className="space-y-3">{profile.incomes.map(item=><div key={item.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-divider py-3"><div className="min-w-0"><p className="font-semibold">{sources.find(s=>s[0]===item.source)?.[t('en','ar')==='ar'?2:1]}</p><p className="break-words text-sm text-muted-foreground">{currencyDisplay(item.amount,locale)} · {frequencies.find(f=>f[0]===item.frequency)?.[t('en','ar')==='ar'?2:1]} · {item.active?t('Active','نشط'):t('Inactive','غير نشط')}{item.expectedDate?' · '+item.expectedDate:''}{item.description?' · '+item.description:''} · {item.stability==='stable'?t('Stable','ثابت'):t('Variable','متغير')}</p></div><div className="flex gap-1"><Button variant="ghost" onClick={()=>edit(item)}>{t('Edit','تعديل')}</Button><Button variant="ghost" className="text-destructive" disabled={remove.isPending} onClick={()=>{if(window.confirm(t('Delete this source?','حذف مصدر الدخل؟')))remove.mutate({id:item.id});}}>{t('Delete','حذف')}</Button></div></div>)}</div>
-    <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-5 rounded-xl border border-divider bg-surface p-4 sm:p-6"><h3 className="font-semibold">{editing?t('Edit income source','تعديل مصدر الدخل'):t('Add income source','إضافة مصدر دخل')}</h3>
+    <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-5 rounded-card border border-divider bg-surface p-4 sm:p-6"><h3 className="font-semibold">{editing?t('Edit income source','تعديل مصدر الدخل'):t('Add income source','إضافة مصدر دخل')}</h3>
       <Row><Field label={t('Source','المصدر')}><select className={inputClass} {...form.register('source')}><Options values={sources} t={t}/></select></Field><Field label={t('Frequency','التكرار')}><select className={inputClass} {...form.register('frequency')}><Options values={frequencies} t={t}/></select></Field></Row>
       <Row><Field label={t('Amount','المبلغ')}><Input required dir="ltr" inputMode="decimal" pattern="[0-9]+(\.[0-9]+)?" {...form.register('amount')}/></Field><Field label={t('Currency','العملة')}><select className={inputClass} {...form.register('currency')}><option>ILS</option><option>USD</option><option>JOD</option></select></Field></Row>
       <Row><Field label={t('Expected date (optional)','التاريخ المتوقع (اختياري)')}><Input type="date" {...form.register('expectedDate')}/></Field><Field label={t('Predictability','طبيعة الدخل')}><select className={inputClass} {...form.register('stability')}><option value="stable">{t('Stable','ثابت')}</option><option value="variable">{t('Variable','متغير')}</option></select></Field></Row>
@@ -242,7 +243,7 @@ function ScholarshipSection({t,locale,profile,onRefresh,onNext}:{t:Text;locale:s
   };
   return <div className="space-y-7"><h2 className="type-title">{t('Scholarships & aid','المنح والمساعدات')}</h2>
     <div className="space-y-3">{profile.scholarships.map(item=><div key={item.id} className="flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-divider py-3"><div className="min-w-0"><p className="font-semibold">{item.name} · {item.provider}</p><p className="break-words text-sm text-muted-foreground">{aidTypes.find(a=>a[0]===item.type)?.[t('en','ar')==='ar'?2:1]} · {currencyDisplay(item.amount,locale)} {item.percentage!==undefined?' · '+item.percentage+'%':''}{item.tuitionCoverage?' · '+item.tuitionCoverage:''}{item.paymentSchedule?' · '+item.paymentSchedule:''}{item.startDate?' · '+item.startDate:''}{item.endDate?' · '+item.endDate:''}{item.renewalDate?' · '+item.renewalDate:''}{item.remainingCoverage?' · '+currencyDisplay(item.remainingCoverage,locale):''}{item.notes?' · '+item.notes:''}</p></div><div className="flex gap-1"><Button variant="ghost" onClick={()=>edit(item)}>{t('Edit','تعديل')}</Button><Button variant="ghost" className="text-destructive" disabled={remove.isPending} onClick={()=>{if(window.confirm(t('Delete this scholarship?','حذف هذه المنحة؟')))remove.mutate({id:item.id});}}>{t('Delete','حذف')}</Button></div></div>)}</div>
-    <Form {...form}><form className="space-y-5 rounded-xl border border-divider bg-surface p-4 sm:p-6" onSubmit={form.handleSubmit(submit)}><h3 className="font-semibold">{editing?t('Edit scholarship','تعديل المنحة'):t('Add scholarship or aid','إضافة منحة أو مساعدة')}</h3>
+    <Form {...form}><form className="space-y-5 rounded-card border border-divider bg-surface p-4 sm:p-6" onSubmit={form.handleSubmit(submit)}><h3 className="font-semibold">{editing?t('Edit scholarship','تعديل المنحة'):t('Add scholarship or aid','إضافة منحة أو مساعدة')}</h3>
       <Row><Field label={t('Name','الاسم')}><Input required maxLength={160} {...form.register('name')}/></Field><Field label={t('Provider','الجهة المانحة')}><Input required maxLength={160} {...form.register('provider')}/></Field></Row>
       <Row><Field label={t('Type','النوع')}><select className={inputClass} {...form.register('type')}><Options values={aidTypes} t={t}/></select></Field><Field label={t('Currency','العملة')}><select className={inputClass} {...form.register('currency')}><option>ILS</option><option>USD</option><option>JOD</option></select></Field></Row>
       <Row><Field label={t('Amount (if applicable)','المبلغ (إن وجد)')}><Input dir="ltr" inputMode="decimal" pattern="[0-9]+(\.[0-9]+)?|^$" {...form.register('amount')}/></Field><Field label={t('Percentage (if applicable)','النسبة المئوية (إن وجدت)')}><Input type="number" min={0} max={100} step={1} {...form.register('percentage')}/></Field></Row>

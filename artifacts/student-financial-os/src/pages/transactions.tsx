@@ -85,10 +85,10 @@ export default function TransactionsPage() {
             <label htmlFor="tx-search" className="sr-only">{t('Search transactions', 'ابحث في المعاملات')}</label>
             <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <input id="tx-search" type="search" value={text} maxLength={120} onChange={(e) => onType(e.target.value)} placeholder={t('Search note, merchant, account, type…', 'ابحث في الملاحظة أو التاجر أو الحساب أو النوع…')}
-              className="min-h-11 w-full rounded-xl border border-input bg-surface ps-9 pe-10 text-sm outline-none focus-visible:border-ring" data-testid="input-search" />
+              className="min-h-11 w-full rounded-lg border border-input bg-surface ps-9 pe-10 text-sm outline-none focus-visible:border-ring" data-testid="input-search" />
             {text ? <button type="button" onClick={() => { setText(''); window.clearTimeout(timer.current); patch({ search: '' }); }} className="absolute end-0 top-0 grid size-11 place-items-center text-muted-foreground hover:text-foreground" aria-label={t('Clear search', 'مسح البحث')} data-testid="button-clear-search"><X className="size-4" aria-hidden /></button> : null}
           </div>
-          <Button variant="outline" className="min-h-11 shrink-0 gap-2 rounded-xl" onClick={() => { if (optionsQ.isError) optionsQ.refetch(); setPanelOpen(true); }} aria-haspopup="dialog" data-testid="button-open-filters">
+          <Button variant="outline" className="min-h-11 shrink-0 gap-2 rounded-lg" onClick={() => { if (optionsQ.isError) optionsQ.refetch(); setPanelOpen(true); }} aria-haspopup="dialog" data-testid="button-open-filters">
             <SlidersHorizontal aria-hidden /><span className="hidden min-[380px]:inline">{t('Filters', 'المرشحات')}</span>
             {count ? <span className="tabular grid min-w-5 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground" aria-label={t(`${count} active`, `${count} مفعّلة`)}>{count}</span> : null}
           </Button>

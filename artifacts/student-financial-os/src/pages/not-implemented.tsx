@@ -29,11 +29,11 @@ export default function NotImplementedPage({ item }: { item: NavItem }) {
         <p className="text-base leading-7 text-muted-foreground">{t('ni.body')}</p>
         <p className="text-sm text-muted-foreground">{t('ni.forRole', { role: t(`role.${role}`) })}</p>
         <div className="flex flex-wrap gap-3 pt-3">
-          <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground" data-testid="link-ni-home">
+          <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground" data-testid="link-ni-home">
             <ArrowLeft className="size-4 rtl:-scale-x-100" aria-hidden />
             {t('ni.back')}
           </Link>
-          <Link href="/foundation" className="inline-flex min-h-10 items-center rounded-md border border-input px-4 text-sm font-medium hover:bg-muted" data-testid="link-ni-foundation">
+          <Link href="/foundation" className="inline-flex min-h-10 items-center rounded-lg border border-input px-4 text-sm font-medium hover:bg-muted" data-testid="link-ni-foundation">
             {t('ni.explore')}
           </Link>
         </div>

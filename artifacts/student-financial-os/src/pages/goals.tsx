@@ -45,8 +45,8 @@ export default function GoalsPage() {
 
       {q.isPending ? (
         <div className="flex flex-col gap-4" role="status" aria-label={t('Loading goals…', 'جارٍ تحميل الأهداف…')} data-testid="state-loading">
-          <div className="skeleton-shimmer h-28 rounded-2xl" />
-          <div className="grid gap-3 md:grid-cols-2">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton-shimmer h-40 rounded-2xl" />)}</div>
+          <div className="skeleton-shimmer h-28 rounded-card" />
+          <div className="grid gap-3 md:grid-cols-2">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton-shimmer h-40 rounded-card" />)}</div>
         </div>
       ) : q.isError || !q.data ? (
         <StatePanel tone="error" title={t('Goals did not load', 'تعذّر تحميل الأهداف')} body={goalErrorText(q.error, t)}
@@ -58,7 +58,7 @@ export default function GoalsPage() {
               <h2 id="goal-totals" className="type-caption text-muted-foreground">{t('Your money, by currency', 'أموالك حسب العملة')}</h2>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2" data-testid="list-goal-totals">
                 {q.data.totals.map((c) => (
-                  <dl key={c.currency} className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-2xl border border-card-border bg-card p-4 md:p-5" data-testid={`card-goal-totals-${c.currency}`}>
+                  <dl key={c.currency} className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-card-border bg-card p-4 md:p-5" data-testid={`card-goal-totals-${c.currency}`}>
                     <div><dt className="type-caption text-muted-foreground">{t('Reserved in goals', 'محجوز في الأهداف')}</dt><dd><MoneyDisplay value={c.reserved} size="lg" tone="highlight" testId={`text-reserved-${c.currency}`} /></dd></div>
                     <div><dt className="type-caption text-muted-foreground">{t('Available to spend', 'متاح للإنفاق')}</dt><dd><MoneyDisplay value={c.available} size="lg" testId={`text-available-${c.currency}`} /></dd></div>
                     <div><dt className="type-caption text-muted-foreground">{t('Net balance', 'صافي الرصيد')}</dt><dd><MoneyDisplay value={c.netBalance} size="sm" testId={`text-net-${c.currency}`} /></dd></div>

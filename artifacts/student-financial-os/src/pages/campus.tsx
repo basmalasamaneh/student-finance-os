@@ -91,7 +91,7 @@ export default function CampusPage() {
                       return (
                         <li key={s.id}>
                           <button type="button" disabled={!s.paymentEnabled} aria-pressed={active} onClick={() => setServiceId(s.id)} data-testid={`button-service-${s.id}`}
-                            className={cn('flex h-full w-full min-w-0 items-start gap-3 rounded-xl border p-3 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-60', active ? 'border-primary bg-primary-soft' : 'border-card-border bg-card hover:bg-muted')}>
+                            className={cn('flex h-full w-full min-w-0 items-start gap-3 rounded-lg border p-3 text-start transition-colors disabled:cursor-not-allowed disabled:opacity-60', active ? 'border-primary bg-primary-soft' : 'border-card-border bg-card hover:bg-muted')}>
                             <span className={cn('grid size-10 shrink-0 place-items-center rounded-xl', active ? 'bg-primary text-primary-foreground' : 'bg-muted text-gold-ink')}><Icon className="size-[18px]" aria-hidden /></span>
                             <span className="flex min-w-0 flex-col gap-0.5">
                               <span className="type-subtitle">{name(s)}</span>
@@ -131,7 +131,7 @@ export default function CampusPage() {
                   <aside className="flex flex-col gap-3 md:sticky md:top-6 md:self-start" aria-labelledby="cart-title">
                     <h2 id="cart-title" className="type-subtitle">{t('4 · Cart', '٤ · السلة')}</h2>
                     {lines.length ? (
-                      <div className="flex flex-col gap-3 rounded-xl bg-surface-sunken p-4">
+                      <div className="flex flex-col gap-3 rounded-card bg-surface-sunken p-4">
                         {lines.map((l, i) => <div key={l.product.id} className="type-caption flex justify-between gap-2"><span>{name(l.product)} × <bdi className="tabular">{l.quantity}</bdi></span>{lineTotals[i] ? <MoneyDisplay value={lineTotals[i]!} size="sm" /> : <span className="text-destructive">—</span>}</div>)}
                         <div className="flex items-baseline justify-between border-t border-divider pt-3"><span className="type-label">{t('Total', 'الإجمالي')}</span>{total ? <MoneyDisplay value={total} size="lg" testId="text-cart-total" /> : null}</div>
                         {overflow || (currencies.size === 1 && lines.length > 0 && !total) ? <Notice tone="error" title={t('Amount too large', 'المبلغ كبير جداً')} body={t('This cart total cannot be represented exactly. Reduce quantities.', 'لا يمكن تمثيل إجمالي السلة بدقة. قلّل الكميات.')} /> : null}

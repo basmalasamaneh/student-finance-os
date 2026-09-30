@@ -42,7 +42,7 @@ export function SectionHeading({ id, title, meta, trailing, as: As = 'h2' }: { i
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 pb-3">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-        <As id={id} className={As === 'h2' ? 'type-title' : 'type-subtitle'}>
+        <As id={id} className={As === 'h2' ? 'type-h2' : 'type-title'}>
           {title}
         </As>
         {meta ? <span className="type-label font-normal text-muted-foreground">{meta}</span> : null}

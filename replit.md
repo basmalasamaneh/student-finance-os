@@ -1,5 +1,9 @@
 # Student Financial OS
 
+## Gold presentation migration
+
+The existing Tailwind v4 semantic theme in `artifacts/student-financial-os/src/index.css` is the single source of truth; retain the current theme provider, Inter/Noto Sans Arabic fonts, and shared Radix/shadcn components. The Phase 0 inventory in `docs/gold-visual-audit.md` lists every screen, shared component group, and raw-color migration location. This is a presentation-only migration: routes, authentication, API/data contracts, financial calculations, money representation, translations, and Prompts 1–7 behavior must remain unchanged. **Phase 1 COMPLETE** (tokens + shared-component consumption, typecheck/build verified, raw-color search clean outside `src/index.css`); details and contrast ratios in `docs/gold-visual-migration.md`. The palette paragraph below that mentions `#D4A72C`/navy is superseded by the Phase 1 palette (gold-500 `#D4AF37`, warm ivory / black-gold).
+
 Student finance workspace with exact-money foundation, app-owned email/password authentication, Prompt 2 onboarding, Prompt 3 profile-driven student home, Prompt 4 **simulated** finance and campus-payment API, Prompt 5 transaction history/details, Prompt 6 planning, and Prompt 7 reserved savings goals with narrowly consented simulated parent funding. Prompts 8–15 remain excluded; onboarding does not post account funds or incomes.
 
 ## Run & Operate

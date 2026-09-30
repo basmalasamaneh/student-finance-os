@@ -38,6 +38,46 @@ const tones: Record<MoneyTone, string> = {
 };
 
 /**
+ * Presentation-only split of the already formatted string into styled spans.
+ * Concatenated text is byte-identical to `formatted` — no parsing to numbers,
+ * no rounding, no reformatting. Fraction length is read from the same
+ * formatter's zero output so zero-decimal currencies are never mis-split.
+ */
+function splitFormatted(formatted: string, zeroFormatted: string): { text: string; kind: 'currency' | 'decimal' | 'sign' | 'plain' }[] {
+  const fractionLen = /[.,\u066B](\d+)\D*$/.exec(zeroFormatted)?.[1]?.length ?? 0;
+  let decStart = -1;
+  if (fractionLen > 0) {
+    const m = new RegExp(`[.,\\u066B]\\d{${fractionLen}}(?=\\D*$)`).exec(formatted);
+    if (m) decStart = m.index;
+  }
+  const decEnd = decStart >= 0 ? decStart + fractionLen + 1 : -1;
+  const kindAt = (ch: string, i: number) => {
+    if (i >= decStart && i < decEnd) return 'decimal' as const;
+    if (/[-\u2212+]/.test(ch)) return 'sign' as const;
+    if (/[\d.,\s\u066B\u00A0\u200E\u200F\u061C]/.test(ch)) return 'plain' as const;
+    return 'currency' as const;
+  };
+  const out: { text: string; kind: 'currency' | 'decimal' | 'sign' | 'plain' }[] = [];
+  Array.from(formatted).forEach((ch, idx) => {
+    const kind = kindAt(ch, idx);
+    const last = out[out.length - 1];
+    if (last && last.kind === kind) last.text += ch;
+    else out.push({ text: ch, kind });
+  });
+  // Abbreviation dots inside a currency symbol (e.g. Arabic JOD) stay with the symbol.
+  const merged: typeof out = [];
+  out.forEach((seg) => {
+    const prev = merged[merged.length - 1];
+    const kind = seg.kind === 'plain' && prev?.kind === 'currency' && /^[.\u200F]+$/.test(seg.text) ? 'currency' : seg.kind;
+    if (prev && prev.kind === kind) prev.text += seg.text;
+    else merged.push({ text: seg.text, kind });
+  });
+  return merged;
+}
+
+const partClass = { currency: 'money-currency', decimal: 'money-decimal', sign: 'money-sign', plain: '' } as const;
+
+/**
  * Reusable amount display. Formatting is delegated to finance-core
  * (integer minor units + explicit currency). `<bdi>` isolates direction
  * so currency symbols never reorder inside Arabic sentences.
@@ -77,7 +117,9 @@ export function MoneyDisplay({
   return (
     <bdi dir="ltr" className={cn('tabular inline-block whitespace-nowrap', sizeClass, tones[tone], className)} data-testid={testId}>
       {prefix}
-      {formatted}
+      {splitFormatted(formatted, formatMoney({ ...value, minor: 0 }, locale)).map((p, i) =>
+        p.kind === 'plain' ? p.text : <span key={i} className={partClass[p.kind]}>{p.text}</span>,
+      )}
     </bdi>
   );
 }

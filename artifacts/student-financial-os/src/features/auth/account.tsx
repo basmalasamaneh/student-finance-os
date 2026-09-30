@@ -37,15 +37,15 @@ export function AccountMenu({ compact = false }: { compact?: boolean }) {
   const [, navigate] = useLocation();
   const logout = useLogOut({ mutation: { onSuccess: () => { qc.clear(); navigate('/login', { replace: true }); } } });
   if (compact) return <div className="flex min-w-0 items-center gap-1">
-    <Link href="/profile" className="max-w-28 truncate rounded-md px-2 py-2 text-xs font-semibold text-gold-ink">{account.name}</Link>
+    <Link href="/profile" className="max-w-28 truncate rounded-lg px-2 py-2 text-xs font-semibold text-gold-ink">{account.name}</Link>
     <Button variant="ghost" size="sm" disabled={logout.isPending} onClick={() => logout.mutate()}>{lang === 'ar' ? 'خروج' : 'Log out'}</Button>
     {logout.isError && <span role="alert" className="sr-only">{lang === 'ar' ? 'تعذّر تسجيل الخروج' : 'Logout failed'}</span>}
   </div>;
-  return <div className="flex min-w-0 flex-col gap-2 rounded-xl bg-surface-sunken/60 p-3">
+  return <div className="flex min-w-0 flex-col gap-2 rounded-card bg-surface-sunken/60 p-3">
     <span className="truncate text-sm font-semibold">{account.name}</span>
     <span className="truncate text-xs text-muted-foreground" dir="ltr">{account.email}</span>
     <div className="flex flex-wrap items-center gap-2">
-      <Link href="/profile" className="rounded-md px-2 py-2 text-xs font-semibold text-gold-ink hover:underline">{lang === 'ar' ? 'الملف الشخصي' : 'Profile'}</Link>
+      <Link href="/profile" className="rounded-lg px-2 py-2 text-xs font-semibold text-gold-ink hover:underline">{lang === 'ar' ? 'الملف الشخصي' : 'Profile'}</Link>
       <Button variant="ghost" size="sm" disabled={logout.isPending} onClick={() => logout.mutate()}>{lang === 'ar' ? 'تسجيل الخروج' : 'Log out'}</Button>
     </div>
     {logout.isError && <p role="alert" className="text-xs text-destructive">{lang === 'ar' ? 'تعذّر تسجيل الخروج. حاول مجدداً.' : 'Could not log out. Please try again.'}</p>}

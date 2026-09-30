@@ -102,7 +102,7 @@ export function InvitationPanel({ goal, t }: { goal: SavingsGoal; t: Tx }) {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3 rounded-xl bg-primary-soft p-4">
+              <div className="flex items-start gap-3 rounded-card bg-primary-soft p-4">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-gold-ink" aria-hidden />
                 <label htmlFor="consent-ack" className="type-label flex items-start gap-3 font-normal">
                   <Checkbox id="consent-ack" checked={ack} onCheckedChange={(v) => setAck(v === true)} className="mt-1" data-testid="checkbox-consent" />

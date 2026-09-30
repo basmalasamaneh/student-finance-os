@@ -649,7 +649,7 @@ export default function FoundationPage() {
               <li key={g.id} className="min-w-0">
                 <a
                   href={`#${g.id}`}
-                  className="flex min-h-11 items-center gap-2 rounded-md px-2.5 type-label font-normal text-muted-foreground transition-colors duration-150 hover:bg-primary-soft/50 hover:text-foreground xl:-ms-px xl:min-h-9 xl:rounded-none xl:border-s-2 xl:border-transparent xl:hover:border-primary xl:hover:bg-transparent"
+                  className="flex min-h-11 items-center gap-2 rounded-lg px-2.5 type-label font-normal text-muted-foreground transition-colors duration-150 hover:bg-primary-soft/50 hover:text-foreground xl:-ms-px xl:min-h-9 xl:rounded-none xl:border-s-2 xl:border-transparent xl:hover:border-primary xl:hover:bg-transparent"
                   data-testid={`link-toc-${g.id}`}
                 >
                   <span className="tabular type-caption text-gold-ink" aria-hidden><bdi>{formatNumber(i + 1, locale).padStart(2, '0')}</bdi></span>

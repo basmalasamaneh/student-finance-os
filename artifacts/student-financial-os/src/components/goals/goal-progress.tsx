@@ -25,7 +25,7 @@ export function GoalProgress({ goal, t, compact }: { goal: Pick<SavingsGoal, 'na
 export function GoalCard({ goal, t }: { goal: SavingsGoal; t: Tx }) {
   const { locale } = useI18n();
   return (
-    <Link href={`/goals/${goal.id}`} className="hover-elevate flex min-w-0 flex-col gap-3 rounded-2xl border border-card-border bg-card p-4 shadow-xs md:p-5" data-testid={`card-goal-${goal.id}`}>
+    <Link href={`/goals/${goal.id}`} className="hover-elevate flex min-w-0 flex-col gap-3 rounded-card border border-card-border bg-card p-4 shadow-xs md:p-5" data-testid={`card-goal-${goal.id}`}>
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="type-subtitle break-words" data-testid={`text-goal-name-${goal.id}`}>{goal.name}</p>
