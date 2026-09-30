@@ -83,7 +83,7 @@ export function LedgerBlock({ summary, which, t }: { summary: Q<FinanceSummary>;
     ? <Unavailable testId="status-transactions" label={t('No transactions yet', 'لا حركات بعد')} body={t('Your onboarding details are for planning only and are never shown as transactions.', 'بيانات الإعداد للتخطيط فقط ولا تُعرض كحركات أبداً.')} />
     : <><Unavailable testId="status-campus" label={t('No campus purchases recorded', 'لا مشتريات جامعية مسجلة')} body={t('Cafeteria, bookstore and printing payments appear here.', 'تظهر هنا مدفوعات الكافتيريا والمكتبة والطباعة.')} /><Link href="/campus" className={linkCls} data-testid="link-campus">{t('Open Campus', 'فتح الحرم')}</Link></>;
   return <>
-    <LedgerList items={items.slice(0, which === 'recent' ? 6 : 3)} t={t} testId={`list-home-${which}`} />
-    <Link href={which === 'recent' ? '/money' : '/campus'} className={linkCls}>{which === 'recent' ? t('All activity', 'كل النشاط') : t('Open Campus', 'فتح الحرم')}</Link>
+    <LedgerList items={items.slice(0, which === 'recent' ? 6 : 3)} t={t} hrefFor={(tx) => `/transactions/${tx.id}`} testId={`list-home-${which}`} />
+    <Link href={which === 'recent' ? '/transactions' : '/campus'} className={linkCls} data-testid={`link-${which}-more`}>{which === 'recent' ? t('All activity', 'كل النشاط') : t('Open Campus', 'فتح الحرم')}</Link>
   </>;
 }

@@ -9,12 +9,43 @@ export const amount = (minor: bigint, currency: string) => ({ minor: Number(mino
 export const accountDto = (a: typeof financeAccounts.$inferSelect) => ({
   id: a.id, type: a.type, name: a.name, currency: a.currency, balance: amount(a.balanceMinor, a.currency),
 });
-export const transactionDto = (t: typeof financeTransactions.$inferSelect) => ({
-  id: t.id, accountId: t.accountId, kind: t.kind, category: t.category, direction: t.direction,
+export function semanticType(t: Pick<typeof financeTransactions.$inferSelect, "kind" | "serviceId" | "direction">) {
+  if (t.serviceId && t.kind === "payment") return "campus_payment";
+  if (t.kind === "transfer" || t.kind === "send" || t.kind === "request_fulfillment") return "transfer";
+  if (t.kind === "withdrawal") return "withdrawal";
+  if (t.kind === "deposit") return "deposit";
+  if (t.kind === "payment") return "payment";
+  if (t.kind === "allowance" || t.kind === "refund" || t.kind === "savings") return t.kind;
+  return t.direction === "credit" ? "income" : "expense";
+}
+export const transactionDto = (t: typeof financeTransactions.$inferSelect, context?: {
+  accountName?: string; counterpartyName?: string; campusId?: string | null;
+  universityId?: string | null; campusName?: string | null; universityName?: string | null;
+}) => ({
+  id: t.id, userId: t.userId, accountId: t.accountId, kind: t.kind, type: semanticType(t), category: t.category, direction: t.direction,
   amount: amount(t.amountMinor, t.currency), balanceAfter: amount(t.balanceAfterMinor, t.currency),
   status: t.status, ...(t.counterpartyAccountId ? { counterpartyAccountId: t.counterpartyAccountId } : {}),
   ...(t.serviceId ? { serviceId: t.serviceId } : {}), ...(t.merchantName ? { merchantName: t.merchantName } : {}),
   ...(t.items ? { items: t.items } : {}), ...(t.note ? { note: t.note } : {}), createdAt: t.createdAt.toISOString(),
+  ...(context?.accountName ? { accountName: context.accountName } : {}),
+  description: t.merchantName ? `Payment to ${t.merchantName}` : ({
+    add: "Simulated funds added", receive: "Simulated funds received", deposit: "Simulated deposit",
+    withdrawal: "Simulated withdrawal", payment: "Simulated payment", transfer: "Account transfer",
+    send: "Student transfer", request_fulfillment: "Fulfilled money request",
+  } as Record<string, string>)[t.kind] ?? "Ledger transaction",
+  source: t.direction === "credit"
+    ? t.counterpartyAccountId ? context?.counterpartyName ?? "Another account" : "External (simulated)"
+    : context?.accountName ?? "Account",
+  destination: t.direction === "debit"
+    ? t.counterpartyAccountId ? context?.counterpartyName ?? "Another account" : t.merchantName ?? "External (simulated)"
+    : context?.accountName ?? "Account",
+  relatedGoalId: t.relatedGoalId, relatedBudgetId: t.relatedBudgetId,
+  parentTransferId: t.parentTransferId, campusServiceId: t.serviceId,
+  universityId: t.universityId ?? context?.universityId ?? null,
+  campusId: t.campusId ?? context?.campusId ?? null,
+  universityName: t.universityName ?? context?.universityName ?? null,
+  campusName: t.campusName ?? context?.campusName ?? null,
+  recurringExpenseId: t.recurringExpenseId,
 });
 export const requestDto = (r: typeof moneyRequests.$inferSelect) => ({
   id: r.id, issuerId: r.issuerId, payerId: r.payerId, recipientAccountId: r.recipientAccountId,
@@ -36,6 +67,7 @@ export async function lockedAccounts(tx: Tx, ids: string[]) {
 export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect, delta: bigint, details: {
   kind: string; category: string; counterpartyAccountId?: string; serviceId?: string;
   merchantName?: string; items?: unknown; note?: string;
+  universityId?: string; campusId?: string; universityName?: string; campusName?: string;
 }) {
   if (delta < 0n && account.balanceMinor < -delta) throw new ApiError("INSUFFICIENT_FUNDS");
   const next = checked(account.balanceMinor + delta);
@@ -46,6 +78,8 @@ export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect,
     currency: account.currency, balanceAfterMinor: next, status: details.kind === "payment" ? "simulated_payment" : "simulated",
     counterpartyAccountId: details.counterpartyAccountId, serviceId: details.serviceId,
     merchantName: details.merchantName, items: details.items, note: details.note,
+    universityId: details.universityId, campusId: details.campusId,
+    universityName: details.universityName, campusName: details.campusName,
   }).returning();
   await tx.insert(financeEvents).values({
     transactionId: entry!.id, userId: account.userId, eventType: "finance.transaction.posted",

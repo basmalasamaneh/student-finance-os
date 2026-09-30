@@ -10,7 +10,9 @@ test("simulated ledger is atomic, concurrency-safe and retry-idempotent", { skip
   const compiled = await build({
     stdin: {
       contents: `export { once, move, lockedAccounts, post } from "./src/lib/finance.ts";
-        export { db, pool, users, financeAccounts, financeTransactions, financeEvents, financeIdempotency } from "@workspace/db";
+        export { semanticType, transactionDto } from "./src/lib/finance.ts";
+        export { historyQuery, historyDetail, enrichedTransactions, validateHistoryQuery } from "./src/routes/finance-history.ts";
+        export { db, pool, users, financeAccounts, financeTransactions, financeEvents, financeIdempotency, universities, campuses, campusServices } from "@workspace/db";
         export { eq, inArray, and } from "drizzle-orm";`,
       resolveDir: new URL("..", import.meta.url).pathname,
       loader: "ts",
@@ -20,9 +22,11 @@ test("simulated ledger is atomic, concurrency-safe and retry-idempotent", { skip
   const module = { exports: {} };
   new Function("require", "module", "exports", compiled.outputFiles[0].text)(createRequire(import.meta.url), module, module.exports);
   const { db, pool, users, financeAccounts: accounts, financeTransactions: entries, financeEvents: events,
-    financeIdempotency: keys, eq, inArray, once, move, lockedAccounts, post } = module.exports;
+    financeIdempotency: keys, universities, campuses, campusServices, eq, inArray, once, move, lockedAccounts, post,
+    historyQuery, historyDetail, enrichedTransactions, validateHistoryQuery, semanticType, transactionDto } = module.exports;
   const marker = randomUUID();
   const userIds = [], accountIds = [];
+  let university, campus, service;
   try {
     for (const name of ["payer", "recipient"]) {
       const [user] = await db.insert(users).values({
@@ -92,6 +96,58 @@ test("simulated ledger is atomic, concurrency-safe and retry-idempotent", { skip
     assert.equal(b.balanceMinor, BigInt(Number.MAX_SAFE_INTEGER));
     assert.equal((await db.select().from(entries).where(inArray(entries.userId, userIds))).length, 7);
     assert.equal((await db.select().from(keys).where(eq(keys.key, "overflow-" + marker))).length, 0);
+    for (const bad of [
+      { dateFrom: "2025-02-30" }, { dateFrom: "2025-05-01", dateTo: "2025-04-30" },
+      { amountMin: "1" }, { amountMin: "10", amountMax: "5", amountCurrency: "ILS" },
+      { amountMax: "1.5", amountCurrency: "ILS" }, { amountMin: "9007199254740992", amountCurrency: "ILS" },
+      { page: "0" }, { accountId: "not-an-id" }, { unknown: "value" },
+    ]) assert.throws(() => validateHistoryQuery(bad), { code: "BAD_REQUEST" });
+    const firstPage = await historyQuery(userIds[0], validateHistoryQuery({ limit: "2", page: "1" }));
+    const next = await historyQuery(userIds[0], validateHistoryQuery({ limit: "2", page: "2" }));
+    assert.equal(firstPage.items.length, 2);
+    assert.equal(firstPage.hasMore, true);
+    assert.equal(firstPage.total, next.total);
+    assert.equal(new Set([...firstPage.items, ...next.items].map(t => t.id)).size, 4);
+    assert(firstPage.items.every(t => t.userId === userIds[0]));
+    assert.equal((await historyQuery(userIds[0], validateHistoryQuery({ accountId: recipient }))).total, 0);
+    assert.equal((await historyQuery(userIds[0], validateHistoryQuery({ amountMin: "251", amountCurrency: "ILS" }))).items.every(t => t.amount.minor >= 251), true);
+    assert.equal((await historyQuery(userIds[0], validateHistoryQuery({ type: "campus_payment" }))).total, 0);
+    assert.equal((await historyQuery(userIds[0], validateHistoryQuery({ dateFrom: "2099-01-01" }))).total, 0);
+    const foreign = (await historyQuery(userIds[1], validateHistoryQuery({}))).items[0];
+    assert.equal(await historyDetail(userIds[0], foreign.id), null);
+    assert.equal(semanticType({ kind: "payment", serviceId: randomUUID(), direction: "debit" }), "campus_payment");
+    const paymentRow = (await db.select().from(entries).where(eq(entries.id, receipt.id)))[0];
+    const contextual = transactionDto({ ...paymentRow, serviceId: randomUUID(), universityId: randomUUID(), campusId: randomUUID() });
+    assert.equal(contextual.type, "campus_payment");
+    assert.equal(contextual.campusServiceId, contextual.serviceId);
+    assert.equal(contextual.status, "simulated_payment");
+    [university] = await db.insert(universities).values({ name: `Test ${marker}`, arabicName: "جامعة اختبار" }).returning();
+    [campus] = await db.insert(campuses).values({ universityId: university.id, name: "Test campus", arabicName: "حرم اختبار" }).returning();
+    [service] = await db.insert(campusServices).values({
+      campusId: campus.id, name: "Test cafeteria", arabicName: "مقصف اختبار",
+      category: "food", description: "", location: "", active: true, paymentEnabled: true,
+    }).returning();
+    const campusReceipt = await once(userIds[0], "campus-" + marker, "campus-payment", { serviceId: service.id }, async tx => {
+      const current = (await lockedAccounts(tx, [payer])).get(payer);
+      return post(tx, current, -25n, { kind: "payment", category: service.category, serviceId: service.id, merchantName: service.name,
+        universityId: university.id, universityName: university.name, campusId: campus.id, campusName: campus.name });
+    });
+    const detail = await historyDetail(userIds[0], campusReceipt.id);
+    assert.equal(detail.type, "campus_payment");
+    assert.equal(detail.description, "Payment to Test cafeteria");
+    assert.equal(detail.campusId, campus.id);
+    assert.equal(detail.universityName, university.name);
+    const campusRow = (await db.select().from(entries).where(eq(entries.id, campusReceipt.id)))[0];
+    assert.deepEqual((await enrichedTransactions(userIds[0], [campusRow]))[0], detail);
+    assert.equal(detail.accountName, "Integration wallet");
+    assert.equal(detail.source, "Integration wallet");
+    assert.equal(detail.destination, "Test cafeteria");
+    const ownSend = (await db.select().from(entries).where(eq(entries.id, first.id)))[0];
+    assert.equal((await enrichedTransactions(userIds[0], [ownSend]))[0].destination, "Another account");
+    const foreignRow = (await db.select().from(entries).where(eq(entries.id, foreign.id)))[0];
+    await assert.rejects(enrichedTransactions(userIds[0], [foreignRow]), { code: "NOT_FOUND" });
+    assert.equal((await historyQuery(userIds[0], validateHistoryQuery({ campusId: campus.id, universityId: university.id, category: "cafeteria", type: "campus_payment" }))).total, 1);
+    assert.equal((await historyQuery(userIds[1], validateHistoryQuery({ campusId: campus.id }))).total, 0);
   } finally {
     if (userIds.length) {
       const txRows = await db.select({ id: entries.id }).from(entries).where(inArray(entries.userId, userIds));
@@ -101,6 +157,9 @@ test("simulated ledger is atomic, concurrency-safe and retry-idempotent", { skip
     }
     if (accountIds.length) await db.delete(accounts).where(inArray(accounts.id, accountIds));
     if (userIds.length) await db.delete(users).where(inArray(users.id, userIds));
+    if (service) await db.delete(campusServices).where(eq(campusServices.id, service.id));
+    if (campus) await db.delete(campuses).where(eq(campuses.id, campus.id));
+    if (university) await db.delete(universities).where(eq(universities.id, university.id));
     await pool.end();
   }
 });

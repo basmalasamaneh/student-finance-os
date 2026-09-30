@@ -142,6 +142,22 @@ export interface FinanceReceiptItem {
   lineTotal: Amount;
 }
 
+export type FinanceSemanticType = typeof FinanceSemanticType[keyof typeof FinanceSemanticType];
+
+
+export const FinanceSemanticType = {
+  income: 'income',
+  expense: 'expense',
+  transfer: 'transfer',
+  allowance: 'allowance',
+  refund: 'refund',
+  savings: 'savings',
+  withdrawal: 'withdrawal',
+  deposit: 'deposit',
+  payment: 'payment',
+  campus_payment: 'campus_payment',
+} as const;
+
 export type FinanceTransactionDirection = typeof FinanceTransactionDirection[keyof typeof FinanceTransactionDirection];
 
 
@@ -160,8 +176,10 @@ export const FinanceTransactionStatus = {
 
 export interface FinanceTransaction {
   id: string;
+  userId: string;
   accountId: string;
   kind: string;
+  type: FinanceSemanticType;
   category: string;
   direction: FinanceTransactionDirection;
   amount: Amount;
@@ -173,6 +191,91 @@ export interface FinanceTransaction {
   items?: FinanceReceiptItem[];
   note?: string;
   createdAt: string;
+  description: string;
+  /** @nullable */
+  source: string | null;
+  /** @nullable */
+  destination: string | null;
+  accountName?: string;
+  /** @nullable */
+  relatedGoalId: string | null;
+  /** @nullable */
+  relatedBudgetId: string | null;
+  /** @nullable */
+  parentTransferId: string | null;
+  /** @nullable */
+  campusServiceId: string | null;
+  /** @nullable */
+  universityId: string | null;
+  /** @nullable */
+  campusId: string | null;
+  /** @nullable */
+  universityName?: string | null;
+  /** @nullable */
+  campusName?: string | null;
+  /** @nullable */
+  recurringExpenseId: string | null;
+}
+
+export interface FinanceHistoryPage {
+  items: FinanceTransaction[];
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+}
+
+export type FinanceHistoryFilterOptionsCategoriesItemGroup = typeof FinanceHistoryFilterOptionsCategoriesItemGroup[keyof typeof FinanceHistoryFilterOptionsCategoriesItemGroup];
+
+
+export const FinanceHistoryFilterOptionsCategoriesItemGroup = {
+  university: 'university',
+  school: 'school',
+  campus: 'campus',
+  legacy: 'legacy',
+} as const;
+
+export type FinanceHistoryFilterOptionsCategoriesItem = {
+  group: FinanceHistoryFilterOptionsCategoriesItemGroup;
+  key: string;
+  label: string;
+  arabicLabel: string;
+};
+
+export type FinanceHistoryFilterOptionsAccountsItemCurrency = typeof FinanceHistoryFilterOptionsAccountsItemCurrency[keyof typeof FinanceHistoryFilterOptionsAccountsItemCurrency];
+
+
+export const FinanceHistoryFilterOptionsAccountsItemCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export type FinanceHistoryFilterOptionsAccountsItem = {
+  id: string;
+  name: string;
+  currency: FinanceHistoryFilterOptionsAccountsItemCurrency;
+};
+
+export type FinanceHistoryFilterOptionsUniversitiesItem = {
+  id: string;
+  name: string;
+  arabicName: string;
+};
+
+export type FinanceHistoryFilterOptionsCampusesItem = {
+  id: string;
+  universityId: string;
+  name: string;
+  arabicName: string;
+};
+
+export interface FinanceHistoryFilterOptions {
+  categories: FinanceHistoryFilterOptionsCategoriesItem[];
+  accounts: FinanceHistoryFilterOptionsAccountsItem[];
+  universities: FinanceHistoryFilterOptionsUniversitiesItem[];
+  campuses: FinanceHistoryFilterOptionsCampusesItem[];
+  goals: string[];
 }
 
 export type FinanceCategoryTotalCurrency = typeof FinanceCategoryTotalCurrency[keyof typeof FinanceCategoryTotalCurrency];
@@ -626,4 +729,54 @@ export interface HealthStatus {
 }
 
 export type IdempotencyKeyParameter = string;
+
+export type GetFinanceHistoryParams = {
+/**
+ * @minLength 1
+ * @maxLength 120
+ */
+search?: string;
+/**
+ * @maxLength 80
+ */
+category?: string;
+type?: FinanceSemanticType;
+dateFrom?: string;
+dateTo?: string;
+/**
+ * @minimum 0
+ * @maximum 9007199254740991
+ */
+amountMin?: number;
+/**
+ * @minimum 0
+ * @maximum 9007199254740991
+ */
+amountMax?: number;
+amountCurrency?: GetFinanceHistoryAmountCurrency;
+accountId?: string;
+parentTransferId?: string;
+campusId?: string;
+universityId?: string;
+goalId?: string;
+/**
+ * @minimum 1
+ * @maximum 100000
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+};
+
+export type GetFinanceHistoryAmountCurrency = typeof GetFinanceHistoryAmountCurrency[keyof typeof GetFinanceHistoryAmountCurrency];
+
+
+export const GetFinanceHistoryAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
 

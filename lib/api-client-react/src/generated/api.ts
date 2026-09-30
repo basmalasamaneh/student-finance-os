@@ -32,10 +32,13 @@ import type {
   CampusUniversityInput,
   FinanceAccount,
   FinanceAccountInput,
+  FinanceHistoryFilterOptions,
+  FinanceHistoryPage,
   FinanceMovementInput,
   FinanceRecipient,
   FinanceSummary,
   FinanceTransaction,
+  GetFinanceHistoryParams,
   HealthStatus,
   Income,
   IncomeInput,
@@ -432,6 +435,158 @@ export function useListFinanceTransactions<TData = Awaited<ReturnType<typeof lis
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListFinanceTransactionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetFinanceHistoryUrl = (params?: GetFinanceHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/finance/history?${stringifiedParams}` : `/api/finance/history`
+}
+
+/**
+ * Owner-only immutable ledger, newest first by createdAt then id. Dates are inclusive UTC calendar days; amounts are integer minor units in amountCurrency.
+ */
+export const getFinanceHistory = async (params?: GetFinanceHistoryParams, options?: Parameters<typeof customFetch>[1]): Promise<FinanceHistoryPage> => {
+
+  return customFetch<FinanceHistoryPage>(getGetFinanceHistoryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFinanceHistoryQueryKey = (params?: GetFinanceHistoryParams,) => {
+    return [
+    `/api/finance/history`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetFinanceHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getFinanceHistory>>, TError = ErrorType<unknown>>(params?: GetFinanceHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFinanceHistoryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFinanceHistory>>> = ({ signal }) => getFinanceHistory(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFinanceHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getFinanceHistory>>>
+export type GetFinanceHistoryQueryError = ErrorType<unknown>
+
+
+
+export function useGetFinanceHistory<TData = Awaited<ReturnType<typeof getFinanceHistory>>, TError = ErrorType<unknown>>(
+ params?: GetFinanceHistoryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFinanceHistoryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetFinanceHistoryFilterOptionsUrl = () => {
+
+
+
+
+  return `/api/finance/history/filter-options`
+}
+
+export const getFinanceHistoryFilterOptions = async ( options?: Parameters<typeof customFetch>[1]): Promise<FinanceHistoryFilterOptions> => {
+
+  return customFetch<FinanceHistoryFilterOptions>(getGetFinanceHistoryFilterOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetFinanceHistoryFilterOptionsQueryKey = () => {
+    return [
+    `/api/finance/history/filter-options`
+    ] as const;
+    }
+
+
+export const getGetFinanceHistoryFilterOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFinanceHistoryFilterOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>> = ({ signal }) => getFinanceHistoryFilterOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetFinanceHistoryFilterOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>>
+export type GetFinanceHistoryFilterOptionsQueryError = ErrorType<unknown>
+
+
+
+export function useGetFinanceHistoryFilterOptions<TData = Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFinanceHistoryFilterOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetFinanceHistoryFilterOptionsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

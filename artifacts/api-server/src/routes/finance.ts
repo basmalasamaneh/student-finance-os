@@ -9,7 +9,8 @@ import {
 } from "@workspace/api-zod";
 import { requireRole, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
-import { accountDto, transactionDto, requestDto, positive, once, lockedAccounts, move, post, checked } from "../lib/finance";
+import { accountDto, requestDto, positive, once, lockedAccounts, move, post, checked } from "../lib/finance";
+import historyRouter, { enrichedTransactions, historyDetail } from "./finance-history";
 
 const router: IRouter = Router();
 function owner(req: Request) { return requireRole(req.res?.locals.principal as TrustedPrincipal | undefined, "student").userId; }
@@ -22,6 +23,7 @@ function id(req: Request): string {
   return raw;
 }
 const key = (req: Request) => req.get("Idempotency-Key");
+router.use(historyRouter);
 
 router.get("/finance/accounts", async (req, res) => {
   const rows = await db.select().from(financeAccounts).where(eq(financeAccounts.userId, owner(req)));
@@ -51,12 +53,12 @@ router.get("/finance/recipients/:id", async (req, res) => {
 router.get("/finance/transactions", async (req, res) => {
   const rows = await db.select().from(financeTransactions).where(eq(financeTransactions.userId, owner(req)))
     .orderBy(desc(financeTransactions.createdAt), desc(financeTransactions.id)).limit(100);
-  res.json(ListFinanceTransactionsResponse.parse(rows.map(transactionDto)));
+  res.json(ListFinanceTransactionsResponse.parse(await enrichedTransactions(owner(req), rows)));
 });
 router.get("/finance/transactions/:id", async (req, res) => {
-  const [row] = await db.select().from(financeTransactions).where(and(eq(financeTransactions.id, id(req)), eq(financeTransactions.userId, owner(req))));
-  if (!row) throw new ApiError("NOT_FOUND");
-  res.json(GetFinanceTransactionResponse.parse(transactionDto(row)));
+  const result = await historyDetail(owner(req), id(req));
+  if (!result) throw new ApiError("NOT_FOUND");
+  res.json(GetFinanceTransactionResponse.parse(result));
 });
 router.post("/finance/movements", async (req, res) => {
   const userId = owner(req), input = parse(CreateFinanceMovementBody, req.body), value = positive(input.amount);
@@ -81,7 +83,9 @@ router.post("/finance/movements", async (req, res) => {
       note: input.note,
     });
   });
-  res.status(201).json(CreateFinanceMovementResponse.parse(result));
+  const current = await historyDetail(userId, result.id);
+  if (!current) throw new ApiError("NOT_FOUND");
+  res.status(201).json(CreateFinanceMovementResponse.parse(current));
 });
 router.get("/finance/requests", async (req, res) => {
   const userId = owner(req);
@@ -156,6 +160,10 @@ router.get("/finance/summary", async (req, res) => {
     }
     totals.set(tx.currency, t);
   }
+  const recentRows = txs.slice(0, 20);
+  const campusRows = txs.filter(t => t.kind === "payment" && t.serviceId !== null).slice(0, 10);
+  const enriched = await enrichedTransactions(userId, [...new Map([...recentRows, ...campusRows].map(row => [row.id, row])).values()]);
+  const byId = new Map(enriched.map(row => [row.id, row]));
   res.json(GetFinanceSummaryResponse.parse({
     cashflow: [...totals].map(([currency, t]) => ({
       currency, balance: { currency, minor: Number(t.balance) },
@@ -164,8 +172,8 @@ router.get("/finance/summary", async (req, res) => {
     categoryTotals: [...categories].map(([k, v]) => {
       const [currency, category] = k.split(":"); return { currency, category, spending: { currency, minor: Number(v) } };
     }),
-    upcomingRequests: requests.map(requestDto), recentTransactions: txs.slice(0, 20).map(transactionDto),
-    campusActivity: txs.filter(t => t.kind === "payment" && t.serviceId !== null).slice(0, 10).map(transactionDto),
+    upcomingRequests: requests.map(requestDto), recentTransactions: recentRows.map(row => byId.get(row.id)),
+    campusActivity: campusRows.map(row => byId.get(row.id)),
   }));
 });
 export default router;

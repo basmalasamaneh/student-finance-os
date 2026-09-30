@@ -7,13 +7,16 @@
  */
 import type { Amount } from './amount';
 import type { FinanceReceiptItem } from './financeReceiptItem';
+import type { FinanceSemanticType } from './financeSemanticType';
 import type { FinanceTransactionDirection } from './financeTransactionDirection';
 import type { FinanceTransactionStatus } from './financeTransactionStatus';
 
 export interface FinanceTransaction {
   id: string;
+  userId: string;
   accountId: string;
   kind: string;
+  type: FinanceSemanticType;
   category: string;
   direction: FinanceTransactionDirection;
   amount: Amount;
@@ -25,4 +28,28 @@ export interface FinanceTransaction {
   items?: FinanceReceiptItem[];
   note?: string;
   createdAt: string;
+  description: string;
+  /** @nullable */
+  source: string | null;
+  /** @nullable */
+  destination: string | null;
+  accountName?: string;
+  /** @nullable */
+  relatedGoalId: string | null;
+  /** @nullable */
+  relatedBudgetId: string | null;
+  /** @nullable */
+  parentTransferId: string | null;
+  /** @nullable */
+  campusServiceId: string | null;
+  /** @nullable */
+  universityId: string | null;
+  /** @nullable */
+  campusId: string | null;
+  /** @nullable */
+  universityName?: string | null;
+  /** @nullable */
+  campusName?: string | null;
+  /** @nullable */
+  recurringExpenseId: string | null;
 }

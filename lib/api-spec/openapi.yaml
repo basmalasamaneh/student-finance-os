@@ -64,6 +64,39 @@ paths:
         "200":
           description: Recent owner ledger entries
           content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } } } }
+  /finance/history:
+    get:
+      operationId: getFinanceHistory
+      tags: [finance]
+      description: Owner-only immutable ledger, newest first by createdAt then id. Dates are inclusive UTC calendar days; amounts are integer minor units in amountCurrency.
+      parameters:
+        - { in: query, name: search, schema: { type: string, minLength: 1, maxLength: 120 } }
+        - { in: query, name: category, schema: { type: string, maxLength: 80 } }
+        - { in: query, name: type, schema: { $ref: "#/components/schemas/FinanceSemanticType" } }
+        - { in: query, name: dateFrom, schema: { type: string, format: date } }
+        - { in: query, name: dateTo, schema: { type: string, format: date } }
+        - { in: query, name: amountMin, schema: { type: integer, minimum: 0, maximum: 9007199254740991 } }
+        - { in: query, name: amountMax, schema: { type: integer, minimum: 0, maximum: 9007199254740991 } }
+        - { in: query, name: amountCurrency, schema: { type: string, enum: [ILS, USD, JOD] } }
+        - { in: query, name: accountId, schema: { type: string, format: uuid } }
+        - { in: query, name: parentTransferId, schema: { type: string, format: uuid } }
+        - { in: query, name: campusId, schema: { type: string, format: uuid } }
+        - { in: query, name: universityId, schema: { type: string, format: uuid } }
+        - { in: query, name: goalId, schema: { type: string, format: uuid } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, maximum: 100000 } }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1, maximum: 100 } }
+      responses:
+        "200":
+          description: Filtered owner ledger; empty items with total 0 means no matches
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceHistoryPage" } } }
+  /finance/history/filter-options:
+    get:
+      operationId: getFinanceHistoryFilterOptions
+      tags: [finance]
+      responses:
+        "200":
+          description: Static bilingual taxonomy plus owner-derived account and campus facets; goals are not implemented
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinanceHistoryFilterOptions" } } }
   /finance/transactions/{id}:
     get:
       operationId: getFinanceTransaction
@@ -490,13 +523,70 @@ components:
         quantity: { type: integer }
         unitPrice: { $ref: "#/components/schemas/Amount" }
         lineTotal: { $ref: "#/components/schemas/Amount" }
+    FinanceSemanticType:
+      type: string
+      enum: [income, expense, transfer, allowance, refund, savings, withdrawal, deposit, payment, campus_payment]
+    FinanceHistoryPage:
+      type: object
+      required: [items, page, limit, total, hasMore]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } }
+        page: { type: integer }
+        limit: { type: integer }
+        total: { type: integer }
+        hasMore: { type: boolean }
+    FinanceHistoryFilterOptions:
+      type: object
+      required: [categories, accounts, universities, campuses, goals]
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            required: [group, key, label, arabicLabel]
+            properties:
+              group: { type: string, enum: [university, school, campus, legacy] }
+              key: { type: string }
+              label: { type: string }
+              arabicLabel: { type: string }
+        accounts:
+          type: array
+          items:
+            type: object
+            required: [id, name, currency]
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              currency: { type: string, enum: [ILS, USD, JOD] }
+        universities:
+          type: array
+          items:
+            type: object
+            required: [id, name, arabicName]
+            properties:
+              id: { type: string, format: uuid }
+              name: { type: string }
+              arabicName: { type: string }
+        campuses:
+          type: array
+          items:
+            type: object
+            required: [id, universityId, name, arabicName]
+            properties:
+              id: { type: string, format: uuid }
+              universityId: { type: string, format: uuid }
+              name: { type: string }
+              arabicName: { type: string }
+        goals: { type: array, items: { type: string, format: uuid } }
     FinanceTransaction:
       type: object
-      required: [id, accountId, kind, category, direction, amount, balanceAfter, status, createdAt]
+      required: [id, userId, accountId, kind, type, category, direction, amount, balanceAfter, status, createdAt, description, source, destination, relatedGoalId, relatedBudgetId, parentTransferId, campusServiceId, universityId, campusId, recurringExpenseId]
       properties:
         id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
         accountId: { type: string, format: uuid }
         kind: { type: string }
+        type: { $ref: "#/components/schemas/FinanceSemanticType" }
         category: { type: string }
         direction: { type: string, enum: [credit, debit] }
         amount: { $ref: "#/components/schemas/Amount" }
@@ -508,6 +598,19 @@ components:
         items: { type: array, items: { $ref: "#/components/schemas/FinanceReceiptItem" } }
         note: { type: string }
         createdAt: { type: string, format: date-time }
+        description: { type: string }
+        source: { type: ["string", "null"] }
+        destination: { type: ["string", "null"] }
+        accountName: { type: string }
+        relatedGoalId: { type: ["string", "null"], format: uuid }
+        relatedBudgetId: { type: ["string", "null"], format: uuid }
+        parentTransferId: { type: ["string", "null"], format: uuid }
+        campusServiceId: { type: ["string", "null"], format: uuid }
+        universityId: { type: ["string", "null"], format: uuid }
+        campusId: { type: ["string", "null"], format: uuid }
+        universityName: { type: ["string", "null"] }
+        campusName: { type: ["string", "null"] }
+        recurringExpenseId: { type: ["string", "null"], format: uuid }
     FinanceCategoryTotal:
       type: object
       required: [currency, category, spending]

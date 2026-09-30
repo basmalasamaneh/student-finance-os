@@ -37,7 +37,11 @@ test("money is positive integer minor units and overflow fails closed", () => {
 test("receipts require server-owned posting fields", () => {
   const accountId = "3899c034-a246-465e-8ccb-8845d8c4c339";
   const receipt = {
-    id: accountId, accountId, kind: "payment", category: "food", direction: "debit",
+    id: accountId, userId: accountId, accountId, kind: "payment", type: "payment",
+    category: "food", direction: "debit", description: "Simulated payment",
+    source: "Account", destination: "External (simulated)",
+    relatedGoalId: null, relatedBudgetId: null, parentTransferId: null,
+    campusServiceId: null, universityId: null, campusId: null, recurringExpenseId: null,
     amount: { minor: 1700, currency: "ILS" }, balanceAfter: { minor: 0, currency: "ILS" },
     status: "simulated_payment", createdAt: new Date().toISOString(),
   };

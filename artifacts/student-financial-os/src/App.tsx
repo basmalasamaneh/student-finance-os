@@ -20,6 +20,8 @@ import AppearancePage from '@/pages/appearance';
 import NotImplementedPage from '@/pages/not-implemented';
 import NotFound from '@/pages/not-found';
 import MoneyPage from '@/pages/money';
+import TransactionsPage from '@/pages/transactions';
+import TransactionDetailPage from '@/pages/transaction-detail';
 import CampusPage from '@/pages/campus';
 import AdminCampusPage from '@/pages/admin-campus';
 
@@ -40,6 +42,8 @@ function Router() {
         <Route path="/foundation" component={FoundationPage} />
         <Route path="/appearance" component={AppearancePage} />
         <Route path="/money" component={MoneyPage} />
+        <Route path="/transactions" component={TransactionsPage} />
+        <Route path="/transactions/:id" component={TransactionDetailPage} />
         <Route path="/campus" component={CampusPage} />
         <Route path="/admin/institutions" component={AdminCampusPage} />
         {FUTURE_ROUTES.map((item) => (

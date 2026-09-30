@@ -28,6 +28,15 @@ export const financeTransactions = pgTable("finance_transactions", {
   merchantName: text("merchant_name"),
   items: jsonb("items"),
   note: text("note"),
+  // Optional, server-owned provenance. Existing ledger rows remain untouched.
+  universityId: uuid("university_id"),
+  campusId: uuid("campus_id"),
+  universityName: text("university_name"),
+  campusName: text("campus_name"),
+  relatedGoalId: uuid("related_goal_id"),
+  relatedBudgetId: uuid("related_budget_id"),
+  parentTransferId: uuid("parent_transfer_id"),
+  recurringExpenseId: uuid("recurring_expense_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, t => [index("finance_tx_user_time_idx").on(t.userId, t.createdAt), check("finance_tx_positive", sql`${t.amountMinor} > 0`)]);
 

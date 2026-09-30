@@ -119,8 +119,10 @@ export const listFinanceTransactionsResponseItemsItemLineTotalMinorMax = 9007199
 
 export const ListFinanceTransactionsResponseItem = zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -149,9 +151,157 @@ export const ListFinanceTransactionsResponseItem = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 })
 export const ListFinanceTransactionsResponse = zod.array(ListFinanceTransactionsResponseItem)
+
+
+/**
+ * Owner-only immutable ledger, newest first by createdAt then id. Dates are inclusive UTC calendar days; amounts are integer minor units in amountCurrency.
+ */
+export const getFinanceHistoryQuerySearchMax = 120;
+
+export const getFinanceHistoryQueryCategoryMax = 80;
+
+export const getFinanceHistoryQueryAmountMinMin = 0;
+export const getFinanceHistoryQueryAmountMinMax = 9007199254740991;
+
+export const getFinanceHistoryQueryAmountMaxMin = 0;
+export const getFinanceHistoryQueryAmountMaxMax = 9007199254740991;
+
+export const getFinanceHistoryQueryPageMax = 100000;
+
+export const getFinanceHistoryQueryLimitMax = 100;
+
+
+
+export const GetFinanceHistoryQueryParams = zod.object({
+  "search": zod.coerce.string().min(1).max(getFinanceHistoryQuerySearchMax).optional(),
+  "category": zod.coerce.string().max(getFinanceHistoryQueryCategoryMax).optional(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']).optional(),
+  "dateFrom": zod.coerce.string().date().optional(),
+  "dateTo": zod.coerce.string().date().optional(),
+  "amountMin": zod.coerce.number().int().min(getFinanceHistoryQueryAmountMinMin).max(getFinanceHistoryQueryAmountMinMax).optional(),
+  "amountMax": zod.coerce.number().int().min(getFinanceHistoryQueryAmountMaxMin).max(getFinanceHistoryQueryAmountMaxMax).optional(),
+  "amountCurrency": zod.enum(['ILS', 'USD', 'JOD']).optional(),
+  "accountId": zod.coerce.string().uuid().optional(),
+  "parentTransferId": zod.coerce.string().uuid().optional(),
+  "campusId": zod.coerce.string().uuid().optional(),
+  "universityId": zod.coerce.string().uuid().optional(),
+  "goalId": zod.coerce.string().uuid().optional(),
+  "page": zod.coerce.number().int().min(1).max(getFinanceHistoryQueryPageMax).optional(),
+  "limit": zod.coerce.number().int().min(1).max(getFinanceHistoryQueryLimitMax).optional()
+})
+
+export const getFinanceHistoryResponseItemsItemAmountMinorMin = 0;
+export const getFinanceHistoryResponseItemsItemAmountMinorMax = 9007199254740991;
+
+export const getFinanceHistoryResponseItemsItemBalanceAfterMinorMin = 0;
+export const getFinanceHistoryResponseItemsItemBalanceAfterMinorMax = 9007199254740991;
+
+export const getFinanceHistoryResponseItemsItemItemsItemUnitPriceMinorMin = 0;
+export const getFinanceHistoryResponseItemsItemItemsItemUnitPriceMinorMax = 9007199254740991;
+
+export const getFinanceHistoryResponseItemsItemItemsItemLineTotalMinorMin = 0;
+export const getFinanceHistoryResponseItemsItemItemsItemLineTotalMinorMax = 9007199254740991;
+
+
+
+export const GetFinanceHistoryResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
+  "accountId": zod.string().uuid(),
+  "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
+  "category": zod.string(),
+  "direction": zod.enum(['credit', 'debit']),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getFinanceHistoryResponseItemsItemAmountMinorMin).max(getFinanceHistoryResponseItemsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "balanceAfter": zod.object({
+  "minor": zod.number().int().min(getFinanceHistoryResponseItemsItemBalanceAfterMinorMin).max(getFinanceHistoryResponseItemsItemBalanceAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "status": zod.enum(['simulated', 'simulated_payment']),
+  "counterpartyAccountId": zod.string().uuid().optional(),
+  "serviceId": zod.string().uuid().optional(),
+  "merchantName": zod.string().optional(),
+  "items": zod.array(zod.object({
+  "productId": zod.string().uuid(),
+  "name": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPrice": zod.object({
+  "minor": zod.number().int().min(getFinanceHistoryResponseItemsItemItemsItemUnitPriceMinorMin).max(getFinanceHistoryResponseItemsItemItemsItemUnitPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "lineTotal": zod.object({
+  "minor": zod.number().int().min(getFinanceHistoryResponseItemsItemItemsItemLineTotalMinorMin).max(getFinanceHistoryResponseItemsItemItemsItemLineTotalMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})).optional(),
+  "note": zod.string().optional(),
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
+})),
+  "page": zod.number().int(),
+  "limit": zod.number().int(),
+  "total": zod.number().int(),
+  "hasMore": zod.boolean()
+})
+
+
+export const GetFinanceHistoryFilterOptionsResponse = zod.object({
+  "categories": zod.array(zod.object({
+  "group": zod.enum(['university', 'school', 'campus', 'legacy']),
+  "key": zod.string(),
+  "label": zod.string(),
+  "arabicLabel": zod.string()
+})),
+  "accounts": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})),
+  "universities": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "arabicName": zod.string()
+})),
+  "campuses": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "universityId": zod.string().uuid(),
+  "name": zod.string(),
+  "arabicName": zod.string()
+})),
+  "goals": zod.array(zod.string().uuid())
+})
 
 
 export const GetFinanceTransactionParams = zod.object({
@@ -174,8 +324,10 @@ export const getFinanceTransactionResponseItemsItemLineTotalMinorMax = 900719925
 
 export const GetFinanceTransactionResponse = zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -204,7 +356,20 @@ export const GetFinanceTransactionResponse = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 })
 
 
@@ -254,8 +419,10 @@ export const createFinanceMovementResponseItemsItemLineTotalMinorMax = 900719925
 
 export const CreateFinanceMovementResponse = zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -284,7 +451,20 @@ export const CreateFinanceMovementResponse = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 })
 
 
@@ -492,8 +672,10 @@ export const GetFinanceSummaryResponse = zod.object({
 }))),
   "recentTransactions": zod.array(zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -522,12 +704,27 @@ export const GetFinanceSummaryResponse = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 })),
   "campusActivity": zod.array(zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -556,7 +753,20 @@ export const GetFinanceSummaryResponse = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 }))
 })
 
@@ -1276,8 +1486,10 @@ export const createCampusPaymentResponseItemsItemLineTotalMinorMax = 90071992547
 
 export const CreateCampusPaymentResponse = zod.object({
   "id": zod.string().uuid(),
+  "userId": zod.string().uuid(),
   "accountId": zod.string().uuid(),
   "kind": zod.string(),
+  "type": zod.enum(['income', 'expense', 'transfer', 'allowance', 'refund', 'savings', 'withdrawal', 'deposit', 'payment', 'campus_payment']),
   "category": zod.string(),
   "direction": zod.enum(['credit', 'debit']),
   "amount": zod.object({
@@ -1306,7 +1518,20 @@ export const CreateCampusPaymentResponse = zod.object({
 })
 })).optional(),
   "note": zod.string().optional(),
-  "createdAt": zod.string().datetime({"offset":true})
+  "createdAt": zod.string().datetime({"offset":true}),
+  "description": zod.string(),
+  "source": zod.string().nullable(),
+  "destination": zod.string().nullable(),
+  "accountName": zod.string().optional(),
+  "relatedGoalId": zod.string().uuid().nullable(),
+  "relatedBudgetId": zod.string().uuid().nullable(),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "campusServiceId": zod.string().uuid().nullable(),
+  "universityId": zod.string().uuid().nullable(),
+  "campusId": zod.string().uuid().nullable(),
+  "universityName": zod.string().nullish(),
+  "campusName": zod.string().nullish(),
+  "recurringExpenseId": zod.string().uuid().nullable()
 })
 
 

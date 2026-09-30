@@ -11,6 +11,7 @@ import {
 import { requireRole, requirePrincipal, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
 import { once, lockedAccounts, post, checked } from "../lib/finance";
+import { historyDetail } from "./finance-history";
 
 const router: IRouter = Router();
 const student = (req: Request) => requireRole(req.res?.locals.principal as TrustedPrincipal | undefined, "student").userId;
@@ -172,6 +173,9 @@ router.post("/campus/payments", async (req, res) => {
     if (!account || account.userId !== userId) throw new ApiError("NOT_FOUND");
     const [service] = await tx.select().from(campusServices).where(eq(campusServices.id, input.serviceId)).for("share");
     if (!service || !service.active || !service.paymentEnabled || service.integrationStatus !== "simulated") throw new ApiError("CONFLICT");
+    const [campus] = await tx.select().from(campuses).where(eq(campuses.id, service.campusId)).for("share");
+    const [university] = campus ? await tx.select().from(universities).where(eq(universities.id, campus.universityId)).for("share") : [];
+    if (!campus || !university) throw new ApiError("CONFLICT");
     const items = [];
     let total = 0n;
     for (const requested of [...input.items].sort((a, b) => a.productId.localeCompare(b.productId))) {
@@ -185,8 +189,11 @@ router.post("/campus/payments", async (req, res) => {
     }
     if (total <= 0n) throw new ApiError("BAD_REQUEST");
     const current = (await lockedAccounts(tx, [account.id])).get(account.id)!;
-    return post(tx, current, -total, { kind: "payment", category: service.category, serviceId: service.id, merchantName: service.name, items });
+    return post(tx, current, -total, { kind: "payment", category: service.category, serviceId: service.id, merchantName: service.name, items,
+      campusId: campus.id, campusName: campus.name, universityId: university.id, universityName: university.name });
   });
-  res.status(201).json(CreateCampusPaymentResponse.parse(receipt));
+  const current = await historyDetail(userId, receipt.id);
+  if (!current) throw new ApiError("NOT_FOUND");
+  res.status(201).json(CreateCampusPaymentResponse.parse(current));
 });
 export default router;

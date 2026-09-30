@@ -111,7 +111,7 @@ export default function MoneyPage() {
               </section>
 
               <section className="flex flex-col gap-2">
-                <SectionHeading id="activity" title={t('Activity', 'النشاط')} meta={selected ? t('Filtered by account', 'مُصفّى حسب الحساب') : undefined} />
+                <SectionHeading id="activity" title={t('Activity', 'النشاط')} meta={selected ? t('Filtered by account', 'مُصفّى حسب الحساب') : undefined} trailing={<Link href={selected ? `/transactions?accountId=${selected}` : '/transactions'} className="type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid="link-full-history">{t('Full history', 'السجل الكامل')}</Link>} />
                 {txQ.isPending ? <SkeletonRows rows={4} label={t('Loading activity…', 'جارٍ تحميل النشاط…')} />
                   : txQ.isError ? <StatePanel tone="error" title={t('Activity did not load', 'تعذّر تحميل النشاط')} body={t('Try again in a moment.', 'حاول بعد قليل.')} action={<RetryButton label={t('Retry', 'إعادة المحاولة')} busyLabel="…" busy={txQ.isRefetching} onClick={() => txQ.refetch()} />} />
                     : txs.length ? <LedgerList items={txs.slice(0, 30)} accounts={accounts} t={t} onOpen={setReceipt} />
@@ -127,7 +127,7 @@ export default function MoneyPage() {
         <DialogContent className="max-h-[92dvh] w-[calc(100vw-1.5rem)] max-w-md overflow-y-auto" data-testid="dialog-receipt">
           <DialogHeader><DialogTitle>{t('Receipt', 'الإيصال')}</DialogTitle><DialogDescription>{t('Recorded entries are immutable.', 'القيود المسجلة غير قابلة للتعديل.')}</DialogDescription></DialogHeader>
           {receipt ? <Receipt tx={receipt} account={accounts.find((a) => a.id === receipt.accountId)} t={t} /> : null}
-          <DialogFooter><Button onClick={() => setReceipt(null)}>{t('Close', 'إغلاق')}</Button></DialogFooter>
+          <DialogFooter className="gap-2">{receipt ? <Button asChild variant="outline"><Link href={`/transactions/${receipt.id}`} data-testid="link-receipt-details">{t('Full details', 'التفاصيل الكاملة')}</Link></Button> : null}<Button onClick={() => setReceipt(null)}>{t('Close', 'إغلاق')}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </Page>
