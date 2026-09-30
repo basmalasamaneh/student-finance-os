@@ -4,6 +4,7 @@ import { MoneyDisplay } from '@/components/finance/money-display';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { accountName, CATEGORY_LABEL, KIND_LABEL, label, type Tx } from '@/features/money/money-model';
 import { ReviewRow, SimulatedNote } from './fields';
+import { SensitiveReference } from '@/features/security/sensitive-reference';
 
 export function statusText(status: string, t: Tx) {
   return status === 'simulated_payment' ? t('Simulated Payment', 'دفعة محاكاة') : t('Simulated', 'محاكاة');
@@ -14,30 +15,30 @@ export function Receipt({ tx, account, t }: { tx: FinanceTransaction; account?: 
   const { locale } = useI18n();
   const when = new Date(tx.createdAt);
   return (
-    <div className="card-premium motion-rise flex flex-col gap-4 rounded-card border p-4 md:p-5" data-testid="receipt">
-      <div className="flex flex-col items-center gap-2 pt-1 text-center">
+    <div className="card-premium motion-rise flex w-full min-w-0 max-w-full flex-col gap-4 rounded-card border p-4 md:p-5" data-testid="receipt">
+      <div className="flex min-w-0 flex-col items-center gap-2 pt-1 text-center">
         <span className="motion-pop grid size-11 place-items-center rounded-full bg-success-soft text-success"><CheckCircle2 className="size-5" aria-hidden /></span>
-        <p className="type-caption text-muted-foreground">{tx.merchantName ?? label(KIND_LABEL, tx.kind, t)}</p>
+        <p className="type-caption max-w-full break-words text-muted-foreground">{tx.merchantName ?? label(KIND_LABEL, tx.kind, t)}</p>
         <MoneyDisplay value={tx.amount} size="xl" tone={tx.direction === 'credit' ? 'positive' : 'default'} showPlus={tx.direction === 'credit'} testId="text-receipt-amount" />
         <span className="type-caption rounded-full border border-primary/40 bg-primary-soft px-2.5 py-0.5 font-medium text-gold-ink" data-testid="status-receipt">{statusText(tx.status, t)}</span>
       </div>
       {tx.items?.length ? (
-        <ul className="divide-y divide-divider border-y border-divider" data-testid="list-receipt-items">
+        <ul className="min-w-0 divide-y divide-divider border-y border-divider" data-testid="list-receipt-items">
           {tx.items.map((it) => (
-            <li key={it.productId} className="flex items-baseline justify-between gap-3 py-2">
+            <li key={it.productId} className="flex min-w-0 flex-wrap items-baseline justify-between gap-3 py-2">
               <span className="type-label min-w-0 break-words">{it.name} <span className="tabular text-muted-foreground">× {it.quantity}</span></span>
               <MoneyDisplay value={it.lineTotal} size="sm" />
             </li>
           ))}
         </ul>
       ) : null}
-      <dl className="divide-y divide-divider">
+      <dl className="min-w-0 divide-y divide-divider">
         <ReviewRow label={t('Type', 'النوع')}>{label(KIND_LABEL, tx.kind, t)} · {label(CATEGORY_LABEL, tx.category, t)}</ReviewRow>
-        <ReviewRow label={t('Account', 'الحساب')} testId="text-receipt-account">{account ? accountName(account, t) : tx.accountId}</ReviewRow>
+        <ReviewRow label={t('Account', 'الحساب')} testId="text-receipt-account">{account ? accountName(account, t) : <SensitiveReference value={tx.accountId} label={t('Account ID', 'معرّف الحساب')} copy />}</ReviewRow>
         <ReviewRow label={t('Balance after', 'الرصيد بعد')}><MoneyDisplay value={tx.balanceAfter} size="sm" /></ReviewRow>
-        {tx.counterpartyAccountId ? <ReviewRow label={t('Counterparty account', 'حساب الطرف الآخر')}><bdi className="tabular break-all text-xs">{tx.counterpartyAccountId}</bdi></ReviewRow> : null}
+        {tx.counterpartyAccountId ? <ReviewRow label={t('Counterparty account', 'حساب الطرف الآخر')}><SensitiveReference value={tx.counterpartyAccountId} label={t('Counterparty account', 'حساب الطرف الآخر')} copy /></ReviewRow> : null}
         <ReviewRow label={t('Date & time', 'التاريخ والوقت')}><bdi>{when.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' })}</bdi></ReviewRow>
-        <ReviewRow label={t('Transaction ID', 'رقم الحركة')} testId="text-receipt-id"><bdi className="tabular break-all text-xs">{tx.id}</bdi></ReviewRow>
+        <ReviewRow label={t('Transaction ID', 'رقم الحركة')} testId="text-receipt-id"><SensitiveReference value={tx.id} label={t('Transaction ID', 'رقم الحركة')} copy /></ReviewRow>
         {tx.note ? <ReviewRow label={t('Note', 'ملاحظة')}>{tx.note}</ReviewRow> : null}
       </dl>
       <SimulatedNote t={t} />

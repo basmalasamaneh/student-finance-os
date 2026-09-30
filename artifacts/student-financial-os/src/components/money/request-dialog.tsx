@@ -9,6 +9,7 @@ import { Notice } from '@/components/states/state-panel';
 import { AccountSelect, AmountInput, Field, inputClass, ReviewRow, SimulatedNote } from './fields';
 import { accountName, amountErrorText, apiErrorText, parseAmountInput, useIdempotencyKey, useRefreshFinance, type Tx } from '@/features/money/money-model';
 import type { Currency, Money } from '@/lib/money';
+import { SensitiveReference } from '@/features/security/sensitive-reference';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -66,6 +67,7 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
         <DialogHeader>
           <DialogTitle>{step === 'done' ? t('Request sent', 'تم إرسال الطلب') : step === 'review' ? t('Review request', 'مراجعة الطلب') : t('Request money', 'طلب مال')}</DialogTitle>
           <DialogDescription>{t('The payer sees it as pending and chooses to pay or decline. No money moves until they pay.', 'يراه الدافع معلّقاً ويختار الدفع أو الرفض. لا يتحرك مال حتى يدفع.')}</DialogDescription>
+          <span className="type-caption w-fit rounded-full border border-primary/40 bg-primary-soft px-2.5 py-1 text-gold-ink">{t('Simulated', 'محاكاة')}</span>
         </DialogHeader>
         <FlowSteps label={t('Progress', 'التقدم')} current={step === 'form' ? 0 : step === 'review' ? 1 : 2} steps={[t('Details', 'التفاصيل'), t('Review', 'مراجعة'), t('Done', 'تم')]} />
         {step === 'form' && (
@@ -74,16 +76,16 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
               <AccountSelect id="req_account" value={accountId} onChange={setAccountId} accounts={accounts} t={t} error={errors.req_account} />
             </Field>
             <Field id="req_payer" label={t('Payer account ID', 'معرّف حساب الدافع')} error={errors.req_payer} hint={t('Their account must use the same currency.', 'يجب أن يكون حسابه بنفس العملة.')}>
-              <input id="req_payer" dir="ltr" autoComplete="off" spellCheck={false} value={payerId} onChange={(e) => setPayerId(e.target.value)} className={`${inputClass} tabular text-xs`}
+              <input id="req_payer" type="text" inputMode="text" dir="ltr" autoComplete="off" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" spellCheck={false} value={payerId} onChange={(e) => setPayerId(e.target.value)} className={`${inputClass} tabular text-xs`}
                 aria-invalid={!!errors.req_payer} aria-describedby={errors.req_payer ? 'req_payer-error' : 'req_payer-hint'} data-testid="input-payer" />
             </Field>
             <Field id="req_amount" label={t('Amount', 'المبلغ')} error={errors.req_amount}>
               <AmountInput id="req_amount" value={amountRaw} onChange={setAmountRaw} currency={currency} error={errors.req_amount} />
             </Field>
             <Field id="req_note" label={t('What is it for? (optional)', 'لأي غرض؟ (اختياري)')}>
-              <input id="req_note" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} className={inputClass} data-testid="input-request-note" />
+              <input id="req_note" type="text" inputMode="text" autoComplete="off" enterKeyHint="done" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} className={inputClass} data-testid="input-request-note" />
             </Field>
-            <DialogFooter className="gap-2 pt-2">
+            <DialogFooter className="form-action-bar gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('Cancel', 'إلغاء')}</Button>
               <Button type="submit" disabled={!currency} data-testid="button-review-request">{t('Review', 'مراجعة')}</Button>
             </DialogFooter>
@@ -94,12 +96,12 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
             <div className="flex justify-center py-2"><MoneyDisplay value={amount} size="xl" /></div>
             <dl className="divide-y divide-divider border-y border-divider">
               <ReviewRow label={t('Receive into', 'الاستلام في')}>{accountName(account, t)}</ReviewRow>
-              <ReviewRow label={t('Payer account', 'حساب الدافع')}><bdi className="tabular break-all text-xs">{payer}</bdi></ReviewRow>
+              <ReviewRow label={t('Payer account', 'حساب الدافع')}><SensitiveReference value={payer} label={t('Payer account', 'حساب الدافع')} copy /></ReviewRow>
               {note.trim() ? <ReviewRow label={t('Note', 'ملاحظة')}>{note.trim()}</ReviewRow> : null}
             </dl>
             {mutation.isError ? <Notice tone="error" title={t('Not sent', 'لم يُرسل')} body={apiErrorText(mutation.error, t)} /> : null}
             <SimulatedNote t={t} />
-            <DialogFooter className="gap-2">
+            <DialogFooter className="form-action-bar gap-2">
               <Button variant="outline" disabled={mutation.isPending} onClick={() => { setStep('form'); idem.renew(); mutation.reset(); }}><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Edit', 'تعديل')}</Button>
               <Button onClick={confirm} loading={mutation.isPending} data-testid="button-confirm-request">
                 {t('Send request', 'إرسال الطلب')}
@@ -112,7 +114,8 @@ export function RequestDialog({ open, onOpenChange, accounts, t }: { open: boole
             <SuccessCheck label={t('Request sent', 'تم إرسال الطلب')} />
             <MoneyDisplay value={created.amount} size="lg" />
             <p className="type-label text-muted-foreground">{t('Pending until the payer responds.', 'معلّق حتى يرد الدافع.')}</p>
-            <DialogFooter className="w-full"><Button className="w-full sm:w-auto" onClick={() => onOpenChange(false)}>{t('Done', 'تم')}</Button></DialogFooter>
+            <SimulatedNote t={t} />
+            <DialogFooter className="form-action-bar w-full"><Button className="w-full sm:w-auto" onClick={() => onOpenChange(false)}>{t('Done', 'تم')}</Button></DialogFooter>
           </div>
         )}
       </DialogContent>

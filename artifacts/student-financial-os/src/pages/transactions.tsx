@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
+import { PullToRefresh } from '@/components/gestures/pull-to-refresh';
 import { LedgerList } from '@/components/money/ledger-list';
 import { FilterPanel } from '@/components/transactions/filter-panel';
 import { ActiveFilters } from '@/components/transactions/active-filters';
@@ -76,7 +77,10 @@ export default function TransactionsPage() {
   const Next = dir === 'rtl' ? ChevronLeft : ChevronRight;
   const optionsState = optionsQ.isPending ? 'loading' : optionsQ.isError ? 'error' : 'ready';
 
+  const refresh = () => Promise.all([valid ? historyQ.refetch() : Promise.resolve(), optionsQ.refetch()]);
+
   return (
+    <PullToRefresh onRefresh={refresh} label={t('Refreshing…', 'جارٍ التحديث…')}>
     <Page>
       <PageHeader eyebrow={t('IMMUTABLE LEDGER', 'سجل غير قابل للتعديل')} title={t('Transactions', 'المعاملات')}
         lede={t('Every simulated entry on your accounts, newest first. Entries are never edited — open one to see everything that was recorded.', 'كل قيد محاكاة على حساباتك، الأحدث أولاً. لا تُعدَّل القيود أبداً — افتح أي قيد لترى كل ما سُجّل.')} />
@@ -96,7 +100,7 @@ export default function TransactionsPage() {
           </Button>
         </div>
 
-        <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={t('Filter by type', 'تصفية حسب النوع')} data-testid="row-type-chips">
+        <div data-no-ptr className="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={t('Filter by type', 'تصفية حسب النوع')} data-testid="row-type-chips">
           {(['', ...SEMANTIC_TYPES] as string[]).map((ty) => {
             const on = filters.type === ty;
             return <button key={ty || 'all'} type="button" aria-pressed={on} onClick={() => patch({ type: ty })} className={cn('type-label inline-flex min-h-11 shrink-0 snap-start items-center rounded-full border px-4 transition-colors', on ? 'border-primary bg-primary-soft text-gold-ink' : 'border-border bg-surface text-muted-foreground hover:border-primary hover:text-foreground')} data-testid={`chip-type-${ty || 'all'}`}>{ty ? typeLabel(ty, t) : t('All', 'الكل')}</button>;
@@ -135,5 +139,6 @@ export default function TransactionsPage() {
 
       <FilterPanel open={panelOpen} onOpenChange={setPanelOpen} value={filters} onApply={setFilters} options={optionsQ.data} optionsState={optionsState} t={t} />
     </Page>
+    </PullToRefresh>
   );
 }

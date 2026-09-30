@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 /** Page container: consistent max width and gutters on the 4px rhythm. */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto w-full min-w-0 max-w-5xl px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-5 sm:px-8 md:pb-16 md:pt-10 lg:px-14 lg:pt-14', className)}>{children}</div>;
+  return <div className={cn('mx-auto w-full min-w-0 max-w-[1200px] px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-5 sm:px-8 min-[769px]:pb-16 md:pt-10 lg:px-14 lg:pt-14', className)}>{children}</div>;
 }
 
 export function PageHeader({ eyebrow, title, lede, actions }: { eyebrow?: string; title: string; lede?: string; actions?: ReactNode }) {

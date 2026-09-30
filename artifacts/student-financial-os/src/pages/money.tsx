@@ -20,6 +20,7 @@ import { LedgerList } from '@/components/money/ledger-list';
 import { Receipt } from '@/components/money/receipt';
 import { useAccount } from '@/features/auth/account';
 import { totalsByCurrency, useTx } from '@/features/money/money-model';
+import { useDeviceSecurity } from '@/features/security/device-security';
 
 const ACTIONS: { kind: FinanceMovementInputKind | 'request' | 'campus'; icon: typeof Wallet; en: string; ar: string; debit?: boolean }[] = [
   { kind: 'add', icon: Plus, en: 'Add money', ar: 'إضافة مال' },
@@ -36,6 +37,7 @@ const ACTIONS: { kind: FinanceMovementInputKind | 'request' | 'campus'; icon: ty
 export default function MoneyPage() {
   const t = useTx();
   const me = useAccount();
+  const { hideBalances } = useDeviceSecurity();
   const accountsQ = useListFinanceAccounts({ query: { queryKey: getListFinanceAccountsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
   const txQ = useListFinanceTransactions({ query: { queryKey: getListFinanceTransactionsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
   const reqQ = useListMoneyRequests({ query: { queryKey: getListMoneyRequestsQueryKey(), enabled: me.role === 'student', refetchInterval: 15_000, refetchOnWindowFocus: true } });
@@ -74,15 +76,15 @@ export default function MoneyPage() {
               <section aria-labelledby="totals-title" className="flex flex-col gap-3">
                 <h2 id="totals-title" className="type-caption text-muted-foreground">{t('Total by currency', 'الإجمالي حسب العملة')}</h2>
                 <div className="card-premium flex flex-wrap items-end gap-x-10 gap-y-3 rounded-card border p-5 md:p-6" data-testid="text-totals">
-                  {totals.map((m) => m.value ? <MoneyDisplay key={m.currency} value={m.value} size="hero" /> : <p key={m.currency} role="alert" className="type-label text-destructive">{t(`${m.currency} total is too large to display exactly.`, `إجمالي ${m.currency} أكبر من أن يُعرض بدقة.`)}</p>)}
+                  {totals.map((m) => m.value ? <MoneyDisplay key={m.currency} value={m.value} hidden={hideBalances} hiddenLabel={t('Balance hidden', 'الرصيد مخفي')} size="hero" /> : <p key={m.currency} role="alert" className="type-label text-destructive">{t(`${m.currency} total is too large to display exactly.`, `إجمالي ${m.currency} أكبر من أن يُعرض بدقة.`)}</p>)}
                 </div>
                 {summaryQ.data?.cashflow.some((c) => (c.reservedBalance?.minor ?? 0) > 0) ? (
                   <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="list-balance-breakdown">
                     {summaryQ.data.cashflow.filter((c) => c.reservedBalance && c.netBalance).map((c) => (
                       <div key={c.currency} className="type-caption flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg bg-surface-sunken px-3 py-2">
-                        <span><dt className="inline text-muted-foreground">{t('Available', 'المتاح')} </dt><dd className="inline"><MoneyDisplay value={c.balance} size="sm" className="inline !text-xs" /></dd></span>
-                        <span><dt className="inline text-muted-foreground">+ {t('Reserved in goals', 'محجوز في الأهداف')} </dt><dd className="inline"><MoneyDisplay value={c.reservedBalance!} size="sm" tone="highlight" className="inline !text-xs" testId={`text-money-reserved-${c.currency}`} /></dd></span>
-                        <span><dt className="inline text-muted-foreground">= {t('Net', 'الصافي')} </dt><dd className="inline"><MoneyDisplay value={c.netBalance!} size="sm" className="inline !text-xs" testId={`text-money-net-${c.currency}`} /></dd></span>
+                        <span><dt className="inline text-muted-foreground">{t('Available', 'المتاح')} </dt><dd className="inline"><MoneyDisplay value={c.balance} hidden={hideBalances} hiddenLabel={t('Balance hidden', 'الرصيد مخفي')} size="sm" className="inline !text-xs" /></dd></span>
+                        <span><dt className="inline text-muted-foreground">+ {t('Reserved in goals', 'محجوز في الأهداف')} </dt><dd className="inline"><MoneyDisplay value={c.reservedBalance!} hidden={hideBalances} hiddenLabel={t('Balance hidden', 'الرصيد مخفي')} size="sm" tone="highlight" className="inline !text-xs" testId={`text-money-reserved-${c.currency}`} /></dd></span>
+                        <span><dt className="inline text-muted-foreground">= {t('Net', 'الصافي')} </dt><dd className="inline"><MoneyDisplay value={c.netBalance!} hidden={hideBalances} hiddenLabel={t('Balance hidden', 'الرصيد مخفي')} size="sm" className="inline !text-xs" testId={`text-money-net-${c.currency}`} /></dd></span>
                       </div>
                     ))}
                   </dl>

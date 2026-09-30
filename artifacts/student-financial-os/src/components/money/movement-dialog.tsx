@@ -11,6 +11,11 @@ import { MoneyDisplay } from '@/components/finance/money-display';
 import { Notice } from '@/components/states/state-panel';
 import { AccountSelect, AmountInput, BalanceHint, Field, inputClass, ReviewRow, SimulatedNote } from './fields';
 import { Receipt } from './receipt';
+import { HighValueConfirm } from './high-value-confirm';
+import { useSuccessHaptic } from './use-success-haptic';
+import { useDeviceSecurity } from '@/features/security/device-security';
+import { SensitiveReference } from '@/features/security/sensitive-reference';
+import { useI18n } from '@/features/i18n/i18n-provider';
 import {
   accountName, amountErrorText, apiErrorText, KIND_LABEL, label, parseAmountInput, useIdempotencyKey, useRefreshFinance, type Tx,
 } from '@/features/money/money-model';
@@ -45,6 +50,9 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
   const idem = useIdempotencyKey();
   const refresh = useRefreshFinance();
   const mutation = useCreateFinanceMovement({ request: { headers: idem.headers } });
+  const { confirmationThreshold } = useDeviceSecurity();
+  const { locale } = useI18n();
+  useSuccessHaptic(step === 'done' ? receipt?.id ?? null : null);
 
   useEffect(() => {
     if (open) {
@@ -105,6 +113,8 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
 
   const title = label(KIND_LABEL, kind, t);
   const sendBlocked = kind === 'send' && (lookup.isLoading || lookup.isError || !!recipientMismatch);
+  const enhanced = (kind === 'send' || kind === 'transfer') && !!amount &&
+    (amount.currency !== 'ILS' || amount.minor > confirmationThreshold.minor);
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!mutation.isPending) onOpenChange(o); }}>
@@ -112,6 +122,7 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
         <DialogHeader>
           <DialogTitle>{step === 'review' ? t(`Review: ${title}`, `مراجعة: ${title}`) : step === 'done' ? t('Recorded', 'تم التسجيل') : title}</DialogTitle>
           <DialogDescription>{step === 'review' ? t('Check every detail. Nothing moves until you confirm.', 'راجع كل التفاصيل. لا يتحرك شيء حتى تؤكد.') : t(DESCRIPTION[kind][0], DESCRIPTION[kind][1])}</DialogDescription>
+          <span className="type-caption w-fit rounded-full border border-primary/40 bg-primary-soft px-2.5 py-1 text-gold-ink">{t('Simulated', 'محاكاة')}</span>
         </DialogHeader>
         <FlowSteps label={t('Progress', 'التقدم')} current={step === 'form' ? 0 : step === 'review' ? 1 : 2} steps={[t('Details', 'التفاصيل'), t('Review', 'مراجعة'), t('Done', 'تم')]} />
 
@@ -129,7 +140,7 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
             )}
             {kind === 'send' && (
               <Field id="recipient" label={t('Recipient account ID', 'معرّف حساب المستلم')} error={errors.recipient} hint={t('Ask the recipient to copy it from their Money page.', 'اطلب من المستلم نسخه من صفحة المال لديه.')}>
-                <input id="recipient" dir="ltr" autoComplete="off" spellCheck={false} value={recipientId} onChange={(e) => setRecipientId(e.target.value)}
+                <input id="recipient" type="text" inputMode="text" dir="ltr" autoComplete="off" autoCapitalize="none" autoCorrect="off" enterKeyHint="next" spellCheck={false} value={recipientId} onChange={(e) => setRecipientId(e.target.value)}
                   placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className={`${inputClass} tabular text-xs`} aria-invalid={!!errors.recipient} aria-describedby={errors.recipient ? 'recipient-error' : 'recipient-hint'} data-testid="input-recipient" />
               </Field>
             )}
@@ -137,9 +148,9 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
               <AmountInput id="amount" value={amountRaw} onChange={setAmountRaw} currency={currency} error={errors.amount} />
             </Field>
             <Field id="note" label={t('Note (optional)', 'ملاحظة (اختياري)')} error={errors.note}>
-              <input id="note" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} className={inputClass} aria-invalid={!!errors.note} data-testid="input-note" />
+              <input id="note" type="text" inputMode="text" autoComplete="off" enterKeyHint="done" value={note} maxLength={300} onChange={(e) => setNote(e.target.value)} className={inputClass} aria-invalid={!!errors.note} data-testid="input-note" />
             </Field>
-            <DialogFooter className="gap-2 pt-2">
+            <DialogFooter className="form-action-bar gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} data-testid="button-cancel">{t('Cancel', 'إلغاء')}</Button>
               <Button type="submit" disabled={!currency} data-testid="button-review">{t('Review', 'مراجعة')}</Button>
             </DialogFooter>
@@ -162,6 +173,11 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
                       : <span className="text-destructive">{t('Not verified', 'غير متحقق')}</span>}
                 </ReviewRow>
               ) : null}
+              {kind === 'send' ? <ReviewRow label={t('Recipient account ID', 'معرّف حساب المستلم')}><SensitiveReference value={trimmedRecipient} copy /></ReviewRow> : null}
+              {enhanced ? <>
+                <ReviewRow label={t('Fee', 'الرسوم')}>{t('None', 'لا توجد')}</ReviewRow>
+                <ReviewRow label={t('Date', 'التاريخ')}><bdi>{new Date().toLocaleDateString(locale, { dateStyle: 'medium' })}</bdi> · {t('Today', 'اليوم')}</ReviewRow>
+              </> : null}
               <ReviewRow label={t('Balance now', 'الرصيد الآن')}><MoneyDisplay value={source.balance} size="sm" /></ReviewRow>
               {note.trim() ? <ReviewRow label={t('Note', 'ملاحظة')}>{note.trim()}</ReviewRow> : null}
             </dl>
@@ -169,11 +185,11 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
             {recipientMismatch ? <Notice tone="error" title={t('Currency mismatch', 'عدم تطابق العملة')} body={t(`The recipient account uses ${lookup.data!.currency}. Send from a ${lookup.data!.currency} account.`, `حساب المستلم بعملة ${lookup.data!.currency}. أرسل من حساب بنفس العملة.`)} /> : null}
             {mutation.isError ? <Notice tone="error" title={t('Not completed', 'لم يكتمل')} body={apiErrorText(mutation.error, t)} /> : null}
             <SimulatedNote t={t} />
-            <DialogFooter className="gap-2">
+            <DialogFooter className={`form-action-bar gap-2 ${enhanced ? 'sm:flex-col' : ''}`}>
               <Button type="button" variant="outline" disabled={mutation.isPending} onClick={() => { setStep('form'); idem.renew(); mutation.reset(); }} data-testid="button-edit"><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Edit', 'تعديل')}</Button>
-              <Button type="button" onClick={confirm} disabled={sendBlocked} loading={mutation.isPending} data-testid="button-confirm">
+              {enhanced ? <HighValueConfirm onConfirm={confirm} disabled={!!sendBlocked} pending={mutation.isPending} threshold={confirmationThreshold} t={t} testId="button-confirm" /> : <Button type="button" onClick={confirm} disabled={sendBlocked} loading={mutation.isPending} data-testid="button-confirm">
                 {mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm', 'تأكيد')}
-              </Button>
+              </Button>}
             </DialogFooter>
           </div>
         )}
@@ -182,7 +198,7 @@ export function MovementDialog({ kind, open, onOpenChange, accounts, defaultAcco
           <>
             <SuccessCheck label={t('Recorded', 'تم التسجيل')} />
             <Receipt tx={receipt} account={source} t={t} />
-            <DialogFooter><Button onClick={() => onOpenChange(false)} data-testid="button-done">{t('Done', 'تم')}</Button></DialogFooter>
+            <DialogFooter className="form-action-bar"><Button onClick={() => onOpenChange(false)} data-testid="button-done">{t('Done', 'تم')}</Button></DialogFooter>
           </>
         )}
       </DialogContent>

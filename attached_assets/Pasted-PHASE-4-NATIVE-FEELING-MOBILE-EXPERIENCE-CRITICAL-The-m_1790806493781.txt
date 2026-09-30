@@ -1,0 +1,61 @@
+PHASE 4 — NATIVE-FEELING MOBILE EXPERIENCE (CRITICAL)
+
+The mobile web app must feel like an installed native app, not a shrunk website.
+
+App shell & navigation
+Bottom tab bar (mobile ≤ 768px): 5 items max, icon + label, active state = gold icon + small gold pill/indicator, blur/translucent background (backdrop-filter), respects env(safe-area-inset-bottom). Keep existing student/parent/admin navigation items exactly as defined in Prompt 1 (University students' extra items Campus/Upcoming go in a "More" sheet or a secondary entry so the bar stays at 5).
+Desktop ≥ 1024px: sidebar (collapsible) with the same items; tablet: compact icon rail.
+Top app bar: large title that collapses to a compact title on scroll, back button with correct RTL direction, sticky, blur background, respects env(safe-area-inset-top).
+Page transitions: short (≤ 250ms) slide/fade transitions between routes and sheet open/close; disabled under prefers-reduced-motion.
+Preserve scroll position when returning to a list; restore tab state.
+Bottom sheets (replace modals on mobile)
+Drag handle, drag-to-dismiss, snap points (e.g. 50% / 90%), backdrop tap to close, focus trapping, Esc on desktop, scroll inside sheet content without scrolling the page behind.
+Sheets hold: filters, contribute-to-goal, add money, transaction details, pickers, confirmations.
+Keyboard-aware: when the on-screen keyboard opens, the primary action stays visible (use 100dvh/visual viewport handling).
+Touch & gesture polish
+All tap targets ≥ 44×44px, spacing ≥ 8px between targets.
+Press feedback (scale/opacity) on every tappable element; remove 300ms delay and default tap highlight (-webkit-tap-highlight-color: transparent, touch-action: manipulation).
+Pull-to-refresh on Home and Transactions (re-fetch data; custom gold spinner).
+Swipe actions on transaction rows and goal cards where actions already exist (e.g. swipe for details / pause) — always provide a non-gesture alternative too.
+Horizontal carousels use scroll-snap; no accidental page-level horizontal scroll.
+overscroll-behavior set so the app shell doesn't rubber-band oddly; disable text selection on UI chrome (keep it for amounts/ref numbers users may copy).
+Lightweight haptics via navigator.vibrate only where supported, only for key confirmations (payment success, goal completed), and never required.
+Forms on mobile
+Correct keyboard types: inputmode="decimal" for amounts, tel, email, proper autocomplete attributes.
+Custom numeric keypad is optional; native keypad with large amount display is acceptable.
+Dates via native-feeling date pickers in sheets.
+Sticky bottom primary action bar (above keyboard, above tab bar, inside safe area).
+Installable PWA (presentation only, no offline financial logic)
+Add/verify manifest.webmanifest: name "Student Financial OS", short_name, display: standalone, theme_color (gold 
+#D4AF37 light / 
+#0D0B07 dark via media-aware meta tags), background_color, icons (192/512 + maskable), start_url, lang/dir aware.
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style, apple touch icon.
+Generate the gold app icon and splash assets if they do not exist (simple monogram/wallet mark on gold gradient).
+Do NOT add offline caching of financial data. A minimal service worker for installability is allowed only if it cannot serve stale money data.
+Performance feel
+Skeletons instead of blank screens; optimistic UI for simulated actions already backed by real state updates (roll back on failure).
+Lazy-load heavy chart code per route; avoid layout shift; images/icons sized explicitly.
+Target smooth 60fps animations: animate only transform and opacity.
+Responsive behavior
+Mobile: single column, bottom tabs, sheets. Tablet: two-column where useful, rail navigation. Desktop: sidebar, max content width ~1200px, dialogs instead of sheets, tables where appropriate.
+No horizontal overflow at 320px width, no clipped content under notches/home indicators.
+PHASE 5 — LOCALIZATION, THEMES & ACCESSIBILITY PASS
+Verify the 4 combinations on every screen: English+Light, English+Dark, Arabic+Light, Arabic+Dark.
+RTL: layout, tab order, bottom bar order, sheets, carousels' scroll start, progress bars fill direction, chart axes, arrows/chevrons, swipe gesture directions (swipe actions reverse in RTL), form alignment, number formatting.
+Keep currency as ₪ with correct placement in both languages. Amounts remain LTR-isolated inside RTL text (use dir="ltr"/<bdi> or Intl handling) so "₪742.50" never renders scrambled.
+Dark mode uses the dedicated black-gold tokens — verify shadows, borders, charts, skeletons, and images look intentional.
+Accessibility: visible focus, keyboard navigation for desktop, ARIA roles/labels on tab bar, sheets (role="dialog", aria-modal), progress bars, charts (text summary), and the hide/show balance toggle; prefers-reduced-motion respected everywhere.
+PHASE 5B — SECURITY & TRUST UX (UI LAYER ONLY, SIMULATED)
+
+Fintech users expect to feel safe. Add these as front-end experiences without touching the existing authentication, sessions, database, or API. Device-level preferences are stored locally on the device (never the PIN in plain text). Anything that would need a real backend or biometrics is shown as Coming soon.
+
+Hide balances: the eye toggle on the balance card (Phase 2) plus a setting "Hide balances by default". Hidden amounts show •••• and keep the layout stable.
+App lock (optional, off by default) in Settings → Security: user sets a 4–6 digit PIN on a clean numeric keypad screen. Store only a salted hash on the device. Lock screen with gold keypad, attempt limit with a calm cooldown message. This is a convenience lock and does not replace real login. Label "Biometric unlock" as Coming soon.
+Auto-lock / idle timeout: choose 1 / 5 / 15 min / Never (only when app lock is on). Show a gentle "Still there?" prompt before locking.
+Privacy screen: when the app goes to the background or the app-switcher (visibilitychange/pagehide), show a blurred gold-branded cover so balances are not visible in thumbnails.
+Confirm important actions: for simulated transfers, sends, and campus payments above a configurable amount (default suggestion ₪200, editable in Settings), use a review bottom sheet with a clear summary (from, to, amount, fee = none, date) and a slide-to-confirm control (with a normal button fallback for accessibility).
+Masked sensitive data: account/reference numbers show only the last 4 characters with a "reveal" tap; copy button for reference numbers.
+Persistent "Simulated" clarity: a small, tasteful "Simulated" badge on money flows and receipts, plus the existing "Coming soon" labels. No wording that suggests real money moves.
+Security center screen (Settings → Security): shows app lock status, hide-balances setting, idle timeout, and a "Recent activity" list that uses existing data if available, otherwise an empty state marked Coming soon. Also link to privacy info consistent with the PRIVACY section of the master spec (city/area only, no exact addresses).
+Trust microcopy: short, calm, human messages such as "Only you can see this unless you share it." and "This is a simulated payment." No fear-based language.
+All of the above: EN + AR (RTL), Light + Dark, keyboard accessible, prefers-reduced-motion respected, and mobile-first with bottom sheets.

@@ -42,9 +42,9 @@ export function AmountInput({ id, value, onChange, currency, error, large }: { i
 /** Label/value row used in review and receipt screens. */
 export function ReviewRow({ label, children, testId }: { label: string; children: ReactNode; testId?: string }) {
   return (
-    <div className="flex min-w-0 items-baseline justify-between gap-4 py-2.5">
-      <dt className="type-label shrink-0 font-normal text-muted-foreground">{label}</dt>
-      <dd className="type-label min-w-0 break-words text-end" data-testid={testId}>{children}</dd>
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1.5 py-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] sm:items-baseline sm:gap-4">
+      <dt className="type-label min-w-0 break-words font-normal text-muted-foreground">{label}</dt>
+      <dd className="type-label min-w-0 max-w-full break-words text-start sm:text-end" data-testid={testId}>{children}</dd>
     </div>
   );
 }

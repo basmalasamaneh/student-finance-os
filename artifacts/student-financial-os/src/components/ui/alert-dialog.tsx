@@ -1,3 +1,4 @@
+import { useKeyboardInset } from '@/components/gestures/use-visual-viewport';
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
 import { buttonVariants } from '@/components/ui/button';
@@ -27,7 +28,10 @@ AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
 const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => {
+  // Confirmations are never drag-dismissed (explicit choice required); keyboard-aware positioning only.
+  useKeyboardInset();
+  return (
   <AlertDialogPortal>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
@@ -42,7 +46,8 @@ const AlertDialogContent = React.forwardRef<
       {children}
     </AlertDialogPrimitive.Content>
   </AlertDialogPortal>
-));
+  );
+});
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 
 const AlertDialogHeader = ({

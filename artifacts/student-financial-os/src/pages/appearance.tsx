@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useTheme } from '@/features/theme/theme-provider';
 import { cn } from '@/lib/utils';
+import { SecuritySettings } from '@/features/security/security-settings';
 
 /** Accessible segmented radio group — reused for every preference. */
 function Choice<T extends string>({ name, value, options, onChange }: { name: string; value: T; options: { value: T; label: string; icon?: ReactNode; lang?: string }[]; onChange: (v: T) => void }) {
@@ -80,6 +81,8 @@ export default function AppearancePage() {
           ]}
         />
       </Section>
+
+      <SecuritySettings />
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-divider pt-8">
         <p className="inline-flex items-center gap-2 type-label font-normal text-muted-foreground">

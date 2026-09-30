@@ -617,18 +617,20 @@ svg.lucide { stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; 
 @keyframes sfos-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes sfos-sheet-out { from { transform: translateY(0); } to { transform: translateY(100%); } }
 .sheet-grabber { display: none; }
-@media (max-width: 639.98px) {
+@media (max-width: 768px) {
   .sheet-mobile {
-    top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+    top: auto !important; left: 0 !important; right: 0 !important;
     translate: none !important; transform: none;
     width: 100% !important; max-width: none !important;
-    max-height: calc(100dvh - 2.5rem) !important;
+    bottom: var(--kb-inset, 0px) !important;
+    max-height: calc(100dvh - var(--kb-inset, 0px) - 2.5rem) !important;
+    transition: max-height var(--duration-base) var(--ease-out-soft), transform var(--duration-base) var(--ease-out-soft);
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0 !important;
     border-bottom-width: 0 !important;
     padding-bottom: calc(env(safe-area-inset-bottom) + 1.25rem) !important;
     padding-top: 1.75rem !important;
   }
-  .sheet-mobile[data-state='open'] { animation: sfos-sheet-in 280ms var(--ease-out-soft) both !important; }
+  .sheet-mobile[data-state='open'] { animation: sfos-sheet-in 240ms var(--ease-out-soft) backwards !important; }
   .sheet-mobile[data-state='closed'] { animation: sfos-sheet-out 200ms ease-in both !important; }
   .sheet-mobile > .sheet-grabber {
     display: block; position: absolute; top: 0.625rem; left: 50%; translate: -50% 0;
@@ -645,3 +647,85 @@ svg.lucide { stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; 
 .plan-card > section, .plan-card > div { border-top-width: 0 !important; }
 .grouped-list { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-card); border: 1px solid hsl(var(--card-border)); background-color: hsl(var(--card)); }
 .grouped-list > * + * { border-top: 1px solid hsl(var(--divider)); }
+
+/* ═════════════ Gold Phase 4 — native-feeling mobile shell ═════════════ */
+:root { --kb-inset: 0px; --tabbar-h: 4rem; --appbar-h: 3.5rem; }
+html { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+body { overscroll-behavior-y: none; overflow-x: clip; }
+#root { overflow-x: clip; }
+a, button, [role='button'], [role='tab'], [role='radio'], [role='menuitem'], label, summary, input, select, textarea { touch-action: manipulation; }
+/* UI chrome is not selectable; amounts, references and user content stay copyable. */
+nav, header[class*='sticky'], .chrome, button, [role='tab'], [role='radio'], .sheet-grabber { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.tabular, bdi, [data-copyable], code, input, textarea { -webkit-user-select: text; user-select: text; }
+/* Press feedback: scale + opacity on anything tappable (transform/opacity only). */
+@media (hover: none) {
+  :is(button, a[href], [role='button'], [role='tab'], [role='radio']):not(:disabled):not([aria-disabled='true']):active { transform: scale(0.97); opacity: 0.86; }
+  :is(button, a[href], [role='button']) { transition: transform 120ms var(--ease-out-soft), opacity 120ms ease-out; }
+}
+.press:active { transform: scale(0.97); opacity: 0.86; }
+
+/* Scroll-snap carousels; horizontal scrollers never chain into the page. */
+.snap-x { overscroll-behavior-x: contain; }
+[dir='rtl'] .snap-x { scroll-padding-inline-start: 1rem; }
+
+/* Route transition ≤ 200ms (reduced motion collapses it via the global rules above). */
+@keyframes sfos-route { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.route-enter { animation: sfos-route 200ms var(--ease-out-soft) both; }
+
+/* Collapsing app bar: compact title fades in once the page's large H1 scrolls under the bar. */
+.appbar { padding-top: env(safe-area-inset-top); }
+.appbar-title { opacity: 0; transform: translateY(6px); transition: opacity var(--duration-fast) ease-out, transform var(--duration-base) var(--ease-out-soft); }
+.appbar[data-compact='true'] .appbar-title { opacity: 1; transform: none; }
+.appbar[data-compact='true'] { box-shadow: 0 1px 0 0 hsl(var(--divider)); }
+
+/* Bottom tab bar: translucent, safe-area aware, gold pill indicator. */
+.tabbar { background-color: hsl(var(--background) / 0.82); backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px); padding-bottom: env(safe-area-inset-bottom); }
+html[data-keyboard] .tabbar { transform: translateY(110%); }
+.tab-pill { transform: scaleX(0.4); opacity: 0; transition: transform var(--duration-base) var(--ease-out-soft), opacity var(--duration-fast) ease-out; }
+[aria-current='page'] > .tab-wrap > .tab-pill { transform: none; opacity: 1; }
+
+/* Sticky primary action bar for FORMS only (opt-in class). Sits above the tab bar and keyboard. */
+.form-action-bar {
+  position: sticky; bottom: calc(var(--kb-inset) + env(safe-area-inset-bottom)); z-index: 20;
+  margin-inline: -1rem; padding: 0.75rem 1rem; display: flex; gap: 0.5rem;
+  background-color: hsl(var(--background) / 0.9); backdrop-filter: blur(12px); border-top: 1px solid hsl(var(--divider));
+}
+@media (max-width: 768px) { .form-action-bar { bottom: calc(var(--kb-inset) + var(--tabbar-h) + env(safe-area-inset-bottom)); } html[data-keyboard] .form-action-bar { bottom: var(--kb-inset); } }
+@media (min-width: 769px) { .form-action-bar { position: static; margin-inline: 0; padding-inline: 0; background: none; backdrop-filter: none; } }
+[role='dialog'] .form-action-bar { bottom: 0; }
+
+/* Bottom sheets: snap points (full ≈ 90dvh cap, half = 50dvh with inner scroll). */
+@media (max-width: 768px) {
+  .sheet-mobile[data-snap='half'] { height: 50dvh !important; max-height: 50dvh !important; }
+  .sheet-mobile { max-height: min(90dvh, calc(100dvh - var(--kb-inset, 0px) - 2.5rem)) !important; }
+}
+.sheet-bottom { bottom: var(--kb-inset, 0px); padding-top: 1.75rem; }
+.sheet-bottom[data-snap='half'] { height: 50dvh; max-height: 50dvh; overflow-y: auto; }
+.sheet-grabber-always { display: block; position: absolute; top: 0.625rem; left: 50%; translate: -50% 0; width: 2.5rem; height: 0.3125rem; border-radius: 999px; background: hsl(var(--border)); }
+/* Enlarged invisible drag zone on the grabber (touch ≥ 44px). */
+.sheet-mobile > .sheet-grabber::before, .sheet-grabber-always::before { content: ''; position: absolute; inset: -1.25rem -2.5rem; }
+
+/* Pull-to-refresh gold spinner. */
+.ptr-content { transition: transform var(--duration-base) var(--ease-out-soft); }
+.ptr-spinner { width: 1.75rem; height: 1.75rem; border-radius: 999px; border: 3px solid hsl(var(--gold-200)); border-top-color: hsl(var(--gold-500)); background: hsl(var(--bg-surface)); box-shadow: var(--shadow-md); }
+.dark .ptr-spinner { border-color: hsl(var(--border-subtle)); border-top-color: hsl(var(--gold-400)); }
+@keyframes sfos-spin { to { transform: rotate(360deg); } }
+.ptr-spinning { animation: sfos-spin 700ms linear infinite; }
+html[data-motion='reduce'] .ptr-spinning { animation: sfos-spin 1.6s linear infinite !important; animation-duration: 1.6s !important; animation-iteration-count: infinite !important; }
+
+/* Swipe rows. */
+.swipe-row > div:first-child button { min-height: 44px; }
+
+/* Coarse pointers: inputs ≥16px so iOS never zooms (targets are sized per component, ≥44px). */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']), select, textarea { font-size: max(16px, 1em); } /* no iOS zoom */
+}
+input[type='date'] { min-height: 44px; }
+input[type='date']::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.7; }
+.dark input[type='date']::-webkit-calendar-picker-indicator { filter: invert(0.85) sepia(0.4); }
+
+/* Touch spacing: adjacent targets in action rows keep ≥8px gaps on coarse pointers. */
+@media (pointer: coarse) { .form-action-bar > * { min-height: 48px; } }
+
+/* Grabber handle only: no browser panning so the drag is ours; sheet content keeps native scroll. */
+.sheet-grabber, .sheet-grabber-always { touch-action: none; }

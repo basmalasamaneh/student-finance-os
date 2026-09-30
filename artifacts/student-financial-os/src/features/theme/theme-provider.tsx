@@ -1,3 +1,4 @@
+import { useI18n } from '@/features/i18n/i18n-provider';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -54,11 +55,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle('dark', resolved === 'dark');
-    const meta = document.querySelector('meta[name="theme-color"]') ?? Object.assign(document.createElement('meta'), { name: 'theme-color' });
-    const bg = getComputedStyle(root).getPropertyValue('--background').trim();
-    meta.setAttribute('content', bg ? `hsl(${bg})` : 'Canvas');
-    if (!meta.parentNode) document.head.appendChild(meta);
+    // Browser chrome colour: gold #D4AF37 in light, black-gold #0D0B07 in dark. index.html ships two
+    // media-scoped metas for first paint; once the user's resolved theme is known both follow it so an
+    // explicit in-app choice wins over the OS setting.
+    const color = resolved === 'dark' ? '#0D0B07' : '#D4AF37';
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    if (metas.length) metas.forEach((m) => m.setAttribute('content', color));
+    else document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'theme-color', content: color }));
   }, [resolved]);
+
+  // Install metadata follows the UI language: swap to the pre-generated localized manifest
+  // (public/manifest.{en,ar}.webmanifest) — static files, relative URLs, correct under BASE_URL.
+  const { lang } = useI18n();
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    if (link) link.href = `${import.meta.env.BASE_URL}manifest.${lang === 'ar' ? 'ar' : 'en'}.webmanifest`;
+  }, [lang]);
 
   useEffect(() => {
     const root = document.documentElement;

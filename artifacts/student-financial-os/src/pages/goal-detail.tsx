@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSuccessHaptic } from '@/components/money/use-success-haptic';
 import { Link, useParams } from 'wouter';
 import { Archive, ArrowLeft, ArrowRight, CheckCircle2, Pause, Pencil, Play, PiggyBank, Sparkles } from 'lucide-react';
 import {
@@ -80,6 +81,8 @@ function Detail({ goal, t }: { goal: SavingsGoal; t: Tx }) {
   const [editOpen, setEditOpen] = useState(false);
   const [contribOpen, setContribOpen] = useState(false);
   const [pending, setPending] = useState<SavingsGoalActionAction | null>(null);
+  const [completedAction, setCompletedAction] = useState<string | null>(null);
+  useSuccessHaptic(completedAction);
   const idem = useSubmissionKey(`${goal.id}|${pending ?? ''}`);
   const refresh = useRefreshAfterGoalChange();
   const status = useChangeSavingsGoalStatus({ request: { headers: idem.headers } });
@@ -88,7 +91,7 @@ function Detail({ goal, t }: { goal: SavingsGoal; t: Tx }) {
 
   const run = () => {
     if (!pending || status.isPending) return;
-    status.mutate({ id: goal.id, data: { action: pending } }, { onSuccess: () => { idem.reset(); setPending(null); void refresh(); } });
+    status.mutate({ id: goal.id, data: { action: pending } }, { onSuccess: () => { if (pending === 'complete') setCompletedAction(goal.id); idem.reset(); setPending(null); void refresh(); } });
   };
 
   return (
@@ -144,7 +147,7 @@ function Detail({ goal, t }: { goal: SavingsGoal; t: Tx }) {
           {pending ? <>
             <AlertDialogHeader><AlertDialogTitle>{t(...CONFIRM[pending].title)}</AlertDialogTitle><AlertDialogDescription>{t(...CONFIRM[pending].body)}</AlertDialogDescription></AlertDialogHeader>
             {status.isError ? <p role="alert" className="type-label text-destructive" data-testid="error-status">{goalErrorText(status.error, t)}</p> : null}
-            <AlertDialogFooter>
+            <AlertDialogFooter className="form-action-bar">
               <AlertDialogCancel disabled={status.isPending}>{t('Cancel', 'إلغاء')}</AlertDialogCancel>
               <AlertDialogAction disabled={status.isPending} onClick={(e) => { e.preventDefault(); run(); }} className={pending === 'archive' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : undefined} data-testid="button-confirm-status">
                 {status.isPending ? t('Applying…', 'جارٍ التطبيق…') : status.isError ? t('Retry', 'إعادة المحاولة') : t(...CONFIRM[pending].cta)}

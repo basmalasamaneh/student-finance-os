@@ -4,7 +4,7 @@ import { useCreateFinanceAccount, type FinanceAccountInputCurrency, type Finance
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Notice } from '@/components/states/state-panel';
-import { Field, inputClass } from './fields';
+import { Field, inputClass, SimulatedNote } from './fields';
 import { ACCOUNT_TYPE_LABEL, apiErrorText, useIdempotencyKey, useRefreshFinance, type Tx } from '@/features/money/money-model';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +37,7 @@ export function CreateAccountDialog({ open, onOpenChange, t }: { open: boolean; 
         <DialogHeader>
           <DialogTitle>{t('New account', 'حساب جديد')}</DialogTitle>
           <DialogDescription>{t('Accounts start at zero. Balances only change through recorded, simulated movements.', 'تبدأ الحسابات من صفر. تتغير الأرصدة فقط عبر حركات محاكاة مسجلة.')}</DialogDescription>
+          <span className="type-caption w-fit rounded-full border border-primary/40 bg-primary-soft px-2.5 py-1 text-gold-ink">{t('Simulated', 'محاكاة')}</span>
         </DialogHeader>
         <form className="flex flex-col gap-4" noValidate onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <fieldset className="flex flex-col gap-1.5">
@@ -51,7 +52,7 @@ export function CreateAccountDialog({ open, onOpenChange, t }: { open: boolean; 
             </div>
           </fieldset>
           <Field id="acct-name" label={t('Name', 'الاسم')} error={error} hint={t('Optional. Defaults to the type.', 'اختياري. الافتراضي هو النوع.')}>
-            <input id="acct-name" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} className={inputClass} aria-invalid={!!error} data-testid="input-account-name" />
+            <input id="acct-name" type="text" inputMode="text" autoComplete="off" enterKeyHint="next" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} className={inputClass} aria-invalid={!!error} data-testid="input-account-name" />
           </Field>
           <Field id="acct-currency" label={t('Currency', 'العملة')} hint={t('Currency cannot be changed later.', 'لا يمكن تغيير العملة لاحقاً.')}>
             <select id="acct-currency" value={currency} onChange={(e) => setCurrency(e.target.value as FinanceAccountInputCurrency)} className={inputClass} data-testid="select-account-currency">
@@ -59,7 +60,8 @@ export function CreateAccountDialog({ open, onOpenChange, t }: { open: boolean; 
             </select>
           </Field>
           {mutation.isError ? <Notice tone="error" title={t('Account not created', 'لم يُنشأ الحساب')} body={apiErrorText(mutation.error, t)} /> : null}
-          <DialogFooter className="gap-2 pt-2">
+          <SimulatedNote t={t} />
+          <DialogFooter className="form-action-bar gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>{t('Cancel', 'إلغاء')}</Button>
             <Button type="submit" disabled={mutation.isPending} aria-busy={mutation.isPending} data-testid="button-create-account">
               {mutation.isPending ? <><Loader2 className="animate-spin" aria-hidden />{t('Creating…', 'جارٍ الإنشاء…')}</> : t('Create account', 'إنشاء الحساب')}

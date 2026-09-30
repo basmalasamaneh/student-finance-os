@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { PullToRefresh } from '@/components/gestures/pull-to-refresh';
+import { useDeviceSecurity } from '@/features/security/device-security';
 import { Link } from 'wouter';
 import { ArrowUpRight, HandCoins, Lightbulb, Plus, ShoppingBag } from 'lucide-react';
 import { MovementDialog } from '@/components/money/movement-dialog';
 import { RequestDialog } from '@/components/money/request-dialog';
-import { useAccount } from '@/features/auth/account';
 import { getGetFinanceSummaryQueryKey, getListFinanceAccountsQueryKey, useGetFinanceSummary, useListFinanceAccounts, type Profile } from '@workspace/api-client-react';
 import { AccountsBlock, ActualIncomeSpending, BalanceBlock, LedgerBlock, RequestsBlock } from './finance-blocks';
 import { EstimateList, HomeBlock, type T } from './home-primitives';
@@ -12,15 +13,6 @@ import { PlanTotalsBlock } from './plan-totals-block';
 import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
 import { deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
 
-/** Hide-balance preference: a boolean only (never an amount), scoped to the signed-in user id. */
-function useHiddenBalance(userId: string | undefined) {
-  const key = `sfos.hideBalance.${userId ?? 'anon'}`;
-  const read = () => { try { return window.localStorage.getItem(key) === '1'; } catch { return false; } };
-  const [hidden, setHidden] = useState(read);
-  useEffect(() => { setHidden(read()); }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
-  const toggle = () => setHidden((h) => { const n = !h; try { window.localStorage.setItem(key, n ? '1' : '0'); } catch { /* storage unavailable: session-only */ } return n; });
-  return [hidden, toggle] as const;
-}
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '·';
@@ -28,8 +20,9 @@ function initials(name: string) {
 const qaCls = 'flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-xl bg-gold-50/30 px-1 py-2 text-center transition-[transform,background-color] hover:bg-gold-50/45 active:scale-[.97] md:min-h-11';
 
 export function StudentDashboard({ profile, name, t }: { profile: Profile; name: string; t: T }) {
-  const me = useAccount();
-  const [hidden, toggleHidden] = useHiddenBalance(me.id);
+  // Shared device preference (Security settings) — replaces the old Home-only local toggle.
+  const { hideBalances: hidden, setHideBalances } = useDeviceSecurity();
+  const toggleHidden = () => setHideBalances(!hidden);
   const [movement, setMovement] = useState<'add' | 'send' | null>(null);
   const [requestOpen, setRequestOpen] = useState(false);
   const summary = useGetFinanceSummary({ query: { queryKey: getGetFinanceSummaryQueryKey(), refetchInterval: 15_000, refetchOnWindowFocus: true } });
@@ -48,7 +41,11 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
   const greet = hour < 12 ? t('Good morning', 'صباح الخير') : hour < 18 ? t('Good afternoon', 'مساء الخير') : t('Good evening', 'مساء الخير');
   const institution = isSchool ? e?.school : e?.university;
 
+  // Pull-to-refresh re-runs the real queries; nothing is shown until the server answers.
+  const refresh = () => Promise.all([summary.refetch(), accounts.refetch()]);
+
   return (
+    <PullToRefresh onRefresh={refresh} label={t('Refreshing…', 'جارٍ التحديث…')}>
     <div className="stagger flex flex-col">
       {/* 1 Greeting */}
       <header className="flex flex-col gap-2 pb-6 md:pb-10" data-testid="section-greeting">
@@ -75,7 +72,7 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
       </div>
 
       {/* 4 Monthly income + 5 Monthly spending */}
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-x-12 md:overflow-visible md:px-0" data-testid="scroller-income-spending">
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-2 md:gap-x-12 md:overflow-visible md:px-0" data-testid="scroller-income-spending">
         <HomeBlock className="w-[85%] shrink-0 snap-start max-md:rounded-card max-md:border max-md:bg-card max-md:px-4 max-md:mt-6 md:w-auto" id="monthly-income" title={t('Monthly income', 'الدخل الشهري')} meta={t('Received · plan', 'مستلم · خطة')}>
           <div className="pb-3"><p className="type-caption pb-1 text-muted-foreground">{t('Received this month (ledger)', 'المستلم هذا الشهر (السجل)')}</p><ActualIncomeSpending summary={summary} kind="income" t={t} /></div>
           <p className="type-caption pb-1 text-muted-foreground">{t('Planning estimate (profile)', 'تقدير تخطيطي (الملف)')}</p>
@@ -130,5 +127,6 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
       <MovementDialog kind={movement ?? 'add'} open={!!movement} onOpenChange={(o) => { if (!o) setMovement(null); }} accounts={accounts.data ?? []} t={t} />
       <RequestDialog open={requestOpen} onOpenChange={setRequestOpen} accounts={accounts.data ?? []} t={t} />
     </div>
+    </PullToRefresh>
   );
 }

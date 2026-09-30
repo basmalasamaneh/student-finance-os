@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { Goal, Plus } from 'lucide-react';
+import { ArrowUpRight, Goal, Plus } from 'lucide-react';
+import { SwipeActions } from '@/components/gestures/swipe-actions';
 import { getListSavingsGoalsQueryKey, useListSavingsGoals, type SavingsGoalStatus } from '@workspace/api-client-react';
 import { Page, PageHeader, SectionHeading } from '@/components/layout/page';
 import { Button } from '@/components/ui/button';
@@ -72,10 +73,10 @@ export default function GoalsPage() {
 
           <section className="flex flex-col gap-3">
             <SectionHeading id="goals-list" title={t('Goals', 'الأهداف')} meta={t(`${q.data.activeCount} active · ${q.data.completedCount} completed`, `${q.data.activeCount} نشط · ${q.data.completedCount} مكتمل`)} />
-            <div role="group" aria-label={t('Filter goals by status', 'تصفية الأهداف حسب الحالة')} className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+            <div role="group" aria-label={t('Filter goals by status', 'تصفية الأهداف حسب الحالة')} className="-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-1">
               {FILTERS.map((f) => (
                 <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}
-                  className={`type-label min-h-10 shrink-0 rounded-full border px-3 ${filter === f ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted'}`} data-testid={`button-filter-${f}`}>
+                  className={`type-label min-h-11 shrink-0 snap-start rounded-full border px-3 ${filter === f ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted'}`} data-testid={`button-filter-${f}`}>
                   {f === 'all' ? t('All', 'الكل') : tl(STATUS_LABEL, f, t)} <bdi className="tabular">{counts[f]}</bdi>
                 </button>
               ))}
@@ -88,7 +89,13 @@ export default function GoalsPage() {
               <StatePanel tone="empty" className="py-5" title={t('Nothing in this view', 'لا شيء في هذا العرض')} body={t('Try another status filter.', 'جرّب تصفية أخرى.')} />
             ) : (
               <div className="stagger grid grid-cols-1 gap-3 md:grid-cols-2" data-testid="list-goals">
-                {shown.map((g) => <GoalCard key={g.id} goal={g} t={t} />)}
+                {/* Swipe = shortcut to the goal's detail page (where Pause/Resume/Archive live). The card itself
+                    stays a normal link, so the gesture is never the only way in. */}
+                {shown.map((g) => (
+                  <SwipeActions key={g.id} testId={`swipe-goal-${g.id}`} actions={[{ id: `open-${g.id}`, label: g.status === 'active' ? t('Details · pause', 'التفاصيل · إيقاف') : t('Details', 'التفاصيل'), icon: <ArrowUpRight className="size-5" aria-hidden />, onSelect: () => navigate(`/goals/${g.id}`) }]}>
+                    <GoalCard goal={g} t={t} />
+                  </SwipeActions>
+                ))}
               </div>
             )}
           </section>

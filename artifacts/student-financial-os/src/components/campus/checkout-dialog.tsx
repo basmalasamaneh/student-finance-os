@@ -8,6 +8,10 @@ import { MoneyDisplay } from '@/components/finance/money-display';
 import { Notice } from '@/components/states/state-panel';
 import { Field, ReviewRow, SimulatedNote } from '@/components/money/fields';
 import { Receipt } from '@/components/money/receipt';
+import { HighValueConfirm } from '@/components/money/high-value-confirm';
+import { useSuccessHaptic } from '@/components/money/use-success-haptic';
+import { useDeviceSecurity } from '@/features/security/device-security';
+import { useI18n } from '@/features/i18n/i18n-provider';
 import { accountName, apiErrorText, exactLine, exactSub, useIdempotencyKey, useRefreshFinance, type Tx } from '@/features/money/money-model';
 import { cn } from '@/lib/utils';
 import type { Money } from '@/lib/money';
@@ -23,6 +27,10 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
   const idem = useIdempotencyKey();
   const refresh = useRefreshFinance();
   const mutation = useCreateCampusPayment({ request: { headers: idem.headers } });
+  const { confirmationThreshold } = useDeviceSecurity();
+  const { locale } = useI18n();
+  useSuccessHaptic(step === 'done' ? receipt?.id ?? null : null);
+  const enhanced = total.currency !== 'ILS' || total.minor > confirmationThreshold.minor;
   const eligible = useMemo(() => accounts.filter((a) => a.currency === total.currency), [accounts, total.currency]);
 
   useEffect(() => {
@@ -50,6 +58,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
         <DialogHeader>
           <DialogTitle>{step === 'done' ? t('Payment receipt', 'إيصال الدفع') : step === 'review' ? t('Confirm payment', 'تأكيد الدفع') : t('Pay with', 'الدفع من')}</DialogTitle>
           <DialogDescription>{serviceName}</DialogDescription>
+          <span className="type-caption w-fit rounded-full border border-primary/40 bg-primary-soft px-2.5 py-1 text-gold-ink">{t('Simulated', 'محاكاة')}</span>
         </DialogHeader>
         <FlowSteps label={t('Progress', 'التقدم')} current={step === 'account' ? 0 : step === 'review' ? 1 : 2} steps={[t('Account', 'الحساب'), t('Review', 'مراجعة'), t('Receipt', 'الإيصال')]} />
 
@@ -73,7 +82,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
               ) : <Notice tone="warning" title={t('No eligible account', 'لا يوجد حساب مؤهل')} body={t(`Create a ${total.currency} account on the Money page and add simulated funds.`, `أنشئ حساباً بعملة ${total.currency} في صفحة المال وأضف أموالاً محاكاة.`)} />}
             </Field>
             {account && !enough ? <Notice tone="error" title={t('Insufficient balance', 'رصيد غير كافٍ')} body={t('Choose another account or add money first.', 'اختر حساباً آخر أو أضف مالاً أولاً.')} /> : null}
-            <DialogFooter className="gap-2">
+            <DialogFooter className="form-action-bar gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>{t('Cancel', 'إلغاء')}</Button>
               <Button disabled={!enough} onClick={() => setStep('review')} data-testid="button-checkout-review">{t('Review', 'مراجعة')}</Button>
             </DialogFooter>
@@ -92,18 +101,23 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
             </ul>
             <dl className="divide-y divide-divider">
               <ReviewRow label={t('Total', 'الإجمالي')}><MoneyDisplay value={total} size="md" testId="text-checkout-total" /></ReviewRow>
-              <ReviewRow label={t('Account', 'الحساب')}>{accountName(account, t)}</ReviewRow>
+              <ReviewRow label={enhanced ? t('From', 'من') : t('Account', 'الحساب')}>{accountName(account, t)}</ReviewRow>
+              {enhanced ? <>
+                <ReviewRow label={t('To', 'إلى')}>{serviceName}</ReviewRow>
+                <ReviewRow label={t('Fee', 'الرسوم')}>{t('None', 'لا توجد')}</ReviewRow>
+                <ReviewRow label={t('Date', 'التاريخ')}><bdi>{new Date().toLocaleDateString(locale, { dateStyle: 'medium' })}</bdi> · {t('Today', 'اليوم')}</ReviewRow>
+              </> : null}
               <ReviewRow label={t('Balance before', 'الرصيد قبل')}><MoneyDisplay value={account.balance} size="sm" /></ReviewRow>
               <ReviewRow label={t('Balance after', 'الرصيد بعد')}><MoneyDisplay value={after} size="sm" /></ReviewRow>
             </dl>
             <p className="type-caption text-muted-foreground">{t('Prices are confirmed by the server at payment time.', 'يؤكد الخادم الأسعار لحظة الدفع.')}</p>
             {mutation.isError ? <Notice tone="error" title={t('Payment not completed', 'لم يكتمل الدفع')} body={apiErrorText(mutation.error, t)} /> : null}
             <SimulatedNote t={t} />
-            <DialogFooter className="gap-2">
+            <DialogFooter className={`form-action-bar gap-2 ${enhanced ? 'sm:flex-col' : ''}`}>
               <Button variant="outline" disabled={mutation.isPending} onClick={() => { setStep('account'); idem.renew(); mutation.reset(); }}><ArrowLeft className="rtl:rotate-180" aria-hidden />{t('Back', 'رجوع')}</Button>
-              <Button onClick={pay} loading={mutation.isPending} data-testid="button-confirm-payment">
+              {enhanced ? <HighValueConfirm onConfirm={pay} disabled={!enough} pending={mutation.isPending} threshold={confirmationThreshold} t={t} testId="button-confirm-payment" /> : <Button onClick={pay} loading={mutation.isPending} data-testid="button-confirm-payment">
                 {mutation.isError ? t('Retry safely', 'أعد المحاولة بأمان') : t('Confirm simulated payment', 'تأكيد الدفع المحاكى')}
-              </Button>
+              </Button>}
             </DialogFooter>
           </div>
         )}
@@ -112,7 +126,7 @@ export function CheckoutDialog({ open, onOpenChange, service, lines, total, acco
           <>
             <SuccessCheck label={t('Payment recorded', 'تم تسجيل الدفع')} />
             <Receipt tx={receipt} account={account} t={t} />
-            <DialogFooter><Button onClick={() => onOpenChange(false)} data-testid="button-receipt-done">{t('Done', 'تم')}</Button></DialogFooter>
+            <DialogFooter className="form-action-bar"><Button onClick={() => onOpenChange(false)} data-testid="button-receipt-done">{t('Done', 'تم')}</Button></DialogFooter>
           </>
         )}
       </DialogContent>

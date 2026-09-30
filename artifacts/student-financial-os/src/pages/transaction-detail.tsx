@@ -14,6 +14,7 @@ import { useI18n } from '@/features/i18n/i18n-provider';
 import { apiErrorText, KIND_LABEL, label, useTx, type Tx } from '@/features/money/money-model';
 import { isUuid } from '@/features/transactions/history-filters';
 import { categoryLabel, typeLabel, transactionDescription } from '@/features/transactions/labels';
+import { SensitiveReference } from '@/features/security/sensitive-reference';
 
 function Row({ term, children, testId }: { term: string; children: ReactNode; testId: string }) {
   return (
@@ -24,7 +25,7 @@ function Row({ term, children, testId }: { term: string; children: ReactNode; te
   );
 }
 const Missing = ({ text }: { text: string }) => <span className="text-muted-foreground italic">{text}</span>;
-const Mono = ({ v }: { v: string }) => <bdi className="font-mono text-xs break-all">{v}</bdi>;
+const Mono = ({ v }: { v: string }) => <SensitiveReference value={v} copy />;
 
 function Linked({ id, name, t, future }: { id: string | null; name?: string | null; t: Tx; future?: boolean }) {
   if (!id) return <Missing text={future ? t('Not linked (feature not available yet)', 'غير مرتبط (الميزة غير متاحة بعد)') : t('Not linked', 'غير مرتبط')} />;

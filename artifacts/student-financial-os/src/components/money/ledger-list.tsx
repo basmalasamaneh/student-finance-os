@@ -1,6 +1,7 @@
 import { Fragment, type ReactNode } from 'react';
-import { Link } from 'wouter';
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, BookOpen, Bus, GraduationCap, Printer, ShoppingBag, UtensilsCrossed, Wallet, type LucideIcon } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { SwipeActions } from '@/components/gestures/swipe-actions';
+import { ArrowDownLeft, ReceiptText, ArrowLeftRight, ArrowUpRight, BookOpen, Bus, GraduationCap, Printer, ShoppingBag, UtensilsCrossed, Wallet, type LucideIcon } from 'lucide-react';
 import type { FinanceAccount, FinanceTransaction } from '@workspace/api-client-react';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { groupByDay, TransactionDateHeader } from '@/components/finance/transaction-row';
@@ -17,6 +18,7 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
 /** Server ledger entries only — never profile/planning data. `grouped` adds sticky Today/Yesterday/date headers. */
 export function LedgerList({ items, accounts, t, onOpen, hrefFor, categoryText, testId = 'list-ledger', grouped = false }: { items: FinanceTransaction[]; accounts?: FinanceAccount[]; t: Tx; onOpen?: (tx: FinanceTransaction) => void; hrefFor?: (tx: FinanceTransaction) => string; categoryText?: (tx: FinanceTransaction) => string; testId?: string; grouped?: boolean }) {
   const { locale } = useI18n();
+  const [, navigate] = useLocation();
   const row = (tx: FinanceTransaction): ReactNode => {
     const credit = tx.direction === 'credit';
     const Icon = tx.serviceId ? ShoppingBag : CATEGORY_ICON[tx.category] ?? (credit ? ArrowDownLeft : ArrowUpRight);
@@ -36,7 +38,8 @@ export function LedgerList({ items, accounts, t, onOpen, hrefFor, categoryText, 
     );
     return (
       <li key={tx.id} data-testid={`row-tx-${tx.id}`}>
-        {hrefFor ? <Link href={hrefFor(tx)} className="flex min-h-16 w-full min-w-0 items-center gap-3 rounded-xl px-1 py-3 transition-colors hover:bg-primary-soft/50" aria-label={`${transactionDescription(tx, t)} — ${t('View details', 'عرض التفاصيل')}`} data-testid={`link-tx-${tx.id}`}>{body}</Link>
+        {/* Swipe (toward start edge, reversed in RTL) is only a shortcut: the row stays a full link to the same detail page. */}
+        {hrefFor ? <SwipeActions testId={`swipe-tx-${tx.id}`} className="rounded-xl" actions={[{ id: `details-${tx.id}`, label: t('Details', 'التفاصيل'), icon: <ReceiptText className="size-5" aria-hidden />, onSelect: () => navigate(hrefFor(tx)) }]}><Link href={hrefFor(tx)} className="flex min-h-16 w-full min-w-0 items-center gap-3 rounded-xl bg-background px-1 py-3 transition-colors hover:bg-primary-soft/50" aria-label={`${transactionDescription(tx, t)} — ${t('View details', 'عرض التفاصيل')}`} data-testid={`link-tx-${tx.id}`}>{body}</Link></SwipeActions>
           : onOpen ? <button type="button" onClick={() => onOpen(tx)} className="flex min-h-16 w-full min-w-0 items-center gap-3 rounded-xl px-1 py-3 transition-colors hover:bg-primary-soft/50">{body}</button>
           : <div className="flex min-h-16 min-w-0 items-center gap-3 px-1 py-3">{body}</div>}
       </li>

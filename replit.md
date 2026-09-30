@@ -6,6 +6,9 @@ The existing Tailwind v4 semantic theme in `artifacts/student-financial-os/src/i
 
 Student finance workspace with exact-money foundation, app-owned email/password authentication, Prompt 2 onboarding, Prompt 3 profile-driven student home, Prompt 4 **simulated** finance and campus-payment API, Prompt 5 transaction history/details, Prompt 6 planning, and Prompt 7 reserved savings goals with narrowly consented simulated parent funding. Prompts 8–15 remain excluded; onboarding does not post account funds or incomes.
 
+## Current work
+**CURRENT: Prompt 7.5 — Gold UI phases 4, 5 and 5B (UI only).** Native-feeling mobile shell, sheets, gestures, PWA metadata and the browser matrix; see `docs/gold-phase4.md` and `docs/gold-phase5b.md`. No backend, route, auth, money or seed changes. **Do not start Prompt 8 until the user asks.**
+
 ## Run & Operate
 
 - Managed artifact workflows run the web/API; do not start root `pnpm dev`.

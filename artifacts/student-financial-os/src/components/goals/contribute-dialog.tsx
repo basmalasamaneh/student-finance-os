@@ -11,6 +11,7 @@ import { accountName, amountErrorText, parseAmountInput, type Tx } from '@/featu
 import { goalErrorText, useRefreshAfterContribution, useSubmissionKey } from '@/features/goals/goals-model';
 import type { Currency } from '@/lib/money';
 import { cn } from '@/lib/utils';
+import { useSuccessHaptic } from '@/components/money/use-success-haptic';
 
 /** Quick-amount chips only fill the same validated text field; parsing stays with parseAmountInput. */
 const QUICK = ['10', '25', '50'];
@@ -29,6 +30,7 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
   const [step, setStep] = useState<'form' | 'review'>('form');
   const [touched, setTouched] = useState(false);
   const [receipt, setReceipt] = useState<GoalContributionReceipt | null>(null);
+  useSuccessHaptic(receipt?.transactions[0]?.id ?? null);
   useEffect(() => { if (open) { setAccountId(eligible.length === 1 ? eligible[0].id : ''); setAmount(''); setNote(''); setStep('form'); setTouched(false); setReceipt(null); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const account = eligible.find((a) => a.id === accountId);
@@ -93,7 +95,7 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
             </div>
             <p className="type-caption text-muted-foreground">{t('Remaining on this goal', 'المتبقي في هذا الهدف')}: <MoneyDisplay value={goal.remaining} size="sm" className="inline !text-xs" /></p>
             <Field id="contrib-note" label={t('Note (optional)', 'ملاحظة (اختياري)')} hint={`${note.length}/500`}>
-              <input id="contrib-note" className={inputClass} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} data-testid="input-contrib-note" />
+              <input id="contrib-note" type="text" inputMode="text" autoComplete="off" enterKeyHint="done" className={inputClass} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} data-testid="input-contrib-note" />
             </Field>
             <SimulatedNote t={t} />
           </form>
@@ -109,7 +111,7 @@ export function ContributeDialog({ open, onOpenChange, goal, accounts, t }: { op
             {m.isError ? <p role="alert" className="type-label text-destructive" data-testid="error-contribute">{goalErrorText(m.error, t)}</p> : null}
           </div>
         )}
-        <DialogFooter className="gap-2">
+        <DialogFooter className="form-action-bar gap-2">
           {receipt ? <Button onClick={() => onOpenChange(false)} data-testid="button-close-receipt">{t('Done', 'تم')}</Button>
             : !eligible.length ? <Button variant="ghost" onClick={() => onOpenChange(false)}>{t('Close', 'إغلاق')}</Button>
               : step === 'form' ? <><Button variant="ghost" onClick={() => onOpenChange(false)}>{t('Cancel', 'إلغاء')}</Button><Button type="submit" form="contribute-form" data-testid="button-review-contribution">{t('Review', 'مراجعة')}</Button></>

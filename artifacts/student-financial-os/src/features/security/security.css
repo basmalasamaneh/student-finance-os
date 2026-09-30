@@ -1,0 +1,14 @@
+.security-key { min-height: 52px; touch-action: manipulation; }
+.security-key:active { transform: scale(.97); }
+.security-blocking-content { z-index: 220; }
+.security-dialog-layout { top: calc((100dvh - var(--kb-inset, 0px)) / 2); max-height: calc(100dvh - var(--kb-inset, 0px) - 2rem); }
+.security-privacy { position: fixed; inset: 0; z-index: 250; display: none; place-items: center; padding: 1.5rem; background: hsl(var(--background)); color: hsl(var(--foreground)); backdrop-filter: blur(24px); }
+html[data-device-privacy] .security-privacy { display: grid; }
+.security-privacy-brand { color: hsl(var(--gold-ink)); font-weight: 700; letter-spacing: -.025em; }
+.security-reference { display: inline-flex; inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.security-reference-text { flex: 1 1 12ch; max-inline-size: 100%; min-inline-size: 0; }
+.security-reference-value { display: block; min-inline-size: 0; max-inline-size: 100%; white-space: normal; overflow-wrap: anywhere; word-break: break-all; font-variant-numeric: tabular-nums; }
+.security-reference > button { flex-shrink: 0; min-inline-size: 44px; min-block-size: 44px; }
+.security-reference > [role='status'] { min-inline-size: 0; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { .security-key:active { transform: none; } }
+[data-motion="reduce"] .security-key:active { transform: none; }

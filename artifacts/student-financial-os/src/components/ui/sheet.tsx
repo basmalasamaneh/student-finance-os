@@ -1,3 +1,5 @@
+import { useSheetDrag } from '@/components/gestures/use-sheet-drag';
+import { useKeyboardInset } from '@/components/gestures/use-visual-viewport';
 'use client';
 
 import * as React from 'react';
@@ -36,7 +38,7 @@ const sheetVariants = cva(
       side: {
         top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
         bottom:
-          'inset-x-0 bottom-0 max-h-[90dvh] rounded-sheet border-t pb-[calc(env(safe-area-inset-bottom)+1.25rem)] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+          'sheet-bottom inset-x-0 bottom-0 max-h-[90dvh] rounded-sheet border-t pb-[calc(env(safe-area-inset-bottom)+1.25rem)] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
         left: 'inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
         right:
           'inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
@@ -55,22 +57,39 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
+>(({ side = 'right', className, children, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onLostPointerCapture, ...props }, ref) => {
+  const closeRef = React.useRef<HTMLButtonElement>(null);
+  const drag = useSheetDrag(closeRef);
+  useKeyboardInset();
+  const bottom = side === 'bottom';
+  const setRefs = React.useCallback((el: HTMLDivElement | null) => {
+    if (bottom) drag.ref(el);
+    if (typeof ref === 'function') ref(el); else if (ref) ref.current = el;
+  }, [ref, drag, bottom]);
+  return (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
-      ref={ref}
+      ref={setRefs}
+      data-snap={bottom ? 'full' : undefined}
+      onPointerDown={(e) => { onPointerDown?.(e); if (bottom) drag.handlers.onPointerDown(e); }}
+      onPointerMove={(e) => { onPointerMove?.(e); if (bottom) drag.handlers.onPointerMove(e); }}
+      onPointerUp={(e) => { onPointerUp?.(e); if (bottom) drag.handlers.onPointerUp(e); }}
+      onPointerCancel={(e) => { onPointerCancel?.(e); if (bottom) drag.handlers.onPointerCancel(); }}
+      onLostPointerCapture={(e) => { onLostPointerCapture?.(e); if (bottom) drag.handlers.onLostPointerCapture(); }}
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
-      <SheetPrimitive.Close className="absolute end-2 top-2 grid size-11 place-items-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      {bottom ? <span aria-hidden className="sheet-grabber sheet-grabber-always" /> : null}
+      <SheetPrimitive.Close ref={closeRef} className="absolute end-2 top-2 grid size-11 place-items-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
-));
+  );
+});
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({
