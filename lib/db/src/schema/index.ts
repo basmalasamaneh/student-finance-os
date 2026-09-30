@@ -19,3 +19,4 @@
 
 export * from "./onboarding";
 export * from "./finance";
+export * from "./planning";

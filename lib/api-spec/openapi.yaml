@@ -18,7 +18,84 @@ tags:
     description: Simulated student finance
   - name: campus
     description: Simulated campus catalog
+  - name: planning
+    description: Owner-only student budgets and estimates
 paths:
+  /planning:
+    get:
+      operationId: getFinancialPlan
+      tags: [planning]
+      responses:
+        "200":
+          description: Live owner-only monthly estimate and budget spending
+          content: { application/json: { schema: { $ref: "#/components/schemas/FinancialPlan" } } }
+  /planning/budgets:
+    post:
+      operationId: createBudget
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/BudgetInput" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Budget" } } } }
+  /planning/budgets/{id}:
+    put:
+      operationId: updateBudget
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/BudgetInput" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Budget" } } } }
+    delete:
+      operationId: deleteBudget
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses: { "204": { description: Deleted } }
+  /planning/recurring-expenses:
+    post:
+      operationId: createRecurringExpense
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/RecurringExpenseInput" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/RecurringExpense" } } } }
+  /planning/recurring-expenses/{id}:
+    put:
+      operationId: updateRecurringExpense
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/RecurringExpenseInput" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/RecurringExpense" } } } }
+    delete:
+      operationId: deleteRecurringExpense
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses: { "204": { description: Deleted } }
+  /planning/lines:
+    post:
+      operationId: createPlanLine
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PlanLineInput" } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/PlanLine" } } } }
+  /planning/lines/{id}:
+    put:
+      operationId: updatePlanLine
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PlanLineInput" } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/PlanLine" } } } }
+    delete:
+      operationId: deletePlanLine
+      tags: [planning]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses: { "204": { description: Deleted } }
+  /planning/commute-override:
+    put:
+      operationId: savePlanCommuteOverride
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CommuteOverrideInput" } } } }
+      responses:
+        "200": { description: Saved setting, content: { application/json: { schema: { $ref: "#/components/schemas/CommuteOverride" } } } }
   /finance/accounts:
     get:
       operationId: listFinanceAccounts
@@ -454,6 +531,140 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    PlanningCategory:
+      type: string
+      enum: [tuition, registration, university_fees, transportation, food, cafeteria, housing, accommodation, rent, utilities, internet, books, bookstore, printing, academic_supplies, subscriptions, personal, shopping, savings, fees, campus_transportation, other]
+    BudgetInput:
+      type: object
+      additionalProperties: false
+      required: [category, period, limit]
+      properties:
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        period: { type: string, enum: [weekly, monthly] }
+        limit: { $ref: "#/components/schemas/Amount" }
+    Budget:
+      type: object
+      required: [id, category, period, limit, actualSpent, remaining, periodStart, periodEnd]
+      properties:
+        id: { type: string, format: uuid }
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        period: { type: string, enum: [weekly, monthly] }
+        limit: { $ref: "#/components/schemas/Amount" }
+        actualSpent: { $ref: "#/components/schemas/Amount" }
+        remaining: { $ref: "#/components/schemas/SignedAmount" }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+    RecurringExpenseInput:
+      type: object
+      additionalProperties: false
+      required: [amount, category, frequency, nextDate, description, active]
+      properties:
+        amount: { $ref: "#/components/schemas/Amount" }
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        frequency: { type: string, enum: [daily, weekly, biweekly, monthly, quarterly, yearly] }
+        nextDate: { type: string, format: date }
+        description: { type: string, maxLength: 300 }
+        active: { type: boolean }
+    RecurringExpense:
+      allOf:
+        - { $ref: "#/components/schemas/RecurringExpenseInput" }
+        - type: object
+          required: [id]
+          properties: { id: { type: string, format: uuid } }
+    PlanLineInput:
+      type: object
+      additionalProperties: false
+      required: [category, type, amount, description]
+      properties:
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        type: { type: string, enum: [fixed, variable, savings] }
+        amount: { $ref: "#/components/schemas/Amount" }
+        description: { type: string, maxLength: 300 }
+        upcomingDate: { type: string, format: date }
+    PlanLine:
+      allOf:
+        - { $ref: "#/components/schemas/PlanLineInput" }
+        - type: object
+          required: [id]
+          properties: { id: { type: string, format: uuid } }
+    CommuteOverrideInput:
+      type: object
+      additionalProperties: false
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+        amount: { $ref: "#/components/schemas/Amount" }
+    CommuteOverride:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+        amount: { $ref: "#/components/schemas/Amount" }
+    SignedAmount:
+      type: object
+      required: [minor, currency]
+      properties:
+        minor: { type: integer, minimum: -9007199254740991, maximum: 9007199254740991 }
+        currency: { type: string, enum: [ILS, USD, JOD] }
+    PlanIncome:
+      type: object
+      required: [id, source, monthlyEstimate, stability]
+      properties:
+        id: { type: string, format: uuid }
+        source: { type: string }
+        monthlyEstimate: { $ref: "#/components/schemas/Amount" }
+        stability: { type: string }
+    UpcomingPlanItem:
+      type: object
+      required: [id, source, description, date, amount]
+      properties:
+        id: { type: string, format: uuid }
+        source: { type: string, enum: [income, recurring, line] }
+        description: { type: string }
+        date: { type: string, format: date }
+        amount: { $ref: "#/components/schemas/Amount" }
+    PlanCost:
+      type: object
+      required: [category, source, amount]
+      properties:
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        source: { type: string, enum: [profile, override, recurring, manual] }
+        amount: { $ref: "#/components/schemas/Amount" }
+    PlanTotals:
+      type: object
+      required: [currency, expectedIncome, plannedExpenses, plannedSavings, projectedRemaining]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        expectedIncome: { $ref: "#/components/schemas/Amount" }
+        plannedExpenses: { $ref: "#/components/schemas/Amount" }
+        plannedSavings: { $ref: "#/components/schemas/Amount" }
+        projectedRemaining: { $ref: "#/components/schemas/SignedAmount" }
+    FinancialPlan:
+      type: object
+      required: [asOf, estimate, policy, totals, costs, income, irregularIncome, irregularCount, upcoming, budgets, budgetCounts, recurringExpenses, lines, scholarships, commuteOverride]
+      properties:
+        asOf: { type: string, format: date }
+        estimate: { type: boolean }
+        policy: { type: string }
+        totals: { type: array, items: { $ref: "#/components/schemas/PlanTotals" } }
+        costs: { type: array, items: { $ref: "#/components/schemas/PlanCost" } }
+        income: { type: array, items: { $ref: "#/components/schemas/PlanIncome" } }
+        irregularIncome: { type: array, items: { $ref: "#/components/schemas/Income" } }
+        irregularCount: { type: integer, minimum: 0 }
+        upcoming: { type: array, items: { $ref: "#/components/schemas/UpcomingPlanItem" } }
+        budgets: { type: array, items: { $ref: "#/components/schemas/Budget" } }
+        budgetCounts:
+          type: object
+          required: [weekly, monthly]
+          properties:
+            weekly: { type: integer, minimum: 0 }
+            monthly: { type: integer, minimum: 0 }
+        recurringExpenses: { type: array, items: { $ref: "#/components/schemas/RecurringExpense" } }
+        lines: { type: array, items: { $ref: "#/components/schemas/PlanLine" } }
+        housing: { $ref: "#/components/schemas/Residence" }
+        commute: { $ref: "#/components/schemas/Commute" }
+        scholarships: { type: array, items: { $ref: "#/components/schemas/Scholarship" } }
+        commuteOverride: { $ref: "#/components/schemas/CommuteOverride" }
     FinanceRecipient:
       type: object
       required: [accountId, name, currency]

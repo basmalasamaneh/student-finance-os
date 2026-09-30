@@ -24,6 +24,7 @@ import TransactionsPage from '@/pages/transactions';
 import TransactionDetailPage from '@/pages/transaction-detail';
 import CampusPage from '@/pages/campus';
 import AdminCampusPage from '@/pages/admin-campus';
+import PlanPage from '@/pages/plan';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -45,6 +46,7 @@ function Router() {
         <Route path="/transactions" component={TransactionsPage} />
         <Route path="/transactions/:id" component={TransactionDetailPage} />
         <Route path="/campus" component={CampusPage} />
+        <Route path="/plan" component={PlanPage} />
         <Route path="/admin/institutions" component={AdminCampusPage} />
         {FUTURE_ROUTES.map((item) => (
           <Route key={item.id} path={item.path}>

@@ -52,7 +52,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'money', path: '/money', icon: Wallet, labelKey: 'nav.money', group: 'money', roles: ['student'], implemented: true, mobile: { student: 2 } },
   { id: 'transactions', path: '/transactions', icon: ArrowLeftRight, labelKey: 'nav.transactions', mobileLabelKey: 'nav.m.activity', group: 'money', roles: ['student'], implemented: true },
   { id: 'upcoming', path: '/upcoming', icon: CalendarClock, labelKey: 'nav.upcoming', group: 'money', roles: ['student'], implemented: false },
-  { id: 'plan', path: '/plan', icon: MapIcon, labelKey: 'nav.plan', group: 'plan', roles: ['student'], implemented: false, mobile: { student: 4 } },
+  { id: 'plan', path: '/plan', icon: MapIcon, labelKey: 'nav.plan', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 4 } },
   { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: false, mobile: { student: 5 } },
   { id: 'afford', path: '/afford', icon: Scale, labelKey: 'nav.afford', group: 'plan', roles: ['student'], implemented: false },
   { id: 'campus', path: '/campus', icon: ShoppingBag, labelKey: 'nav.campus', schoolLabelKey: 'nav.campus.school', mobileLabelKey: 'nav.group.campus', group: 'campus', roles: ['student'], implemented: true, mobile: { student: 3 } },

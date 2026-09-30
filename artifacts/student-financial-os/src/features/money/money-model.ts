@@ -52,11 +52,11 @@ export function useIdempotencyKey() {
   return { key, renew, headers: { 'Idempotency-Key': key } };
 }
 
-/** Refresh every finance/campus query after a successful money operation. */
+/** Refresh every finance/campus/planning query after a successful money operation (budget actuals come from the ledger). */
 export function useRefreshFinance() {
   const qc = useQueryClient();
   return useCallback(() => qc.invalidateQueries({
-    predicate: (q) => typeof q.queryKey[0] === 'string' && (q.queryKey[0].startsWith('/api/finance') || q.queryKey[0].startsWith('/api/campus')),
+    predicate: (q) => typeof q.queryKey[0] === 'string' && (q.queryKey[0].startsWith('/api/finance') || q.queryKey[0].startsWith('/api/campus') || q.queryKey[0].startsWith('/api/planning')),
   }), [qc]);
 }
 

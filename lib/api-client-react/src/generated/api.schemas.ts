@@ -5,6 +5,403 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type PlanningCategory = typeof PlanningCategory[keyof typeof PlanningCategory];
+
+
+export const PlanningCategory = {
+  tuition: 'tuition',
+  registration: 'registration',
+  university_fees: 'university_fees',
+  transportation: 'transportation',
+  food: 'food',
+  cafeteria: 'cafeteria',
+  housing: 'housing',
+  accommodation: 'accommodation',
+  rent: 'rent',
+  utilities: 'utilities',
+  internet: 'internet',
+  books: 'books',
+  bookstore: 'bookstore',
+  printing: 'printing',
+  academic_supplies: 'academic_supplies',
+  subscriptions: 'subscriptions',
+  personal: 'personal',
+  shopping: 'shopping',
+  savings: 'savings',
+  fees: 'fees',
+  campus_transportation: 'campus_transportation',
+  other: 'other',
+} as const;
+
+export type BudgetInputPeriod = typeof BudgetInputPeriod[keyof typeof BudgetInputPeriod];
+
+
+export const BudgetInputPeriod = {
+  weekly: 'weekly',
+  monthly: 'monthly',
+} as const;
+
+export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
+
+
+export const AmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface Amount {
+  /**
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: AmountCurrency;
+}
+
+export interface BudgetInput {
+  category: PlanningCategory;
+  period: BudgetInputPeriod;
+  limit: Amount;
+}
+
+export type BudgetPeriod = typeof BudgetPeriod[keyof typeof BudgetPeriod];
+
+
+export const BudgetPeriod = {
+  weekly: 'weekly',
+  monthly: 'monthly',
+} as const;
+
+export type SignedAmountCurrency = typeof SignedAmountCurrency[keyof typeof SignedAmountCurrency];
+
+
+export const SignedAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface SignedAmount {
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: SignedAmountCurrency;
+}
+
+export interface Budget {
+  id: string;
+  category: PlanningCategory;
+  period: BudgetPeriod;
+  limit: Amount;
+  actualSpent: Amount;
+  remaining: SignedAmount;
+  periodStart: string;
+  periodEnd: string;
+}
+
+export type RecurringExpenseInputFrequency = typeof RecurringExpenseInputFrequency[keyof typeof RecurringExpenseInputFrequency];
+
+
+export const RecurringExpenseInputFrequency = {
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+} as const;
+
+export interface RecurringExpenseInput {
+  amount: Amount;
+  category: PlanningCategory;
+  frequency: RecurringExpenseInputFrequency;
+  nextDate: string;
+  /** @maxLength 300 */
+  description: string;
+  active: boolean;
+}
+
+export type RecurringExpense = RecurringExpenseInput & {
+  id: string;
+};
+
+export type PlanLineInputType = typeof PlanLineInputType[keyof typeof PlanLineInputType];
+
+
+export const PlanLineInputType = {
+  fixed: 'fixed',
+  variable: 'variable',
+  savings: 'savings',
+} as const;
+
+export interface PlanLineInput {
+  category: PlanningCategory;
+  type: PlanLineInputType;
+  amount: Amount;
+  /** @maxLength 300 */
+  description: string;
+  upcomingDate?: string;
+}
+
+export type PlanLine = PlanLineInput & {
+  id: string;
+};
+
+export interface CommuteOverrideInput {
+  enabled: boolean;
+  amount?: Amount;
+}
+
+export interface CommuteOverride {
+  enabled: boolean;
+  amount?: Amount;
+}
+
+export interface PlanIncome {
+  id: string;
+  source: string;
+  monthlyEstimate: Amount;
+  stability: string;
+}
+
+export type UpcomingPlanItemSource = typeof UpcomingPlanItemSource[keyof typeof UpcomingPlanItemSource];
+
+
+export const UpcomingPlanItemSource = {
+  income: 'income',
+  recurring: 'recurring',
+  line: 'line',
+} as const;
+
+export interface UpcomingPlanItem {
+  id: string;
+  source: UpcomingPlanItemSource;
+  description: string;
+  date: string;
+  amount: Amount;
+}
+
+export type PlanCostSource = typeof PlanCostSource[keyof typeof PlanCostSource];
+
+
+export const PlanCostSource = {
+  profile: 'profile',
+  override: 'override',
+  recurring: 'recurring',
+  manual: 'manual',
+} as const;
+
+export interface PlanCost {
+  category: PlanningCategory;
+  source: PlanCostSource;
+  amount: Amount;
+}
+
+export type PlanTotalsCurrency = typeof PlanTotalsCurrency[keyof typeof PlanTotalsCurrency];
+
+
+export const PlanTotalsCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface PlanTotals {
+  currency: PlanTotalsCurrency;
+  expectedIncome: Amount;
+  plannedExpenses: Amount;
+  plannedSavings: Amount;
+  projectedRemaining: SignedAmount;
+}
+
+export type FinancialPlanBudgetCounts = {
+  /** @minimum 0 */
+  weekly: number;
+  /** @minimum 0 */
+  monthly: number;
+};
+
+export type IncomeInputSource = typeof IncomeInputSource[keyof typeof IncomeInputSource];
+
+
+export const IncomeInputSource = {
+  parent_allowance: 'parent_allowance',
+  family_support: 'family_support',
+  scholarship: 'scholarship',
+  financial_aid: 'financial_aid',
+  student_loan: 'student_loan',
+  salary: 'salary',
+  part_time: 'part_time',
+  full_time: 'full_time',
+  freelance: 'freelance',
+  internship: 'internship',
+  business_project: 'business_project',
+  gift: 'gift',
+  other: 'other',
+} as const;
+
+export type IncomeInputFrequency = typeof IncomeInputFrequency[keyof typeof IncomeInputFrequency];
+
+
+export const IncomeInputFrequency = {
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+  one_time: 'one_time',
+  irregular: 'irregular',
+} as const;
+
+export type IncomeInputStability = typeof IncomeInputStability[keyof typeof IncomeInputStability];
+
+
+export const IncomeInputStability = {
+  stable: 'stable',
+  variable: 'variable',
+} as const;
+
+export interface IncomeInput {
+  source: IncomeInputSource;
+  amount: Amount;
+  frequency: IncomeInputFrequency;
+  expectedDate?: string;
+  stability: IncomeInputStability;
+  /** @maxLength 500 */
+  description?: string;
+  active: boolean;
+}
+
+export type Income = IncomeInput & {
+  id: string;
+};
+
+export type ResidenceType = typeof ResidenceType[keyof typeof ResidenceType];
+
+
+export const ResidenceType = {
+  family: 'family',
+  university_housing: 'university_housing',
+  shared: 'shared',
+  private: 'private',
+  other: 'other',
+} as const;
+
+export interface Residence {
+  type: ResidenceType;
+  /** @maxLength 160 */
+  city: string;
+  monthlyRent?: Amount;
+  studentShare?: Amount;
+  utilities?: Amount;
+  internet?: Amount;
+  deposit?: Amount;
+}
+
+export type CommuteMethod = typeof CommuteMethod[keyof typeof CommuteMethod];
+
+
+export const CommuteMethod = {
+  walking: 'walking',
+  private_car: 'private_car',
+  family_ride: 'family_ride',
+  taxi: 'taxi',
+  shared_taxi: 'shared_taxi',
+  bus: 'bus',
+  other: 'other',
+} as const;
+
+/**
+ * Monthly estimate in costPerTrip currency minor units. Convention: 52 weeks per 12 months, rounded to nearest minor unit; roundTrip doubles one-way trip cost. manualEstimate=true permits explicit override.
+ */
+export interface Commute {
+  /** @maxLength 160 */
+  homeCity: string;
+  /** @maxLength 160 */
+  university?: string;
+  /** @maxLength 160 */
+  campus?: string;
+  method: CommuteMethod;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  tripsPerWeek: number;
+  costPerTrip: Amount;
+  roundTrip: boolean;
+  monthlyEstimate: Amount;
+  manualEstimate?: boolean;
+}
+
+export type ScholarshipInputType = typeof ScholarshipInputType[keyof typeof ScholarshipInputType];
+
+
+export const ScholarshipInputType = {
+  scholarship: 'scholarship',
+  financial_aid: 'financial_aid',
+  grant: 'grant',
+  other: 'other',
+} as const;
+
+export interface ScholarshipInput {
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  provider: string;
+  type: ScholarshipInputType;
+  amount?: Amount;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  percentage?: number;
+  /** @maxLength 160 */
+  tuitionCoverage?: string;
+  /** @maxLength 160 */
+  paymentSchedule?: string;
+  startDate?: string;
+  endDate?: string;
+  renewalDate?: string;
+  remainingCoverage?: Amount;
+  /** @maxLength 1000 */
+  notes?: string;
+}
+
+export type Scholarship = ScholarshipInput & {
+  id: string;
+};
+
+export interface FinancialPlan {
+  asOf: string;
+  estimate: boolean;
+  policy: string;
+  totals: PlanTotals[];
+  costs: PlanCost[];
+  income: PlanIncome[];
+  irregularIncome: Income[];
+  /** @minimum 0 */
+  irregularCount: number;
+  upcoming: UpcomingPlanItem[];
+  budgets: Budget[];
+  budgetCounts: FinancialPlanBudgetCounts;
+  recurringExpenses: RecurringExpense[];
+  lines: PlanLine[];
+  housing?: Residence;
+  commute?: Commute;
+  scholarships: Scholarship[];
+  commuteOverride: CommuteOverride;
+}
+
 export type FinanceRecipientCurrency = typeof FinanceRecipientCurrency[keyof typeof FinanceRecipientCurrency];
 
 
@@ -47,24 +444,6 @@ export interface FinanceAccountInput {
      */
   name: string;
   currency: FinanceAccountInputCurrency;
-}
-
-export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
-
-
-export const AmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface Amount {
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: AmountCurrency;
 }
 
 export type FinanceAccount = FinanceAccountInput & {
@@ -535,63 +914,6 @@ export interface Education {
   studyStatus?: string;
 }
 
-export type ResidenceType = typeof ResidenceType[keyof typeof ResidenceType];
-
-
-export const ResidenceType = {
-  family: 'family',
-  university_housing: 'university_housing',
-  shared: 'shared',
-  private: 'private',
-  other: 'other',
-} as const;
-
-export interface Residence {
-  type: ResidenceType;
-  /** @maxLength 160 */
-  city: string;
-  monthlyRent?: Amount;
-  studentShare?: Amount;
-  utilities?: Amount;
-  internet?: Amount;
-  deposit?: Amount;
-}
-
-export type CommuteMethod = typeof CommuteMethod[keyof typeof CommuteMethod];
-
-
-export const CommuteMethod = {
-  walking: 'walking',
-  private_car: 'private_car',
-  family_ride: 'family_ride',
-  taxi: 'taxi',
-  shared_taxi: 'shared_taxi',
-  bus: 'bus',
-  other: 'other',
-} as const;
-
-/**
- * Monthly estimate in costPerTrip currency minor units. Convention: 52 weeks per 12 months, rounded to nearest minor unit; roundTrip doubles one-way trip cost. manualEstimate=true permits explicit override.
- */
-export interface Commute {
-  /** @maxLength 160 */
-  homeCity: string;
-  /** @maxLength 160 */
-  university?: string;
-  /** @maxLength 160 */
-  campus?: string;
-  method: CommuteMethod;
-  /**
-     * @minimum 0
-     * @maximum 100
-     */
-  tripsPerWeek: number;
-  costPerTrip: Amount;
-  roundTrip: boolean;
-  monthlyEstimate: Amount;
-  manualEstimate?: boolean;
-}
-
 export interface ProfileInput {
   /**
      * @minLength 1
@@ -602,106 +924,6 @@ export interface ProfileInput {
   residence?: Residence;
   commute?: Commute;
 }
-
-export type IncomeInputSource = typeof IncomeInputSource[keyof typeof IncomeInputSource];
-
-
-export const IncomeInputSource = {
-  parent_allowance: 'parent_allowance',
-  family_support: 'family_support',
-  scholarship: 'scholarship',
-  financial_aid: 'financial_aid',
-  student_loan: 'student_loan',
-  salary: 'salary',
-  part_time: 'part_time',
-  full_time: 'full_time',
-  freelance: 'freelance',
-  internship: 'internship',
-  business_project: 'business_project',
-  gift: 'gift',
-  other: 'other',
-} as const;
-
-export type IncomeInputFrequency = typeof IncomeInputFrequency[keyof typeof IncomeInputFrequency];
-
-
-export const IncomeInputFrequency = {
-  daily: 'daily',
-  weekly: 'weekly',
-  biweekly: 'biweekly',
-  monthly: 'monthly',
-  quarterly: 'quarterly',
-  yearly: 'yearly',
-  one_time: 'one_time',
-  irregular: 'irregular',
-} as const;
-
-export type IncomeInputStability = typeof IncomeInputStability[keyof typeof IncomeInputStability];
-
-
-export const IncomeInputStability = {
-  stable: 'stable',
-  variable: 'variable',
-} as const;
-
-export interface IncomeInput {
-  source: IncomeInputSource;
-  amount: Amount;
-  frequency: IncomeInputFrequency;
-  expectedDate?: string;
-  stability: IncomeInputStability;
-  /** @maxLength 500 */
-  description?: string;
-  active: boolean;
-}
-
-export type Income = IncomeInput & {
-  id: string;
-};
-
-export type ScholarshipInputType = typeof ScholarshipInputType[keyof typeof ScholarshipInputType];
-
-
-export const ScholarshipInputType = {
-  scholarship: 'scholarship',
-  financial_aid: 'financial_aid',
-  grant: 'grant',
-  other: 'other',
-} as const;
-
-export interface ScholarshipInput {
-  /**
-     * @minLength 1
-     * @maxLength 160
-     */
-  name: string;
-  /**
-     * @minLength 1
-     * @maxLength 160
-     */
-  provider: string;
-  type: ScholarshipInputType;
-  amount?: Amount;
-  /**
-     * @minimum 0
-     * @maximum 100
-     */
-  percentage?: number;
-  /** @maxLength 160 */
-  tuitionCoverage?: string;
-  /** @maxLength 160 */
-  paymentSchedule?: string;
-  startDate?: string;
-  endDate?: string;
-  renewalDate?: string;
-  remainingCoverage?: Amount;
-  /** @maxLength 1000 */
-  notes?: string;
-}
-
-export type Scholarship = ScholarshipInput & {
-  id: string;
-};
 
 export type ProfileRole = typeof ProfileRole[keyof typeof ProfileRole];
 

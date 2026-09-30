@@ -87,9 +87,9 @@ function Detail({ tx, t }: { tx: FinanceTransaction; t: Tx }) {
           <Row term={t('University', 'الجامعة')} testId="field-university"><Linked id={tx.universityId} name={tx.universityName} t={t} /></Row>
           <Row term={t('Campus', 'الحرم')} testId="field-campus"><Linked id={tx.campusId} name={tx.campusName} t={t} /></Row>
           <Row term={t('Related goal', 'الهدف المرتبط')} testId="field-goal"><Linked id={tx.relatedGoalId} t={t} future /></Row>
-          <Row term={t('Related budget', 'الميزانية المرتبطة')} testId="field-budget"><Linked id={tx.relatedBudgetId} t={t} future /></Row>
+          <Row term={t('Related budget', 'الميزانية المرتبطة')} testId="field-budget"><Linked id={tx.relatedBudgetId} t={t} /></Row>
           <Row term={t('Parent transfer', 'تحويل الأهل')} testId="field-parent-transfer"><Linked id={tx.parentTransferId} t={t} future /></Row>
-          <Row term={t('Recurring expense', 'المصروف المتكرر')} testId="field-recurring"><Linked id={tx.recurringExpenseId} t={t} future /></Row>
+          <Row term={t('Recurring expense', 'المصروف المتكرر')} testId="field-recurring"><Linked id={tx.recurringExpenseId} t={t} /></Row>
           {tx.counterpartyAccountId ? <Row term={t('Counterparty account', 'حساب الطرف الآخر')} testId="field-counterparty"><Mono v={tx.counterpartyAccountId} /></Row> : null}
         </dl>
         <p className="type-caption pt-3 text-muted-foreground">{t('Source and destination are simulated labels, not verified bank identities. No real money moved.', 'المصدر والوجهة تسميات محاكاة وليست هويات بنكية موثقة. لم تتحرك أموال حقيقية.')}</p>

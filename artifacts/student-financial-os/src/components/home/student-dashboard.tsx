@@ -4,6 +4,7 @@ import { Lightbulb } from 'lucide-react';
 import { getGetFinanceSummaryQueryKey, getListFinanceAccountsQueryKey, useGetFinanceSummary, useListFinanceAccounts, type Profile } from '@workspace/api-client-react';
 import { AccountsBlock, ActualIncomeSpending, BalanceBlock, LedgerBlock, RequestsBlock } from './finance-blocks';
 import { EstimateList, HomeBlock, Unavailable, type T } from './home-primitives';
+import { PlanTotalsBlock } from './plan-totals-block';
 import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
 import { deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
 
@@ -72,6 +73,8 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
         ? <SchoolPlanning profile={profile} incomes={incomes} today={today} t={t} />
         : <UniversityPlanning profile={profile} upcoming={upcoming} t={t} />
         : null}
+
+      <PlanTotalsBlock t={t} />
 
       {/* 7 Savings, 8 Campus */}
       <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
