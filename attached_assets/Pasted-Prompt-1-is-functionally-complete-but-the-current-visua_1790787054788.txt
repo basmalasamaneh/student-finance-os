@@ -1,0 +1,745 @@
+Prompt 1 is functionally complete, but the current visual implementation is not strong enough. Before continuing to Prompt 2, redesign the existing Prompt 1 foundation to achieve a genuinely modern, premium fintech-quality visual identity.
+
+IMPORTANT:
+This is a VISUAL/UX REDESIGN of Prompt 1 only.
+Do NOT implement any functionality from Prompts 2–15.
+Do NOT add authentication, onboarding, wallet logic, transactions, budgets, goals, campus payments, AI, family features, or other product features.
+Do NOT replace the existing architecture unnecessarily.
+Preserve all working Prompt 1 functionality, tests, API health, database layer, OpenAPI/generated clients, localization, RTL, theme system, and accessibility foundations.
+
+The current implementation feels too generic and too much like a standard SaaS/admin dashboard. Redesign it substantially rather than only changing the colors.
+
+==================================================
+
+1. NEW VISUAL IDENTITY
+   ==================================================
+
+Change the primary visual direction from the current indigo-led system to:
+
+PREMIUM MODERN FINTECH + GOLD SIGNATURE
+
+The product should feel:
+
+* modern
+* premium
+* elegant
+* trustworthy
+* calm
+* sophisticated
+* youthful but mature
+* financial without looking like a traditional bank
+* student-friendly without looking childish
+* visually distinctive
+
+The gold color should become the product's signature accent.
+
+Do NOT make the entire interface gold.
+Gold should be intentional and relatively rare.
+
+Use a palette approximately around:
+
+Primary Gold:
+#D4A72C
+
+Deep Navy:
+#111827
+
+Warm Off-White:
+#FAF9F5
+
+White:
+#FFFFFF
+
+Primary Text:
+#172033
+
+Secondary Text:
+#64748B
+
+Success:
+a calm green such as #22A06B
+
+Warning:
+a deeper amber/gold semantic tone
+
+Error:
+#EF4444
+
+You may derive accessible shades/tints from these values where necessary.
+
+IMPORTANT:
+Do not blindly use these exact values if contrast testing requires accessible derived variants. Preserve the visual identity while meeting accessibility requirements.
+
+Gold should primarily communicate:
+
+* primary actions
+* selected navigation
+* important financial highlights
+* savings/progress accents
+* key financial figures
+* important interactive states
+* subtle visual branding
+
+Gold must NOT be used as:
+
+* the background of every card
+* every heading
+* every icon
+* every button
+* large decorative blocks
+* body text everywhere
+
+The interface should still feel refined when gold is removed.
+
+==================================================
+2. REDESIGN THE VISUAL LANGUAGE
+===============================
+
+Do not simply recolor the current UI.
+
+Reconsider the visual composition of the application shell and component gallery.
+
+The current result feels like a generic SaaS dashboard.
+Move toward a product that looks intentionally designed as a financial operating system.
+
+Use:
+
+* stronger typography hierarchy
+* generous whitespace
+* open layouts
+* restrained surfaces
+* subtle borders
+* minimal shadows
+* carefully controlled corner radii
+* strong financial-number hierarchy
+* elegant section separation
+* deliberate alignment
+* consistent visual rhythm
+* premium but understated interactions
+
+Avoid:
+
+* excessive cards
+* card-inside-card
+* excessive rounded containers
+* excessive shadows
+* giant gradients
+* decorative blobs
+* random illustrations
+* childish graphics
+* excessive icons
+* rainbow colors
+* generic dashboard widgets
+* dense admin-panel appearance
+* excessive glassmorphism
+* unnecessary animations
+
+A user should immediately understand what is important without the UI screaming for attention.
+
+==================================================
+3. FINTECH-QUALITY FINANCIAL HIERARCHY
+======================================
+
+The foundation must visually establish how financial information will look later.
+
+Create polished reusable specimens for:
+
+* available balance
+* financial amount
+* currency + amount
+* positive movement
+* negative movement
+* neutral movement
+* planned amount
+* projected amount
+* savings progress
+* budget progress
+* upcoming payment
+* transaction row
+* account surface
+* financial summary
+* status
+* primary financial action
+
+These are ONLY design-system specimens.
+
+They must be clearly labeled as examples/specimens and must not pretend to be real financial activity.
+
+Financial numbers should have:
+
+* strong hierarchy
+* tabular numerals
+* excellent alignment
+* correct currency formatting
+* enough whitespace
+* no unnecessary decoration
+
+Avoid turning every number into a colorful KPI card.
+
+The design should communicate:
+"financial clarity"
+rather than
+"dashboard full of metrics."
+
+==================================================
+4. APPLICATION SHELL REDESIGN
+=============================
+
+Redesign the application shell itself.
+
+Desktop:
+
+Use a refined sidebar/navigation system.
+
+It should feel closer to a premium fintech/productivity product than an admin dashboard.
+
+Include:
+
+* brand/product area
+* navigation
+* selected state using a refined gold accent
+* subtle dividers
+* user/profile area
+* theme/language controls where appropriate
+
+Do not make the sidebar visually heavy.
+
+Mobile:
+
+Use a polished five-item bottom navigation foundation for the student experience.
+
+It must:
+
+* be compact
+* have clear labels
+* have strong active state
+* have accessible touch targets
+* feel native/mobile-first
+* avoid looking like a web admin panel squeezed into a phone
+
+Tablet:
+
+Adapt intelligently between mobile and desktop layouts.
+
+==================================================
+5. HOME / PRODUCT PREVIEW VISUAL DIRECTION
+==========================================
+
+Even though Prompt 1 must NOT implement the actual Home Dashboard from Prompt 3, the foundation should visually demonstrate the intended hierarchy.
+
+Create a representative design specimen showing how a future financial home could feel.
+
+For example, conceptually:
+
+Greeting
+
+Available balance
+large and dominant
+
+small contextual explanation
+
+primary actions
+
+Then open sections for:
+Current period
+Upcoming
+Savings
+Recent activity
+
+Do NOT implement their real functionality.
+
+Use clearly marked design-system/reference content only.
+
+The purpose is to prove that the design system can support a premium financial dashboard without becoming a card grid.
+
+==================================================
+6. COMPONENT GALLERY REDESIGN
+=============================
+
+The Components gallery is currently one of the main places where the quality of the design system can be evaluated.
+
+Redesign it significantly.
+
+Organize it into visually clear sections:
+
+FOUNDATIONS
+
+* colors
+* typography
+* spacing
+* radii
+* elevation
+* icons
+
+ACTIONS
+
+* primary button
+* secondary button
+* tertiary/text button
+* destructive button
+* icon button
+* loading button
+* disabled button
+
+INPUTS
+
+* text input
+* money input
+* select
+* checkbox
+* switch
+* validation states
+
+FINANCIAL
+
+* amount
+* balance
+* transaction row
+* progress
+* financial summary
+* account surface
+* upcoming payment
+
+FEEDBACK
+
+* success
+* warning
+* error
+* informational
+* loading
+* empty
+* permission-limited
+
+OVERLAYS
+
+* dialog
+* sheet
+* confirmation/review
+* menu
+
+NAVIGATION
+
+* sidebar
+* bottom navigation
+* tabs
+* breadcrumbs
+
+Do not make every component live inside a floating card.
+Use the page itself as the canvas and demonstrate components naturally.
+
+==================================================
+7. BUTTON DESIGN
+================
+
+Buttons should feel premium and modern.
+
+Primary:
+
+* gold accent
+* strong readable text
+* restrained radius
+* subtle hover/pressed states
+* clear focus state
+
+Secondary:
+
+* quiet surface/border
+* not competing with primary
+
+Tertiary:
+
+* minimal
+* text-oriented
+
+Destructive:
+
+* reserved for destructive actions
+
+Do NOT use excessive pill-shaped buttons.
+
+Pills should primarily be used for:
+
+* status
+* tags
+* compact filters
+* badges
+
+==================================================
+8. CARDS AND SURFACES
+=====================
+
+Reduce the number of cards significantly.
+
+Not everything should be inside a card.
+
+Use three levels:
+
+1. Canvas
+2. Open section / subtle divider
+3. Raised surface when grouping is genuinely useful
+
+Cards/surfaces should communicate grouping, not decoration.
+
+Avoid:
+card → card → card → card.
+
+Especially avoid nested white cards on white backgrounds.
+
+==================================================
+9. TYPOGRAPHY
+=============
+
+Use:
+
+English:
+Inter
+
+Arabic:
+Noto Sans Arabic
+
+Make typography one of the main visual tools.
+
+Hierarchy should be obvious without relying on color.
+
+Suggested scale:
+
+Financial hero amount:
+32–48px depending on viewport
+
+Page title:
+28–32px
+
+Section heading:
+18–20px
+
+Body:
+16px
+
+Supporting:
+14px
+
+Compact:
+12–13px
+
+Use regular / medium / semibold.
+
+Avoid excessive bold text.
+
+Financial amounts should use tabular numerals.
+
+Arabic typography must have appropriate line-height and spacing.
+
+Do NOT use uppercase styling or excessive letter-spacing for Arabic.
+
+==================================================
+10. GOLD INTERACTION LANGUAGE
+=============================
+
+Create a coherent gold interaction language.
+
+Examples:
+
+Selected navigation:
+subtle gold indicator/accent
+
+Primary action:
+gold
+
+Important financial number:
+gold accent when semantically appropriate
+
+Savings:
+gold/mint relationship
+
+Focus:
+accessible gold-derived focus ring
+
+Hover:
+subtle gold surface/tint
+
+Pressed:
+slightly darker gold
+
+Do not turn everything gold.
+
+Gold should feel like a signature detail.
+
+==================================================
+11. DARK MODE
+=============
+
+Dark mode must be redesigned intentionally.
+
+Do NOT simply invert the light theme.
+
+Use:
+
+deep navy/charcoal canvas
+slightly lighter surfaces
+quiet borders
+warm off-white primary text
+muted secondary text
+controlled gold accents
+
+Dark mode should feel premium.
+
+Think:
+"premium financial app at night"
+
+not:
+"developer dark theme."
+
+Make sure:
+
+* gold remains readable
+* secondary text has sufficient contrast
+* borders remain visible
+* selected states are obvious
+* disabled states remain understandable
+* focus states remain accessible
+
+==================================================
+12. LIGHT MODE
+==============
+
+Light mode should use:
+
+warm off-white canvas
+white surfaces only where needed
+deep navy text
+subtle borders
+gold accents
+
+Avoid making the whole page pure white.
+
+The warm background should create visual depth without requiring shadows.
+
+==================================================
+13. MICRO-INTERACTIONS
+======================
+
+Use subtle interactions only.
+
+Examples:
+
+* hover elevation changes
+* border/accent transitions
+* selected navigation transitions
+* button pressed states
+* dialog/sheet transitions
+* tab transitions
+* focus transitions
+
+Keep motion approximately:
+120–180ms for controls
+180–240ms for overlays
+
+Respect prefers-reduced-motion.
+
+Do NOT use:
+
+* confetti
+* animated balance counting
+* excessive bouncing
+* large page transitions
+* decorative motion
+* layout-shifting animations
+
+The product should feel responsive, not animated for the sake of animation.
+
+==================================================
+14. RESPONSIVE QUALITY
+======================
+
+Do not treat mobile as a smaller desktop.
+
+Explicitly redesign the foundation for:
+
+Mobile
+Tablet
+Desktop
+
+Verify:
+
+* navigation
+* spacing
+* typography
+* buttons
+* forms
+* financial amounts
+* component gallery
+* dialogs/sheets
+* tables/lists
+* touch targets
+
+Mobile should feel like a deliberate financial mobile app.
+
+Critical financial information must never be hidden just because the viewport is small.
+
+==================================================
+15. ARABIC / RTL
+================
+
+Keep the existing Arabic/RTL functionality, but improve its visual quality.
+
+Test real Arabic text.
+
+Ensure:
+
+* logical start/end
+* mirrored navigation where appropriate
+* correct text alignment
+* correct spacing
+* correct financial number treatment
+* correct mixed Arabic/English handling
+* currency remains understandable
+* icons are not incorrectly mirrored
+* charts remain logically oriented
+* dialogs and sheets behave correctly
+
+Arabic should look designed, not like English with direction reversed.
+
+==================================================
+16. ACCESSIBILITY
+=================
+
+Preserve and improve the current WCAG 2.2 AA foundation.
+
+Verify:
+
+* keyboard navigation
+* visible focus
+* focus order
+* focus trapping in dialogs
+* focus restoration
+* sufficient contrast
+* semantic headings
+* accessible labels
+* icon-only controls
+* reduced motion
+* screen-reader-friendly states
+
+Do not sacrifice accessibility for visual appearance.
+
+==================================================
+17. BRAND / PRODUCT DISTINCTIVENESS
+===================================
+
+The final result should NOT resemble:
+
+* generic banking dashboard
+* generic SaaS admin
+* generic Tailwind template
+* generic student portal
+
+It should feel like a new category:
+
+A modern financial operating system designed specifically for students.
+
+The student identity should come from:
+
+* financial questions
+* contextual information
+* goals
+* campus context
+* planning
+* calm language
+
+NOT from childish illustrations or excessive playful colors.
+
+==================================================
+18. IMPLEMENTATION REQUIREMENTS
+===============================
+
+Keep the existing architecture.
+
+Update the canonical design tokens and shared components rather than creating page-specific styling.
+
+All future pages must automatically inherit the new visual language.
+
+There must be ONE canonical implementation for:
+
+* buttons
+* inputs
+* typography
+* surfaces
+* navigation
+* financial amounts
+* states
+* dialogs
+* progress
+* responsive layout
+
+Do not duplicate components.
+
+Do not hardcode page-specific colors.
+
+Use semantic tokens.
+
+Ensure the design system supports future:
+
+* Student
+* Parent
+* Admin
+
+experiences consistently.
+
+==================================================
+19. VERIFY VISUALLY
+===================
+
+After implementation, inspect the actual rendered application.
+
+Do not rely only on type checks.
+
+Verify the preview in:
+
+1. Student desktop
+2. Student mobile
+3. Parent desktop
+4. Admin desktop
+5. Components gallery
+6. Light mode
+7. Dark mode
+8. English
+9. Arabic/RTL
+10. Keyboard navigation
+
+Fix obvious visual inconsistencies before finishing.
+
+The result should visibly look substantially different from the current generic implementation.
+
+==================================================
+20. IMPORTANT STOP CONDITION
+============================
+
+Do NOT proceed to Prompt 2.
+
+Do NOT implement authentication or onboarding.
+
+Do NOT implement financial functionality.
+
+Do NOT create real financial data.
+
+This task ends when the Prompt 1 foundation has been visually redesigned and verified.
+
+At the end, report:
+
+* What visual changes were made
+* New color/token system
+* Major component changes
+* Navigation/shell changes
+* Responsive changes
+* Dark mode changes
+* Arabic/RTL changes
+* Accessibility verification
+* Tests/build/type checks
+* Files changed
+* Dependencies changed
+* Any remaining visual issues
+
+Also explicitly confirm:
+
+"Prompt 1.5 is complete. Prompts 2–15 were not implemented."
+
+Wait for further instruction after completion.
