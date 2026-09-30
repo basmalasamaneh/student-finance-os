@@ -1,0 +1,386 @@
+Before starting implementation, I want to strengthen the product’s UI/UX and visual design direction.
+
+Do NOT build anything yet, do NOT modify code, files, database, dependencies, configuration, or project structure.
+
+Treat this as a design-system and UX planning pass only.
+
+The goal is for Student Financial OS to feel like a polished, modern fintech product designed specifically for students — not like a generic admin dashboard or CRUD application.
+
+Review the existing Master Specification V3 and the implementation plan you just produced, then extend the plan with a comprehensive UI/UX strategy that will guide all 15 implementation prompts.
+
+The product should feel:
+
+* Modern and premium
+* Very clean and visually polished
+* Calm and comfortable
+* Professional but not corporate
+* Young but mature, not childish
+* Friendly and approachable
+* Extremely clear and easy to understand
+* Efficient and intuitive
+* Trustworthy without feeling intimidating
+* Similar in quality and interaction polish to a modern fintech/productivity application
+
+IMPORTANT:
+The existing V3 color palette remains the source of truth:
+
+* Indigo #4338CA
+* Mint #34D399
+* Amber #F59E0B
+* Off-white #F8FAFC
+* White #FFFFFF
+* Navy #172033
+* Slate #64748B
+* Red #EF4444 only for errors/critical states
+
+Do not simply apply these colors everywhere. Define how they should be used as a sophisticated semantic design system.
+
+Create a detailed UI/UX design strategy covering:
+
+1. VISUAL IDENTITY
+   Define the visual character, hierarchy, typography direction, spacing rhythm, border radius, elevation/shadows, iconography, imagery/illustration usage, and overall visual balance.
+
+Avoid:
+
+* Generic SaaS dashboard aesthetics
+* Excessive cards
+* Excessive rounded containers
+* Excessive gradients
+* Excessive decoration
+* Childish illustrations
+* Visual clutter
+* Too many competing colors
+* Dense financial tables when a simpler visualization would communicate better
+
+2. DESIGN SYSTEM
+   Define reusable design tokens and components that should be established early and reused throughout the entire application.
+
+Include:
+
+* Typography hierarchy
+* Spacing scale
+* Color semantics
+* Buttons
+* Inputs
+* Selects
+* Cards
+* Financial summary components
+* Account cards
+* Transaction rows
+* Progress indicators
+* Charts
+* Badges
+* Status indicators
+* Alerts
+* Dialogs
+* Bottom sheets
+* Tabs
+* Navigation
+* Empty states
+* Skeleton/loading states
+* Toasts
+* Confirmation patterns
+* Form validation
+* Error states
+
+Do not create visually different versions of the same component for different pages unless there is a genuine UX reason.
+
+3. INFORMATION ARCHITECTURE
+   Design the experience around the questions students actually need answered:
+
+* How much money can I spend?
+* What is happening with my money?
+* What do I need to pay soon?
+* How much am I spending?
+* What am I saving for?
+* Will I have enough later?
+* Can I afford this?
+* What financial actions need my attention?
+
+Prioritize information based on importance rather than showing every available metric at once.
+
+Use progressive disclosure:
+Show the most important information first and allow users to access deeper details when needed.
+
+4. DASHBOARD UX
+   Define a strong hierarchy for the student dashboard.
+
+It should NOT become a grid of random cards.
+
+The dashboard should clearly communicate:
+
+* Available/spendable balance
+* Current-period financial situation
+* Upcoming obligations
+* Savings goals
+* Useful insights
+* Recent activity
+* Important actions
+
+Define which information deserves visual prominence and which should remain secondary.
+
+5. FINANCIAL DATA VISUALIZATION
+   Use visualizations only when they improve understanding.
+
+Define when to use:
+
+* Progress bars
+* Donut/ring charts
+* Trend charts
+* Forecast charts
+* Timelines
+* Calendar views
+* Category breakdowns
+* Comparison views
+
+Avoid decorative charts.
+
+Every visualization should answer a clear financial question.
+
+6. FINANCIAL UX
+   Because this is a financial product, make actions and consequences extremely clear.
+
+For financial actions:
+
+* Clearly show the amount
+* Clearly show source and destination
+* Clearly show the resulting balance
+* Use confirmation for meaningful actions
+* Explain errors in simple language
+* Never hide important consequences
+* Never use confusing financial terminology when a simpler explanation works
+
+The interface should feel calm and supportive, never shame users about their spending.
+
+Avoid language such as:
+"You failed your budget."
+"You're bad at saving."
+"You're overspending!"
+
+Prefer neutral, actionable language such as:
+"You're getting close to this month's food budget."
+"You have ₪150 coming up this week."
+"At your current pace, this goal may take about 4 months."
+
+7. PROGRESSIVE DISCLOSURE
+   Keep the primary experience simple.
+
+For example, a savings goal should initially show:
+
+* Goal name
+* Current amount
+* Target
+* Progress
+* Target date
+
+Detailed contribution history, calculations, assumptions, and settings should appear only when requested.
+
+Apply this principle across the product.
+
+8. MOBILE UX
+   Design mobile as a first-class experience, not a compressed desktop layout.
+
+Define:
+
+* Bottom navigation
+* Touch-friendly controls
+* Mobile-friendly cards
+* Bottom sheets where appropriate
+* Appropriate responsive tables/list transformations
+* Thumb-friendly primary actions
+* Mobile dashboard hierarchy
+* Appropriate information density
+
+9. DESKTOP AND TABLET UX
+   Use the larger screen intentionally.
+
+Desktop can use:
+
+* Sidebar navigation
+* Multi-column layouts
+* Expanded financial analytics
+* Side panels where useful
+
+Tablet should have its own responsive behavior rather than simply being treated as desktop or mobile.
+
+10. ARABIC / RTL UX
+    Arabic must receive the same design quality as English.
+
+Define:
+
+* RTL layout behavior
+* Mirroring of directional elements
+* Correct alignment
+* Arabic typography considerations
+* Tables and charts in RTL
+* Navigation behavior
+* Dialog and form behavior
+* Number/currency formatting
+
+Do not treat RTL as simply adding dir="rtl".
+
+11. DARK MODE
+    Dark mode must be intentionally designed.
+
+Do not simply invert colors.
+
+Define:
+
+* Dark surfaces
+* Text hierarchy
+* Borders
+* Shadows/elevation
+* Charts
+* Semantic colors
+* Contrast
+* Selected/hover/focus states
+
+12. ACCESSIBILITY
+    Include:
+
+* Keyboard navigation
+* Focus states
+* Color contrast
+* Semantic HTML
+* Screen-reader-friendly labels
+* Accessible dialogs
+* Accessible forms
+* Do not rely on color alone to communicate financial status
+
+13. MICRO-INTERACTIONS AND MOTION
+    Use subtle, purposeful motion.
+
+Examples:
+
+* Smooth navigation transitions
+* Progress animations
+* Successful action feedback
+* Button/loading states
+* Goal contribution feedback
+* Checkout confirmation
+
+Avoid excessive animation or anything that slows down the user.
+
+14. AI ASSISTANT UX
+    The AI assistant should feel integrated into the financial product, not like a separate chatbot pasted into the application.
+
+Define:
+
+* Suggested questions
+* Context-aware insights
+* Clear distinction between calculated facts and AI-generated explanations
+* Source/context indicators where useful
+* Loading states
+* Error states
+* Follow-up interactions
+* Privacy-aware responses
+
+15. "CAN I AFFORD THIS?" UX
+    Make this one of the clearest experiences in the product.
+
+The user should enter:
+
+* Item
+* Price
+* Optional category/date/account
+
+Then see a simple comparison between:
+
+* Current situation
+* Baseline projection
+* Projection after purchase
+* Budget impact
+* Goal impact
+* Relevant assumptions
+
+Do not reduce the feature to a simplistic green/red "yes/no" decision.
+
+16. CAMPUS CHECKOUT UX
+    Make simulated payments feel polished and realistic while remaining clearly simulated.
+
+The flow should be:
+Browse → Select → Cart → Review → Confirm → Success/Receipt
+
+Clearly display:
+
+* Merchant/service
+* Items
+* Quantity
+* Prices
+* Total
+* Payment account
+* Resulting balance
+
+Always make "Simulated Payment" clear.
+
+17. EMPTY / LOADING / ERROR / SUCCESS UX
+    Every major feature needs intentionally designed states.
+
+Do not use generic:
+"Loading..."
+"No data."
+"Something went wrong."
+
+Design useful, contextual states that explain what is happening and what the user can do next.
+
+18. DESIGN CONSISTENCY
+    All 15 implementation prompts must inherit the same design system.
+
+A new feature must NOT introduce:
+
+* A new button style
+* A new card style
+* A new color language
+* A different spacing system
+* Different typography
+* Different interaction patterns
+
+unless explicitly justified.
+
+19. VISUAL QUALITY CONTROL
+    Add a dedicated visual/UX audit to the final implementation stage.
+
+The final audit should inspect the entire product for:
+
+* Visual inconsistency
+* Weak hierarchy
+* Excessive density
+* Poor spacing
+* Confusing interactions
+* Unnecessary complexity
+* Inconsistent components
+* Poor responsive behavior
+* RTL problems
+* Dark-mode problems
+* Accessibility problems
+* Generic-looking screens
+* Excessive card usage
+* Weak empty/loading/error states
+
+Then fix these issues systematically while preserving the established product identity.
+
+20. FIGMA / DESIGN REFERENCE COMPATIBILITY
+    The architecture should allow us to optionally use Figma as a visual reference during implementation.
+
+If a Figma design/reference is later provided, the implementation should reproduce its established visual language and interaction patterns consistently rather than copying isolated screens.
+
+Do not make Figma a technical dependency of the application.
+
+21. AI DESIGN/CODING ASSISTANCE
+    The implementation process may optionally use external AI/design assistance such as z.ai or Figma when available, but these tools must remain optional development aids.
+
+They must never become runtime dependencies or sources of truth.
+
+The application’s source code, design system, behavior, and data model remain the source of truth.
+
+Finally, update the proposed implementation plan to show:
+
+A. Which parts of the UI/UX system should be established in Prompt 1.
+B. Which UX requirements belong specifically to Prompts 2–14.
+C. What the final visual/UX audit should verify in Prompt 15.
+D. Which reusable design-system components should be created first.
+E. How Figma can be incorporated later if I provide reference designs.
+
+Still do NOT implement anything.
+
+Return only the updated implementation/design plan and any important decisions that should be confirmed before starting Prompt 1.
