@@ -22,7 +22,107 @@ tags:
     description: Owner-only student budgets and estimates
   - name: goals
     description: Reserved student savings and consent-scoped simulated parent funding
+  - name: family
+    description: Accepted-link permission-scoped simulated family money requests
+  - name: notifications
+    description: Owner-only durable in-app inbox with current consent checks
 paths:
+  /family/requests:
+    get:
+      operationId: listStudentFamilyRequests
+      tags: [family]
+      responses:
+        "200": { description: Student requests on currently accepted requests-enabled links, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } } }
+    post:
+      operationId: createFamilyMoneyRequest
+      tags: [family]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequestInput" } } } }
+      responses:
+        "201": { description: Student-created request; no money posted, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /family/requests/{id}:
+    get:
+      operationId: getStudentFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200": { description: Student request with conversation, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /family/requests/{id}/reply:
+    post:
+      operationId: replyToFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyRequestMessageInput" } } } }
+      responses:
+        "200": { description: Reply returns details_requested to pending; no money posted, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /family/requests/{id}/cancel:
+    post:
+      operationId: cancelFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      responses:
+        "200": { description: Cancel pending or details_requested request, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /parent/requests:
+    get:
+      operationId: listParentFamilyRequests
+      tags: [family]
+      responses:
+        "200": { description: Only requests addressed to this parent on currently authorized links, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } } }
+  /parent/requests/{id}:
+    get:
+      operationId: getParentFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200": { description: Permission-scoped request detail, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /parent/requests/{id}/approve:
+    post:
+      operationId: approveFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyRequestApprovalInput" } } } }
+      responses:
+        "200": { description: Atomic simulated parent debit and student income credit; no FX, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /parent/requests/{id}/decline:
+    post:
+      operationId: declineFamilyRequest
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      responses:
+        "200": { description: Declined with no money movement, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /parent/requests/{id}/ask-details:
+    post:
+      operationId: askFamilyRequestDetails
+      tags: [family]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyRequestMessageInput" } } } }
+      responses:
+        "200": { description: Pending request becomes details_requested, content: { application/json: { schema: { $ref: "#/components/schemas/FamilyMoneyRequest" } } } }
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      responses:
+        "200": { description: Owner-only currently authorized in-app inbox; denied parent records omitted, content: { application/json: { schema: { $ref: "#/components/schemas/NotificationInbox" } } } }
+  /notifications/unread-count:
+    get:
+      operationId: getNotificationUnreadCount
+      tags: [notifications]
+      responses:
+        "200": { description: Count of currently authorized unread records only, content: { application/json: { schema: { $ref: "#/components/schemas/NotificationUnreadCount" } } } }
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        "200": { description: Owner-only authorized notification marked read, content: { application/json: { schema: { $ref: "#/components/schemas/InAppNotification" } } } }
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      responses:
+        "200": { description: Mark currently visible records read only, content: { application/json: { schema: { $ref: "#/components/schemas/NotificationUnreadCount" } } } }
   /goals:
     get:
       operationId: listSavingsGoals
@@ -829,6 +929,78 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    FamilyMoneyRequestInput:
+      type: object
+      additionalProperties: false
+      required: [familyLinkId, receivingAccountId, amount, reason, note, date]
+      properties:
+        familyLinkId: { type: string, format: uuid }
+        receivingAccountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        reason: { type: string, minLength: 1, maxLength: 120 }
+        note: { type: string, maxLength: 500 }
+        date: { type: string, format: date }
+    FamilyRequestMessageInput:
+      type: object
+      additionalProperties: false
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1, maxLength: 500 }
+    FamilyRequestApprovalInput:
+      type: object
+      additionalProperties: false
+      required: [parentAccountId]
+      properties:
+        parentAccountId: { type: string, format: uuid }
+    FamilyRequestMessage:
+      type: object
+      required: [id, role, message, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        role: { type: string, enum: [student, parent] }
+        message: { type: string }
+        createdAt: { type: string }
+    FamilyMoneyRequest:
+      type: object
+      required: [id, familyLinkId, studentId, parentId, amount, reason, note, date, status, history, parentTransferId, transactionIds, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        familyLinkId: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        parentId: { type: string, format: uuid }
+        receivingAccountId: { type: string, format: uuid, description: Student-only own selected account; omitted from parent responses }
+        amount: { $ref: "#/components/schemas/Amount" }
+        reason: { type: string }
+        note: { type: string }
+        date: { type: string, format: date }
+        status: { type: string, enum: [pending, details_requested, approved, declined, cancelled] }
+        history: { type: array, items: { $ref: "#/components/schemas/FamilyRequestMessage" } }
+        parentTransferId: { type: [string, "null"], format: uuid }
+        transactionIds: { type: array, items: { type: string, format: uuid }, description: Only this viewer's own ledger leg }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+    InAppNotification:
+      type: object
+      required: [id, type, title, createdAt, readAt]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string, enum: [request, approval, decline, ask_details, reply, allowance_posted, goal_funded, permission_changed] }
+        title: { type: string }
+        href: { type: string, description: Reauthorized application-relative deep link; omitted for generic sharing changes }
+        amount: { $ref: "#/components/schemas/Amount" }
+        createdAt: { type: string }
+        readAt: { type: [string, "null"] }
+    NotificationInbox:
+      type: object
+      required: [items, unreadCount]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/InAppNotification" } }
+        unreadCount: { type: integer, minimum: 0 }
+    NotificationUnreadCount:
+      type: object
+      required: [unreadCount]
+      properties:
+        unreadCount: { type: integer, minimum: 0 }
     FamilyPermissions:
       type: object
       additionalProperties: false
@@ -974,8 +1146,8 @@ components:
       type: object
       required: [status, items]
       properties:
-        status: { type: string, enum: [coming_soon] }
-        items: { type: array, maxItems: 0, items: { type: string } }
+        status: { type: string, enum: [coming_soon, live] }
+        items: { type: array, items: { $ref: "#/components/schemas/FamilyMoneyRequest" } }
     ParentChild:
       type: object
       required: [childId, name, permissions]
@@ -1002,7 +1174,7 @@ components:
       properties:
         children: { type: array, items: { $ref: "#/components/schemas/ParentChild" } }
         simulated: { type: boolean, enum: [true] }
-        requestsStatus: { type: string, enum: [coming_soon] }
+        requestsStatus: { type: string, enum: [coming_soon, live] }
         goalFundingPath: { type: string, enum: [/goals/fund] }
     AllowanceProjection:
       type: object

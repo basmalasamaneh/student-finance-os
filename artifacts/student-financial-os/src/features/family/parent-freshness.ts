@@ -15,7 +15,8 @@ import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 
 export const PRIVACY_RESUME_EVENT = 'sfos:privacy-resume';
 const ATTR = 'data-parent-refreshing';
-const isParentKey = (k: readonly unknown[]) => typeof k[0] === 'string' && k[0].startsWith('/api/parent');
+// Parent-scoped data plus the shared inbox (its parent entries are consent-scoped too).
+const isParentKey = (k: readonly unknown[]) => typeof k[0] === 'string' && (k[0].startsWith('/api/parent') || k[0].startsWith('/api/notifications'));
 
 let concealed = false;
 const subs = new Set<() => void>();

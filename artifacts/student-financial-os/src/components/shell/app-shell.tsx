@@ -12,6 +12,7 @@ import { GROUP_LABEL, groupedForRole, isActive, itemsForRole, mobileItemsForRole
 import type { TranslationKey } from '@/features/i18n/dictionary';
 import { LanguageToggle, ThemeMenu } from './shell-controls';
 import { cn } from '@/lib/utils';
+import { NotificationCenter } from '@/components/requests/notification-inbox';
 import { canReachScroll } from '@/components/gestures/gesture-math';
 import { createScrollController, type NavKind } from './scroll-memory';
 
@@ -87,6 +88,7 @@ function Sidebar() {
             );
           })}
         </nav>
+        <NotificationCenter />
         <Button type="button" variant="ghost" size="icon" onClick={toggle} aria-label={toggleLabel} aria-expanded={false} data-testid="button-sidebar-toggle">
           <ToggleIcon className="rtl:-scale-x-100" aria-hidden />
         </Button>
@@ -97,9 +99,10 @@ function Sidebar() {
     <aside className="chrome sticky top-0 hidden h-[100dvh] w-[264px] shrink-0 flex-col border-e border-sidebar-border bg-sidebar lg:flex">
       <div className="flex items-start justify-between gap-2 ps-5 pe-2 pb-5 pt-6">
         <Brand />
+        <div className="flex items-center"><NotificationCenter />
         <Button type="button" variant="ghost" size="icon" className="text-muted-foreground" onClick={toggle} aria-label={toggleLabel} aria-expanded data-testid="button-sidebar-toggle">
           <ToggleIcon className="rtl:-scale-x-100" aria-hidden />
-        </Button>
+        </Button></div>
       </div>
       <nav aria-label={t('a11y.mainNav')} className="flex-1 overflow-y-auto border-t border-sidebar-border px-3 pb-6 pt-4">
         {groupedForRole(role).map(([group, items]) => (
@@ -239,6 +242,7 @@ function TopBar() {
           <LanguageToggle />
           <ThemeMenu />
         </div>
+        <NotificationCenter className="ms-auto min-[769px]:ms-0" />
         <MoreSheet />
       </div>
     </header>

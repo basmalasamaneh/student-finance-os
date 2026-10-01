@@ -43,6 +43,10 @@ import type {
   FamilyDecisionInput,
   FamilyInvitationReceipt,
   FamilyLink,
+  FamilyMoneyRequest,
+  FamilyMoneyRequestInput,
+  FamilyRequestApprovalInput,
+  FamilyRequestMessageInput,
   FinanceAccount,
   FinanceAccountInput,
   FinanceHistoryFilterOptions,
@@ -60,6 +64,7 @@ import type {
   GoalInvitationCreated,
   GoalInvitationRedemption,
   HealthStatus,
+  InAppNotification,
   Income,
   IncomeInput,
   LoginInput,
@@ -67,6 +72,8 @@ import type {
   MoneyRequest,
   MoneyRequestDecision,
   MoneyRequestInput,
+  NotificationInbox,
+  NotificationUnreadCount,
   ParentChild,
   ParentDashboard,
   ParentFundingGoal,
@@ -117,6 +124,1035 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getListStudentFamilyRequestsUrl = () => {
+
+
+
+
+  return `/api/family/requests`
+}
+
+export const listStudentFamilyRequests = async ( options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest[]> => {
+
+  return customFetch<FamilyMoneyRequest[]>(getListStudentFamilyRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStudentFamilyRequestsQueryKey = () => {
+    return [
+    `/api/family/requests`
+    ] as const;
+    }
+
+
+export const getListStudentFamilyRequestsQueryOptions = <TData = Awaited<ReturnType<typeof listStudentFamilyRequests>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentFamilyRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStudentFamilyRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudentFamilyRequests>>> = ({ signal }) => listStudentFamilyRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStudentFamilyRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStudentFamilyRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof listStudentFamilyRequests>>>
+export type ListStudentFamilyRequestsQueryError = ErrorType<unknown>
+
+
+
+export function useListStudentFamilyRequests<TData = Awaited<ReturnType<typeof listStudentFamilyRequests>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentFamilyRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStudentFamilyRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateFamilyMoneyRequestUrl = () => {
+
+
+
+
+  return `/api/family/requests`
+}
+
+export const createFamilyMoneyRequest = async (familyMoneyRequestInput: FamilyMoneyRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyMoneyRequest>(getCreateFamilyMoneyRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyMoneyRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateFamilyMoneyRequestMutationKey = () => ['createFamilyMoneyRequest'] as const;
+
+export const getCreateFamilyMoneyRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFamilyMoneyRequest>>, TError,CreateFamilyMoneyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFamilyMoneyRequest>>, TError,CreateFamilyMoneyRequestMutationVariables, TContext> => {
+
+const mutationKey = getCreateFamilyMoneyRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFamilyMoneyRequest>>, CreateFamilyMoneyRequestMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFamilyMoneyRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFamilyMoneyRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createFamilyMoneyRequest>>>
+    export type CreateFamilyMoneyRequestMutationBody = BodyType<FamilyMoneyRequestInput>
+    export type CreateFamilyMoneyRequestMutationError = ErrorType<unknown>
+    export type CreateFamilyMoneyRequestMutationVariables = {data: BodyType<FamilyMoneyRequestInput>}
+
+    export const useCreateFamilyMoneyRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFamilyMoneyRequest>>, TError,CreateFamilyMoneyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFamilyMoneyRequest>>,
+        TError,
+        CreateFamilyMoneyRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateFamilyMoneyRequestMutationOptions(options));
+    }
+
+export const getGetStudentFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/family/requests/${id}`
+}
+
+export const getStudentFamilyRequest = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+  return customFetch<FamilyMoneyRequest>(getGetStudentFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentFamilyRequestQueryKey = (id: string,) => {
+    return [
+    `/api/family/requests/${id}`
+    ] as const;
+    }
+
+
+export const getGetStudentFamilyRequestQueryOptions = <TData = Awaited<ReturnType<typeof getStudentFamilyRequest>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentFamilyRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentFamilyRequestQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentFamilyRequest>>> = ({ signal }) => getStudentFamilyRequest(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentFamilyRequest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentFamilyRequestQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentFamilyRequest>>>
+export type GetStudentFamilyRequestQueryError = ErrorType<unknown>
+
+
+
+export function useGetStudentFamilyRequest<TData = Awaited<ReturnType<typeof getStudentFamilyRequest>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentFamilyRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentFamilyRequestQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReplyToFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/family/requests/${id}/reply`
+}
+
+export const replyToFamilyRequest = async (id: string,
+    familyRequestMessageInput: FamilyRequestMessageInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyMoneyRequest>(getReplyToFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyRequestMessageInput)
+  }
+);}
+
+
+
+
+
+export const getReplyToFamilyRequestMutationKey = () => ['replyToFamilyRequest'] as const;
+
+export const getReplyToFamilyRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replyToFamilyRequest>>, TError,ReplyToFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof replyToFamilyRequest>>, TError,ReplyToFamilyRequestMutationVariables, TContext> => {
+
+const mutationKey = getReplyToFamilyRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof replyToFamilyRequest>>, ReplyToFamilyRequestMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  replyToFamilyRequest(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReplyToFamilyRequestMutationResult = NonNullable<Awaited<ReturnType<typeof replyToFamilyRequest>>>
+    export type ReplyToFamilyRequestMutationBody = BodyType<FamilyRequestMessageInput>
+    export type ReplyToFamilyRequestMutationError = ErrorType<unknown>
+    export type ReplyToFamilyRequestMutationVariables = {id: string;data: BodyType<FamilyRequestMessageInput>}
+
+    export const useReplyToFamilyRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replyToFamilyRequest>>, TError,ReplyToFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof replyToFamilyRequest>>,
+        TError,
+        ReplyToFamilyRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReplyToFamilyRequestMutationOptions(options));
+    }
+
+export const getCancelFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/family/requests/${id}/cancel`
+}
+
+export const cancelFamilyRequest = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+  return customFetch<FamilyMoneyRequest>(getCancelFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCancelFamilyRequestMutationKey = () => ['cancelFamilyRequest'] as const;
+
+export const getCancelFamilyRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelFamilyRequest>>, TError,CancelFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelFamilyRequest>>, TError,CancelFamilyRequestMutationVariables, TContext> => {
+
+const mutationKey = getCancelFamilyRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelFamilyRequest>>, CancelFamilyRequestMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  cancelFamilyRequest(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelFamilyRequestMutationResult = NonNullable<Awaited<ReturnType<typeof cancelFamilyRequest>>>
+
+    export type CancelFamilyRequestMutationError = ErrorType<unknown>
+    export type CancelFamilyRequestMutationVariables = {id: string}
+
+    export const useCancelFamilyRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelFamilyRequest>>, TError,CancelFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cancelFamilyRequest>>,
+        TError,
+        CancelFamilyRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelFamilyRequestMutationOptions(options));
+    }
+
+export const getListParentFamilyRequestsUrl = () => {
+
+
+
+
+  return `/api/parent/requests`
+}
+
+export const listParentFamilyRequests = async ( options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest[]> => {
+
+  return customFetch<FamilyMoneyRequest[]>(getListParentFamilyRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListParentFamilyRequestsQueryKey = () => {
+    return [
+    `/api/parent/requests`
+    ] as const;
+    }
+
+
+export const getListParentFamilyRequestsQueryOptions = <TData = Awaited<ReturnType<typeof listParentFamilyRequests>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listParentFamilyRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListParentFamilyRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listParentFamilyRequests>>> = ({ signal }) => listParentFamilyRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listParentFamilyRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListParentFamilyRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof listParentFamilyRequests>>>
+export type ListParentFamilyRequestsQueryError = ErrorType<unknown>
+
+
+
+export function useListParentFamilyRequests<TData = Awaited<ReturnType<typeof listParentFamilyRequests>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listParentFamilyRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListParentFamilyRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetParentFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/parent/requests/${id}`
+}
+
+export const getParentFamilyRequest = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+  return customFetch<FamilyMoneyRequest>(getGetParentFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetParentFamilyRequestQueryKey = (id: string,) => {
+    return [
+    `/api/parent/requests/${id}`
+    ] as const;
+    }
+
+
+export const getGetParentFamilyRequestQueryOptions = <TData = Awaited<ReturnType<typeof getParentFamilyRequest>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentFamilyRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetParentFamilyRequestQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getParentFamilyRequest>>> = ({ signal }) => getParentFamilyRequest(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getParentFamilyRequest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetParentFamilyRequestQueryResult = NonNullable<Awaited<ReturnType<typeof getParentFamilyRequest>>>
+export type GetParentFamilyRequestQueryError = ErrorType<unknown>
+
+
+
+export function useGetParentFamilyRequest<TData = Awaited<ReturnType<typeof getParentFamilyRequest>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentFamilyRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetParentFamilyRequestQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getApproveFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/parent/requests/${id}/approve`
+}
+
+export const approveFamilyRequest = async (id: string,
+    familyRequestApprovalInput: FamilyRequestApprovalInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyMoneyRequest>(getApproveFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyRequestApprovalInput)
+  }
+);}
+
+
+
+
+
+export const getApproveFamilyRequestMutationKey = () => ['approveFamilyRequest'] as const;
+
+export const getApproveFamilyRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveFamilyRequest>>, TError,ApproveFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveFamilyRequest>>, TError,ApproveFamilyRequestMutationVariables, TContext> => {
+
+const mutationKey = getApproveFamilyRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveFamilyRequest>>, ApproveFamilyRequestMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  approveFamilyRequest(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveFamilyRequestMutationResult = NonNullable<Awaited<ReturnType<typeof approveFamilyRequest>>>
+    export type ApproveFamilyRequestMutationBody = BodyType<FamilyRequestApprovalInput>
+    export type ApproveFamilyRequestMutationError = ErrorType<unknown>
+    export type ApproveFamilyRequestMutationVariables = {id: string;data: BodyType<FamilyRequestApprovalInput>}
+
+    export const useApproveFamilyRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveFamilyRequest>>, TError,ApproveFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveFamilyRequest>>,
+        TError,
+        ApproveFamilyRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getApproveFamilyRequestMutationOptions(options));
+    }
+
+export const getDeclineFamilyRequestUrl = (id: string,) => {
+
+
+
+
+  return `/api/parent/requests/${id}/decline`
+}
+
+export const declineFamilyRequest = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+  return customFetch<FamilyMoneyRequest>(getDeclineFamilyRequestUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeclineFamilyRequestMutationKey = () => ['declineFamilyRequest'] as const;
+
+export const getDeclineFamilyRequestMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof declineFamilyRequest>>, TError,DeclineFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof declineFamilyRequest>>, TError,DeclineFamilyRequestMutationVariables, TContext> => {
+
+const mutationKey = getDeclineFamilyRequestMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof declineFamilyRequest>>, DeclineFamilyRequestMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  declineFamilyRequest(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeclineFamilyRequestMutationResult = NonNullable<Awaited<ReturnType<typeof declineFamilyRequest>>>
+
+    export type DeclineFamilyRequestMutationError = ErrorType<unknown>
+    export type DeclineFamilyRequestMutationVariables = {id: string}
+
+    export const useDeclineFamilyRequest = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof declineFamilyRequest>>, TError,DeclineFamilyRequestMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof declineFamilyRequest>>,
+        TError,
+        DeclineFamilyRequestMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeclineFamilyRequestMutationOptions(options));
+    }
+
+export const getAskFamilyRequestDetailsUrl = (id: string,) => {
+
+
+
+
+  return `/api/parent/requests/${id}/ask-details`
+}
+
+export const askFamilyRequestDetails = async (id: string,
+    familyRequestMessageInput: FamilyRequestMessageInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyMoneyRequest> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyMoneyRequest>(getAskFamilyRequestDetailsUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyRequestMessageInput)
+  }
+);}
+
+
+
+
+
+export const getAskFamilyRequestDetailsMutationKey = () => ['askFamilyRequestDetails'] as const;
+
+export const getAskFamilyRequestDetailsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof askFamilyRequestDetails>>, TError,AskFamilyRequestDetailsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof askFamilyRequestDetails>>, TError,AskFamilyRequestDetailsMutationVariables, TContext> => {
+
+const mutationKey = getAskFamilyRequestDetailsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof askFamilyRequestDetails>>, AskFamilyRequestDetailsMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  askFamilyRequestDetails(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AskFamilyRequestDetailsMutationResult = NonNullable<Awaited<ReturnType<typeof askFamilyRequestDetails>>>
+    export type AskFamilyRequestDetailsMutationBody = BodyType<FamilyRequestMessageInput>
+    export type AskFamilyRequestDetailsMutationError = ErrorType<unknown>
+    export type AskFamilyRequestDetailsMutationVariables = {id: string;data: BodyType<FamilyRequestMessageInput>}
+
+    export const useAskFamilyRequestDetails = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof askFamilyRequestDetails>>, TError,AskFamilyRequestDetailsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof askFamilyRequestDetails>>,
+        TError,
+        AskFamilyRequestDetailsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAskFamilyRequestDetailsMutationOptions(options));
+    }
+
+export const getListNotificationsUrl = () => {
+
+
+
+
+  return `/api/notifications`
+}
+
+export const listNotifications = async ( options?: Parameters<typeof customFetch>[1]): Promise<NotificationInbox> => {
+
+  return customFetch<NotificationInbox>(getListNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListNotificationsQueryKey = () => {
+    return [
+    `/api/notifications`
+    ] as const;
+    }
+
+
+export const getListNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof listNotifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listNotifications>>> = ({ signal }) => listNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof listNotifications>>>
+export type ListNotificationsQueryError = ErrorType<unknown>
+
+
+
+export function useListNotifications<TData = Awaited<ReturnType<typeof listNotifications>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetNotificationUnreadCountUrl = () => {
+
+
+
+
+  return `/api/notifications/unread-count`
+}
+
+export const getNotificationUnreadCount = async ( options?: Parameters<typeof customFetch>[1]): Promise<NotificationUnreadCount> => {
+
+  return customFetch<NotificationUnreadCount>(getGetNotificationUnreadCountUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetNotificationUnreadCountQueryKey = () => {
+    return [
+    `/api/notifications/unread-count`
+    ] as const;
+    }
+
+
+export const getGetNotificationUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof getNotificationUnreadCount>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotificationUnreadCount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationUnreadCountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotificationUnreadCount>>> = ({ signal }) => getNotificationUnreadCount({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotificationUnreadCount>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetNotificationUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof getNotificationUnreadCount>>>
+export type GetNotificationUnreadCountQueryError = ErrorType<unknown>
+
+
+
+export function useGetNotificationUnreadCount<TData = Awaited<ReturnType<typeof getNotificationUnreadCount>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotificationUnreadCount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetNotificationUnreadCountQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarkNotificationReadUrl = (id: string,) => {
+
+
+
+
+  return `/api/notifications/${id}/read`
+}
+
+export const markNotificationRead = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<InAppNotification> => {
+
+  return customFetch<InAppNotification>(getMarkNotificationReadUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkNotificationReadMutationKey = () => ['markNotificationRead'] as const;
+
+export const getMarkNotificationReadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,MarkNotificationReadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,MarkNotificationReadMutationVariables, TContext> => {
+
+const mutationKey = getMarkNotificationReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markNotificationRead>>, MarkNotificationReadMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  markNotificationRead(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkNotificationReadMutationResult = NonNullable<Awaited<ReturnType<typeof markNotificationRead>>>
+
+    export type MarkNotificationReadMutationError = ErrorType<unknown>
+    export type MarkNotificationReadMutationVariables = {id: string}
+
+    export const useMarkNotificationRead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,MarkNotificationReadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markNotificationRead>>,
+        TError,
+        MarkNotificationReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkNotificationReadMutationOptions(options));
+    }
+
+export const getMarkAllNotificationsReadUrl = () => {
+
+
+
+
+  return `/api/notifications/read-all`
+}
+
+export const markAllNotificationsRead = async ( options?: Parameters<typeof customFetch>[1]): Promise<NotificationUnreadCount> => {
+
+  return customFetch<NotificationUnreadCount>(getMarkAllNotificationsReadUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkAllNotificationsReadMutationKey = () => ['markAllNotificationsRead'] as const;
+
+export const getMarkAllNotificationsReadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markAllNotificationsRead>>, TError,void, TContext> => {
+
+const mutationKey = getMarkAllNotificationsReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markAllNotificationsRead>>, void> = () => {
+
+
+          return  markAllNotificationsRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkAllNotificationsReadMutationResult = NonNullable<Awaited<ReturnType<typeof markAllNotificationsRead>>>
+
+    export type MarkAllNotificationsReadMutationError = ErrorType<unknown>
+
+
+    export const useMarkAllNotificationsRead = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllNotificationsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markAllNotificationsRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkAllNotificationsReadMutationOptions(options));
+    }
 
 export const getListSavingsGoalsUrl = () => {
 

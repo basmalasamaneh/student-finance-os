@@ -8,6 +8,7 @@ import { ApiError } from "../lib/http-errors";
 import { once, lockedAccounts, post, type Tx } from "../lib/finance";
 import { validDate } from "../lib/planning";
 import { historyDto, invitationDto, lockedGoal, ownerGoals, parentConsent, parentGoalDto, readGoal } from "../lib/goals";
+import { notifyFamily } from "../lib/notifications";
 
 const router: IRouter = Router();
 const owner = (r: Request) => requireRole(r.res?.locals.principal, "student").userId;
@@ -95,7 +96,7 @@ async function contribute(req: Request, isParent: boolean) {
     // Reuse this transaction (including its goal lock) for idempotency and postings.
     return once(actorId, req.get("Idempotency-Key"), `goal:fund:${goalId}`, input, async tx => {
       const goal = await lockedGoal(tx, goalId, isParent ? undefined : actorId);
-      if (isParent) await parentConsent(tx, goalId, actorId);
+      const grant = isParent ? await parentConsent(tx, goalId, actorId) : undefined;
       if (goal.status !== "active") throw new ApiError("CONFLICT");
       const sourceId = "accountId" in input ? input.accountId : undefined;
       const accounts = await lockedAccounts(tx, [goal.reserveAccountId, ...(sourceId ? [sourceId] : [])], true);
@@ -115,6 +116,8 @@ async function contribute(req: Request, isParent: boolean) {
       transactions.push(await post(tx, reserve, value, { ...details, counterpartyAccountId: sourceId }));
       const [entry] = await tx.insert(goalHistory).values({ goalId, actorId, action: "contribution", source,
         amountMinor: value, currency: goal.currency, transactionIds: transactions.map(t => t.id), note: input.note }).returning();
+      await notifyFamily(tx, [goal.userId, ...(isParent ? [actorId] : [])], { type: "goal_funded",
+        sourceId: entry!.id, goalId, goalInvitationId: grant?.id, targetId: goalId, amountMinor: value, currency: goal.currency });
       const [updated] = await tx.update(savingsGoals).set({ updatedAt: new Date() }).where(eq(savingsGoals.id, goalId)).returning();
       const dto = await readGoal(tx, updated!);
       return isParent ? { id: entry!.id, goal: parentGoalDto(dto), amount: input.amount, source, createdAt: entry!.createdAt.toISOString() } :

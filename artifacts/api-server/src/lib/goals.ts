@@ -25,6 +25,7 @@ export async function parentConsent(tx: Tx, goalId: string, parentId: string) {
   const [grant] = await tx.select().from(goalInvitations).where(and(eq(goalInvitations.goalId, goalId),
     eq(goalInvitations.parentId, parentId), isNull(goalInvitations.revokedAt)));
   if (!grant || !grant.redeemedAt) throw new ApiError("NOT_FOUND");
+  return grant;
 }
 export function goalDto(goal: SavingsGoalRow, reserve: typeof financeAccounts.$inferSelect, history: GoalHistoryRow[], now = new Date()) {
   if (reserve.type !== "goal_reserve" || reserve.userId !== goal.userId || reserve.currency !== goal.currency ||

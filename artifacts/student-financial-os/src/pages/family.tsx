@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { UserPlus } from 'lucide-react';
+import { HandCoins, UserPlus } from 'lucide-react';
 import {
   getGetStudentFamilyQueryKey, getListFinanceAccountsQueryKey, useCreateFamilyInvitation, useGetStudentFamily, useListFinanceAccounts,
   useRevokeFamilyLink, useUpdateFamilyConsent, type FamilyLink, type FamilyPermissions,
@@ -58,7 +58,8 @@ function Inner() {
   return (
     <Page>
       <PageHeader eyebrow={t('FAMILY', 'العائلة')} title={t('Family sharing', 'المشاركة العائلية')} lede={t('You decide what each parent sees. Everything starts private.', 'أنت تقرر ما يراه كل ولي أمر. كل شيء خاص افتراضياً.')}
-        actions={<Button onClick={openInvite} data-testid="button-invite-parent"><UserPlus />{t('Invite a parent', 'دعوة ولي أمر')}</Button>} />
+        actions={<div className="flex flex-wrap gap-2"><Button onClick={openInvite} data-testid="button-invite-parent"><UserPlus />{t('Invite a parent', 'دعوة ولي أمر')}</Button>
+          <Link href="/family/requests" className="inline-flex min-h-11 items-center gap-2 rounded-[14px] border border-border px-4 type-label hover-elevate" data-testid="link-family-requests"><HandCoins className="size-4" aria-hidden />{t('Family requests', 'الطلبات العائلية')}</Link></div>} />
       <PullToRefresh label={t('Pull to refresh', 'اسحب للتحديث')} onRefresh={() => Promise.all([q.refetch(), accts.refetch()])}>
         {q.isPending ? <SkeletonRows rows={4} label={t('Loading family', 'جارٍ تحميل العائلة')} />
           : q.isError ? <StatePanel tone="error" title={t('Couldn’t load family sharing', 'تعذّر تحميل المشاركة العائلية')} body={apiErrorText(q.error, t)}

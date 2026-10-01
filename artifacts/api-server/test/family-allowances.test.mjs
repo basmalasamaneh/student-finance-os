@@ -78,7 +78,7 @@ test("family privacy, allowance atomic concurrency/revocation, occurrence retrie
     await assert.rejects(f("put", "/family/links/:id", 1, { permissions: all, receivingAccountId: receiving.id }, { id: invite.link.id }), { code: "NOT_FOUND" });
     await f("put", "/family/links/:id", 0, { permissions: all, receivingAccountId: receiving.id }, { id: invite.link.id });
     assert.equal((await f("get", "/family", 0)).links[0].parentName, "Family synthetic 2");
-    assert.equal((await child()).requests.status, "coming_soon");
+    assert.equal((await child()).requests.status, "live");
     // Multiple accepted guardians, multiple children; neither grants access to the other's schedules.
     const second = await f("post", "/family/invitations", 0, { permissions: all, receivingAccountId: receiving.id });
     await f("post", "/parent/family-invitations/decide", 3, { token: second.token, action: "accept" });

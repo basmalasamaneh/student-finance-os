@@ -13,6 +13,7 @@ import { useI18n } from '@/features/i18n/i18n-provider';
 import { useDeviceSecurity } from '@/features/security/device-security';
 import { formatDate } from '@/lib/money';
 import type { Tx } from '@/features/money/money-model';
+import { isLive } from '@/components/requests/request-view-model';
 import { ALLOWANCE_STATUS, day, FREQUENCY_TEXT, grantedCount, UPCOMING_SOURCE } from '@/features/family/family-view';
 
 /** Parent: enter the private code, then accept or decline. Code lives in component memory only. */
@@ -107,7 +108,10 @@ export function ChildSummaryCard({ child, t, detailed = false }: { child: Parent
             <MoneyDisplay hidden={hb} value={a.amount} size="sm" tone={a.direction === 'credit' ? 'positive' : 'default'} showPlus={a.direction === 'credit'} /></li>))}</ul>
           : <span className="type-caption text-muted-foreground">{t('No activity yet', 'لا نشاط بعد')}</span>}
       </div> : null}
-      {child.requests ? <p className="type-caption text-muted-foreground">{t('Requests: coming soon.', 'الطلبات: قريباً.')}</p> : null}
+      {child.requests ? (() => { const open = child.requests.items.filter(isLive).length; return (
+        <Link href="/parent/requests" className="type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid={`link-child-requests-${child.childId}`}>
+          {open ? t(`${open} open request${open === 1 ? '' : 's'} · review`, `${open} طلبات مفتوحة · مراجعة`) : t(`Requests · ${child.requests.items.length} total, none open`, `الطلبات · ${child.requests.items.length} إجمالاً، لا شيء مفتوح`)}
+        </Link>); })() : null}
       {hidden > 0 ? <p className="type-caption flex items-center gap-1.5 text-muted-foreground"><Lock className="size-3.5" aria-hidden />
         {t(`${hidden} of 8 areas not shared`, `${hidden} من 8 مجالات غير مشتركة`)}</p> : null}
     </Card>

@@ -5,10 +5,10 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { FamilyMoneyRequest } from './familyMoneyRequest';
 import type { FamilyRequestsStatus } from './familyRequestsStatus';
 
 export interface FamilyRequests {
   status: FamilyRequestsStatus;
-  /** @maxItems 0 */
-  items: string[];
+  items: FamilyMoneyRequest[];
 }

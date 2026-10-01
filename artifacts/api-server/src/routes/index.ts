@@ -6,6 +6,8 @@ import campusRouter from "./campus";
 import planningRouter from "./planning";
 import goalsRouter from "./goals";
 import familyRouter from "./family";
+import familyRequestsRouter from "./family-requests";
+import notificationsRouter from "./notifications";
 
 const router: IRouter = Router();
 
@@ -16,5 +18,7 @@ router.use(campusRouter);
 router.use(planningRouter);
 router.use(goalsRouter);
 router.use(familyRouter);
+router.use(familyRequestsRouter);
+router.use(notificationsRouter);
 
 export default router;

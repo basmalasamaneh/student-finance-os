@@ -1,16 +1,18 @@
 import { Router, type IRouter, type Request } from "express";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { db, familyLinks, financeAccounts, financeTransactions, users, allowances, allowanceOccurrences,
   savingsGoals, incomes, planningRecurring, planningLines, type FamilyLink } from "@workspace/db";
 import * as V from "@workspace/api-zod";
 import { requireRole } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
-import { accountDto, amount, lockedAccounts, once, post, semanticType, transactionDto, type Tx } from "../lib/finance";
+import { accountDto, amount, lockedAccounts, once, post, semanticType, parentWalletTransactionDto, type Tx } from "../lib/finance";
 import { allowanceDto, cancelAllowance, cancelLinkAllowances, lockedAllowance, lockedFamily, processOccurrence, todayUtc } from "../lib/allowances";
 import { allowanceProjection, allowanceUpcoming, manualAllowanceUpcomingCovered } from "../lib/allowance-projection";
 import { parentGoalDto, readGoal } from "../lib/goals";
 import { canonicalCategory, validDate, safeMinor } from "../lib/planning";
+import { cancelLinkRequests, requestsForLink } from "../lib/family-requests";
+import { notifyFamily } from "../lib/notifications";
 
 const router: IRouter = Router();
 const student = (r: Request) => requireRole(r.res?.locals.principal, "student").userId;
@@ -87,11 +89,17 @@ router.put("/family/links/:id", async (req, res) => {
     if (!["pending", "accepted"].includes(link.status)) throw new ApiError("CONFLICT");
     const account = await checkReceiving(tx, userId, input);
     if (link.permissions.allowance && !input.permissions.allowance) await cancelLinkAllowances(tx, link.id);
+    if (link.permissions.requests && !input.permissions.requests) await cancelLinkRequests(tx, link.id);
     if (account && input.permissions.allowance && account.id !== link.receivingAccountId) {
       const schedules = await tx.select().from(allowances).where(eq(allowances.familyLinkId, link.id));
       if (schedules.some(s => ["active", "paused"].includes(s.status) && s.currency !== account.currency)) throw new ApiError("CONFLICT");
     }
     const [updated] = await tx.update(familyLinks).set(input).where(eq(familyLinks.id, link.id)).returning();
+    if (link.status === "accepted" && link.parentId &&
+      (link.receivingAccountId !== input.receivingAccountId ||
+        Object.keys(link.permissions).some(k => link.permissions[k as keyof typeof link.permissions] !== input.permissions[k as keyof typeof link.permissions]))) {
+      await notifyFamily(tx, [userId, link.parentId], { type: "permission_changed", sourceId: randomUUID(), familyLinkId: link.id });
+    }
     return linkDto(tx, updated!);
   });
   res.json(V.UpdateFamilyConsentResponse.parse(result));
@@ -103,7 +111,11 @@ router.delete("/family/links/:id", async (req, res) => {
     const [link] = await tx.select().from(familyLinks).where(and(eq(familyLinks.id, linkId), eq(familyLinks.studentId, userId))).for("update");
     if (!link) throw new ApiError("NOT_FOUND");
     await cancelLinkAllowances(tx, link.id);
+    await cancelLinkRequests(tx, link.id);
     await tx.update(familyLinks).set({ status: "revoked" }).where(eq(familyLinks.id, link.id));
+    if (link.status === "accepted" && link.parentId) await notifyFamily(tx, [userId, link.parentId], {
+      type: "permission_changed", sourceId: randomUUID(), familyLinkId: link.id,
+    });
   });
   res.sendStatus(204);
 });
@@ -136,7 +148,9 @@ router.get("/parent/wallet", async (req, res) => {
     db.select().from(financeAccounts).where(and(eq(financeAccounts.userId, userId), ne(financeAccounts.type, "goal_reserve"))),
     db.select().from(financeTransactions).where(eq(financeTransactions.userId, userId)).orderBy(desc(financeTransactions.createdAt)).limit(100),
   ]);
-  res.json(V.GetParentWalletResponse.parse({ accounts: accounts.map(accountDto), transactions: transactions.map(t => transactionDto(t)), simulated: true }));
+  res.set("Cache-Control", "no-store").json(V.GetParentWalletResponse.parse({
+    accounts: accounts.map(accountDto), transactions: transactions.map(parentWalletTransactionDto), simulated: true,
+  }));
 });
 router.post("/parent/wallet/accounts", async (req, res) => {
   const userId = parent(req), input = parse(V.CreateParentAccountBody, req.body);
@@ -295,7 +309,7 @@ async function childDto(tx: Tx, link: FamilyLink) {
     const rows = await tx.select().from(allowances).where(eq(allowances.familyLinkId, link.id)).orderBy(desc(allowances.createdAt));
     result.allowances = await serialMap(rows, r => allowanceDto(tx, r));
   }
-  if (p.requests) result.requests = { status: "coming_soon", items: [] };
+  if (p.requests) result.requests = { status: "live", items: await requestsForLink(tx, link.id) };
   if (p.upcomingPayments) {
     const today = todayUtc();
     const recurring = await tx.select().from(planningRecurring).where(and(eq(planningRecurring.userId, childId), eq(planningRecurring.active, true)));
@@ -334,6 +348,6 @@ router.get("/parent/dashboard", async (req, res) => {
     for (const link of links) result.push(await childDto(tx, link));
     return result;
   });
-  res.set("Cache-Control", "no-store").json(V.GetParentDashboardResponse.parse({ children, simulated: true, requestsStatus: "coming_soon", goalFundingPath: "/goals/fund" }));
+  res.set("Cache-Control", "no-store").json(V.GetParentDashboardResponse.parse({ children, simulated: true, requestsStatus: "live", goalFundingPath: "/goals/fund" }));
 });
 export default router;

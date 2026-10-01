@@ -11,4 +11,5 @@ export type FamilyRequestsStatus = typeof FamilyRequestsStatus[keyof typeof Fami
 
 export const FamilyRequestsStatus = {
   coming_soon: 'coming_soon',
+  live: 'live',
 } as const;

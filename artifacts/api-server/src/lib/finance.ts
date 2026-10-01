@@ -33,6 +33,7 @@ export const transactionDto = (t: typeof financeTransactions.$inferSelect, conte
     withdrawal: "Simulated withdrawal", payment: "Simulated payment", transfer: "Account transfer",
     send: "Student transfer", request_fulfillment: "Fulfilled money request",
     allowance: "Parent allowance (simulated)",
+    family_request: "Parent-funded money request (simulated)",
     savings: t.goalFundingSource === "parent_simulated" ? "Simulated parent goal funding" : "Reserved goal contribution",
   } as Record<string, string>)[t.kind] ?? "Ledger transaction",
   source: t.direction === "credit"
@@ -56,6 +57,14 @@ export const requestDto = (r: typeof moneyRequests.$inferSelect) => ({
   ...(r.note ? { note: r.note } : {}), ...(r.transactionId ? { transactionId: r.transactionId } : {}),
   createdAt: r.createdAt.toISOString(),
 });
+export function parentWalletTransactionDto(row: typeof financeTransactions.$inferSelect) {
+  if (row.kind !== "family_request" && row.kind !== "allowance" && !row.parentTransferId) return transactionDto(row);
+  // Read-time protection also covers immutable receipts posted before this privacy fix.
+  // Keep the parent's own ledger ID, account, amounts, date and transfer pairing reference.
+  // Allowance notes are parent-authored; request notes originate from the student.
+  const safe = { ...row, counterpartyAccountId: null, ...(row.kind === "family_request" ? { note: null } : {}) };
+  return { ...transactionDto(safe), destination: row.direction === "debit" ? "Family payment (simulated)" : "Account" };
+}
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export function assertOrdinaryAccount(account: { type: string }) {
   if (account.type === "goal_reserve") throw new ApiError("NOT_FOUND");

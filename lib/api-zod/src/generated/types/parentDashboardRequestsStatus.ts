@@ -11,4 +11,5 @@ export type ParentDashboardRequestsStatus = typeof ParentDashboardRequestsStatus
 
 export const ParentDashboardRequestsStatus = {
   coming_soon: 'coming_soon',
+  live: 'live',
 } as const;

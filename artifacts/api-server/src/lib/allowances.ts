@@ -2,6 +2,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import { allowances, allowanceOccurrences, familyLinks, type Allowance, type FamilyLink } from "@workspace/db";
 import { amount, lockedAccounts, post, type Tx } from "./finance";
 import { ApiError } from "./http-errors";
+import { notifyFamily } from "./notifications";
 
 export const todayUtc = () => new Date().toISOString().slice(0, 10);
 export async function lockedFamily(tx: Tx, parentId: string, childId: string, permission?: keyof FamilyLink["permissions"]) {
@@ -85,9 +86,11 @@ export async function processOccurrence(tx: Tx, link: FamilyLink, row: Allowance
     return failed!;
   }
   const details = { kind: "allowance", category: "parent_allowance", parentTransferId: occurrence!.id, note: row.note };
-  const debit = await post(tx, parent, -row.amountMinor, { ...details, counterpartyAccountId: student.id });
+  const debit = await post(tx, parent, -row.amountMinor, details);
   const credit = await post(tx, student, row.amountMinor, { ...details, counterpartyAccountId: parent.id });
   await tx.update(allowanceOccurrences).set({ transactionIds: [debit.id, credit.id] }).where(eq(allowanceOccurrences.id, occurrence!.id));
+  await notifyFamily(tx, [row.studentId, row.parentId], { type: "allowance_posted", sourceId: occurrence!.id,
+    targetId: row.id, familyLinkId: link.id, amountMinor: row.amountMinor, currency: row.currency });
   const next = row.kind === "oneTime" ? row.nextPayment : nextAllowanceDate(row.nextPayment, row.frequency!, row.startDate);
   const completed = row.kind === "oneTime" || row.endDate !== null && next > row.endDate;
   const [updated] = await tx.update(allowances).set({

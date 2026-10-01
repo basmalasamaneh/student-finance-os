@@ -14,3 +14,9 @@ Permission-revocation tests must inspect the pending-refetch interval, not only 
 **Why:** TanStack Query v5's visibility-based focus handling did not cover returning through the device privacy cover. Server authorization correctly denied revoked access, yet previously shared child details remained visible until reload. An eventual 404 alone missed the privacy failure.
 
 **How to apply:** Hold the returning reader's request pending after another account revokes access, inspect visible content, then release the response. Test window focus, visibility return and the privacy cover's explicit Return action separately; polling is not proof that each return path revalidates access.
+
+Treat removal of an actively observed query as a lifecycle reset, not just cache cleanup.
+
+**Why:** Permission-denied cleanup removed the detail query that the page was still observing. The observer recreated and fetched it again, making a stable denied screen unreliable. Receiving a sharing-change notification also did not, by itself, refresh other cached views.
+
+**How to apply:** Check that denied views settle without repeated loading/refetch loops, and that new permission-change events invalidate every affected visible surface—not merely the notification inbox. Test with the detail left open, not only after navigation or reload.

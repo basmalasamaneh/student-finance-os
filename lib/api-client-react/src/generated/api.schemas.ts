@@ -5,6 +5,152 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
+
+
+export const GoalPositiveAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface GoalPositiveAmount {
+  /**
+     * @minimum 1
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: GoalPositiveAmountCurrency;
+}
+
+export interface FamilyMoneyRequestInput {
+  familyLinkId: string;
+  receivingAccountId: string;
+  amount: GoalPositiveAmount;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  reason: string;
+  /** @maxLength 500 */
+  note: string;
+  date: string;
+}
+
+export interface FamilyRequestMessageInput {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  message: string;
+}
+
+export interface FamilyRequestApprovalInput {
+  parentAccountId: string;
+}
+
+export type FamilyRequestMessageRole = typeof FamilyRequestMessageRole[keyof typeof FamilyRequestMessageRole];
+
+
+export const FamilyRequestMessageRole = {
+  student: 'student',
+  parent: 'parent',
+} as const;
+
+export interface FamilyRequestMessage {
+  id: string;
+  role: FamilyRequestMessageRole;
+  message: string;
+  createdAt: string;
+}
+
+export type FamilyMoneyRequestStatus = typeof FamilyMoneyRequestStatus[keyof typeof FamilyMoneyRequestStatus];
+
+
+export const FamilyMoneyRequestStatus = {
+  pending: 'pending',
+  details_requested: 'details_requested',
+  approved: 'approved',
+  declined: 'declined',
+  cancelled: 'cancelled',
+} as const;
+
+export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
+
+
+export const AmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface Amount {
+  /**
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: AmountCurrency;
+}
+
+export interface FamilyMoneyRequest {
+  id: string;
+  familyLinkId: string;
+  studentId: string;
+  parentId: string;
+  /** Student-only own selected account; omitted from parent responses */
+  receivingAccountId?: string;
+  amount: Amount;
+  reason: string;
+  note: string;
+  date: string;
+  status: FamilyMoneyRequestStatus;
+  history: FamilyRequestMessage[];
+  /** @nullable */
+  parentTransferId: string | null;
+  /** Only this viewer's own ledger leg */
+  transactionIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InAppNotificationType = typeof InAppNotificationType[keyof typeof InAppNotificationType];
+
+
+export const InAppNotificationType = {
+  request: 'request',
+  approval: 'approval',
+  decline: 'decline',
+  ask_details: 'ask_details',
+  reply: 'reply',
+  allowance_posted: 'allowance_posted',
+  goal_funded: 'goal_funded',
+  permission_changed: 'permission_changed',
+} as const;
+
+export interface InAppNotification {
+  id: string;
+  type: InAppNotificationType;
+  title: string;
+  /** Reauthorized application-relative deep link; omitted for generic sharing changes */
+  href?: string;
+  amount?: Amount;
+  createdAt: string;
+  /** @nullable */
+  readAt: string | null;
+}
+
+export interface NotificationInbox {
+  items: InAppNotification[];
+  /** @minimum 0 */
+  unreadCount: number;
+}
+
+export interface NotificationUnreadCount {
+  /** @minimum 0 */
+  unreadCount: number;
+}
+
 export interface FamilyPermissions {
   monthlySummary: boolean;
   balance: boolean;
@@ -99,24 +245,6 @@ export const AllowanceInputFrequency = {
   monthly: 'monthly',
 } as const;
 
-export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
-
-
-export const GoalPositiveAmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface GoalPositiveAmount {
-  /**
-     * @minimum 1
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: GoalPositiveAmountCurrency;
-}
-
 export interface AllowanceInput {
   parentAccountId: string;
   amount: GoalPositiveAmount;
@@ -151,24 +279,6 @@ export const AllowanceLastFailure = {
   insufficient_funds: 'insufficient_funds',
   balance_limit: 'balance_limit',
 } as const;
-
-export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
-
-
-export const AmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface Amount {
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: AmountCurrency;
-}
 
 export type AllowanceOccurrenceStatus = typeof AllowanceOccurrenceStatus[keyof typeof AllowanceOccurrenceStatus];
 
@@ -424,12 +534,12 @@ export type FamilyRequestsStatus = typeof FamilyRequestsStatus[keyof typeof Fami
 
 export const FamilyRequestsStatus = {
   coming_soon: 'coming_soon',
+  live: 'live',
 } as const;
 
 export interface FamilyRequests {
   status: FamilyRequestsStatus;
-  /** @maxItems 0 */
-  items: string[];
+  items: FamilyMoneyRequest[];
 }
 
 /**
@@ -490,6 +600,7 @@ export type ParentDashboardRequestsStatus = typeof ParentDashboardRequestsStatus
 
 export const ParentDashboardRequestsStatus = {
   coming_soon: 'coming_soon',
+  live: 'live',
 } as const;
 
 export type ParentDashboardGoalFundingPath = typeof ParentDashboardGoalFundingPath[keyof typeof ParentDashboardGoalFundingPath];

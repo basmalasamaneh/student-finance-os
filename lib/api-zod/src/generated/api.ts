@@ -8,6 +8,515 @@
 import * as zod from 'zod';
 
 
+export const listStudentFamilyRequestsResponseAmountMinorMin = 0;
+export const listStudentFamilyRequestsResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const ListStudentFamilyRequestsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(listStudentFamilyRequestsResponseAmountMinorMin).max(listStudentFamilyRequestsResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListStudentFamilyRequestsResponse = zod.array(ListStudentFamilyRequestsResponseItem)
+
+
+export const createFamilyMoneyRequestHeaderIdempotencyKeyMin = 8;
+export const createFamilyMoneyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CreateFamilyMoneyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(createFamilyMoneyRequestHeaderIdempotencyKeyMin).max(createFamilyMoneyRequestHeaderIdempotencyKeyMax)
+})
+
+export const createFamilyMoneyRequestBodyAmountMinorMax = 9007199254740991;
+
+export const createFamilyMoneyRequestBodyReasonMax = 120;
+
+export const createFamilyMoneyRequestBodyNoteMax = 500;
+
+
+
+export const CreateFamilyMoneyRequestBody = zod.object({
+  "familyLinkId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(createFamilyMoneyRequestBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string().min(1).max(createFamilyMoneyRequestBodyReasonMax),
+  "note": zod.string().max(createFamilyMoneyRequestBodyNoteMax),
+  "date": zod.string().date()
+})
+
+export const createFamilyMoneyRequestResponseAmountMinorMin = 0;
+export const createFamilyMoneyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const CreateFamilyMoneyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(createFamilyMoneyRequestResponseAmountMinorMin).max(createFamilyMoneyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const GetStudentFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getStudentFamilyRequestResponseAmountMinorMin = 0;
+export const getStudentFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const GetStudentFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getStudentFamilyRequestResponseAmountMinorMin).max(getStudentFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const ReplyToFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const replyToFamilyRequestHeaderIdempotencyKeyMin = 8;
+export const replyToFamilyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const ReplyToFamilyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(replyToFamilyRequestHeaderIdempotencyKeyMin).max(replyToFamilyRequestHeaderIdempotencyKeyMax)
+})
+
+export const replyToFamilyRequestBodyMessageMax = 500;
+
+
+
+export const ReplyToFamilyRequestBody = zod.object({
+  "message": zod.string().min(1).max(replyToFamilyRequestBodyMessageMax)
+})
+
+export const replyToFamilyRequestResponseAmountMinorMin = 0;
+export const replyToFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const ReplyToFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(replyToFamilyRequestResponseAmountMinorMin).max(replyToFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const CancelFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const cancelFamilyRequestHeaderIdempotencyKeyMin = 8;
+export const cancelFamilyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const CancelFamilyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(cancelFamilyRequestHeaderIdempotencyKeyMin).max(cancelFamilyRequestHeaderIdempotencyKeyMax)
+})
+
+export const cancelFamilyRequestResponseAmountMinorMin = 0;
+export const cancelFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const CancelFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(cancelFamilyRequestResponseAmountMinorMin).max(cancelFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const listParentFamilyRequestsResponseAmountMinorMin = 0;
+export const listParentFamilyRequestsResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const ListParentFamilyRequestsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(listParentFamilyRequestsResponseAmountMinorMin).max(listParentFamilyRequestsResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListParentFamilyRequestsResponse = zod.array(ListParentFamilyRequestsResponseItem)
+
+
+export const GetParentFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getParentFamilyRequestResponseAmountMinorMin = 0;
+export const getParentFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const GetParentFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getParentFamilyRequestResponseAmountMinorMin).max(getParentFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const ApproveFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const approveFamilyRequestHeaderIdempotencyKeyMin = 8;
+export const approveFamilyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const ApproveFamilyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(approveFamilyRequestHeaderIdempotencyKeyMin).max(approveFamilyRequestHeaderIdempotencyKeyMax)
+})
+
+export const ApproveFamilyRequestBody = zod.object({
+  "parentAccountId": zod.string().uuid()
+})
+
+export const approveFamilyRequestResponseAmountMinorMin = 0;
+export const approveFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const ApproveFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(approveFamilyRequestResponseAmountMinorMin).max(approveFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const DeclineFamilyRequestParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const declineFamilyRequestHeaderIdempotencyKeyMin = 8;
+export const declineFamilyRequestHeaderIdempotencyKeyMax = 128;
+
+
+
+export const DeclineFamilyRequestHeader = zod.object({
+  "Idempotency-Key": zod.string().min(declineFamilyRequestHeaderIdempotencyKeyMin).max(declineFamilyRequestHeaderIdempotencyKeyMax)
+})
+
+export const declineFamilyRequestResponseAmountMinorMin = 0;
+export const declineFamilyRequestResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const DeclineFamilyRequestResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(declineFamilyRequestResponseAmountMinorMin).max(declineFamilyRequestResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const AskFamilyRequestDetailsParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const askFamilyRequestDetailsHeaderIdempotencyKeyMin = 8;
+export const askFamilyRequestDetailsHeaderIdempotencyKeyMax = 128;
+
+
+
+export const AskFamilyRequestDetailsHeader = zod.object({
+  "Idempotency-Key": zod.string().min(askFamilyRequestDetailsHeaderIdempotencyKeyMin).max(askFamilyRequestDetailsHeaderIdempotencyKeyMax)
+})
+
+export const askFamilyRequestDetailsBodyMessageMax = 500;
+
+
+
+export const AskFamilyRequestDetailsBody = zod.object({
+  "message": zod.string().min(1).max(askFamilyRequestDetailsBodyMessageMax)
+})
+
+export const askFamilyRequestDetailsResponseAmountMinorMin = 0;
+export const askFamilyRequestDetailsResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const AskFamilyRequestDetailsResponse = zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(askFamilyRequestDetailsResponseAmountMinorMin).max(askFamilyRequestDetailsResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+export const listNotificationsResponseItemsItemAmountMinorMin = 0;
+export const listNotificationsResponseItemsItemAmountMinorMax = 9007199254740991;
+
+export const listNotificationsResponseUnreadCountMin = 0;
+
+
+
+export const ListNotificationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "type": zod.enum(['request', 'approval', 'decline', 'ask_details', 'reply', 'allowance_posted', 'goal_funded', 'permission_changed']),
+  "title": zod.string(),
+  "href": zod.string().optional().describe('Reauthorized application-relative deep link; omitted for generic sharing changes'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(listNotificationsResponseItemsItemAmountMinorMin).max(listNotificationsResponseItemsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).optional(),
+  "createdAt": zod.string(),
+  "readAt": zod.string().nullable()
+})),
+  "unreadCount": zod.number().int().min(listNotificationsResponseUnreadCountMin)
+})
+
+
+export const getNotificationUnreadCountResponseUnreadCountMin = 0;
+
+
+
+export const GetNotificationUnreadCountResponse = zod.object({
+  "unreadCount": zod.number().int().min(getNotificationUnreadCountResponseUnreadCountMin)
+})
+
+
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const markNotificationReadResponseAmountMinorMin = 0;
+export const markNotificationReadResponseAmountMinorMax = 9007199254740991;
+
+
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.string().uuid(),
+  "type": zod.enum(['request', 'approval', 'decline', 'ask_details', 'reply', 'allowance_posted', 'goal_funded', 'permission_changed']),
+  "title": zod.string(),
+  "href": zod.string().optional().describe('Reauthorized application-relative deep link; omitted for generic sharing changes'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(markNotificationReadResponseAmountMinorMin).max(markNotificationReadResponseAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}).optional(),
+  "createdAt": zod.string(),
+  "readAt": zod.string().nullable()
+})
+
+
+export const markAllNotificationsReadResponseUnreadCountMin = 0;
+
+
+
+export const MarkAllNotificationsReadResponse = zod.object({
+  "unreadCount": zod.number().int().min(markAllNotificationsReadResponseUnreadCountMin)
+})
+
+
 export const listSavingsGoalsResponseGoalsItemOneNameMax = 120;
 
 export const listSavingsGoalsResponseGoalsItemOneTargetMinorMax = 9007199254740991;
@@ -4453,7 +4962,8 @@ export const getParentDashboardResponseChildrenItemAllowancesItemOneNoteMax = 50
 export const getParentDashboardResponseChildrenItemAllowancesItemTwoOccurrencesItemAmountMinorMin = 0;
 export const getParentDashboardResponseChildrenItemAllowancesItemTwoOccurrencesItemAmountMinorMax = 9007199254740991;
 
-export const getParentDashboardResponseChildrenItemRequestsItemsMax = 0;
+export const getParentDashboardResponseChildrenItemRequestsItemsItemAmountMinorMin = 0;
+export const getParentDashboardResponseChildrenItemRequestsItemsItemAmountMinorMax = 9007199254740991;
 
 export const getParentDashboardResponseChildrenItemTransactionsItemAmountMinorMin = 0;
 export const getParentDashboardResponseChildrenItemTransactionsItemAmountMinorMax = 9007199254740991;
@@ -4551,8 +5061,32 @@ export const GetParentDashboardResponse = zod.object({
   "createdAt": zod.string().datetime({"offset":true})
 }))).optional(),
   "requests": zod.object({
-  "status": zod.enum(['coming_soon']),
-  "items": zod.array(zod.string()).max(getParentDashboardResponseChildrenItemRequestsItemsMax)
+  "status": zod.enum(['coming_soon', 'live']),
+  "items": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getParentDashboardResponseChildrenItemRequestsItemsItemAmountMinorMin).max(getParentDashboardResponseChildrenItemRequestsItemsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
 }).optional(),
   "transactions": zod.array(zod.object({
   "id": zod.string().uuid(),
@@ -4579,7 +5113,7 @@ export const GetParentDashboardResponse = zod.object({
 })).optional()
 })),
   "simulated": zod.literal(true),
-  "requestsStatus": zod.enum(['coming_soon']),
+  "requestsStatus": zod.enum(['coming_soon', 'live']),
   "goalFundingPath": zod.enum(['/goals/fund'])
 })
 
@@ -4624,7 +5158,8 @@ export const getParentChildResponseAllowancesItemOneNoteMax = 500;
 export const getParentChildResponseAllowancesItemTwoOccurrencesItemAmountMinorMin = 0;
 export const getParentChildResponseAllowancesItemTwoOccurrencesItemAmountMinorMax = 9007199254740991;
 
-export const getParentChildResponseRequestsItemsMax = 0;
+export const getParentChildResponseRequestsItemsItemAmountMinorMin = 0;
+export const getParentChildResponseRequestsItemsItemAmountMinorMax = 9007199254740991;
 
 export const getParentChildResponseTransactionsItemAmountMinorMin = 0;
 export const getParentChildResponseTransactionsItemAmountMinorMax = 9007199254740991;
@@ -4721,8 +5256,32 @@ export const GetParentChildResponse = zod.object({
   "createdAt": zod.string().datetime({"offset":true})
 }))).optional(),
   "requests": zod.object({
-  "status": zod.enum(['coming_soon']),
-  "items": zod.array(zod.string()).max(getParentChildResponseRequestsItemsMax)
+  "status": zod.enum(['coming_soon', 'live']),
+  "items": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "familyLinkId": zod.string().uuid(),
+  "studentId": zod.string().uuid(),
+  "parentId": zod.string().uuid(),
+  "receivingAccountId": zod.string().uuid().optional().describe('Student-only own selected account; omitted from parent responses'),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getParentChildResponseRequestsItemsItemAmountMinorMin).max(getParentChildResponseRequestsItemsItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "reason": zod.string(),
+  "note": zod.string(),
+  "date": zod.string().date(),
+  "status": zod.enum(['pending', 'details_requested', 'approved', 'declined', 'cancelled']),
+  "history": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "role": zod.enum(['student', 'parent']),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})),
+  "parentTransferId": zod.string().uuid().nullable(),
+  "transactionIds": zod.array(zod.string().uuid()).describe('Only this viewer\'s own ledger leg'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}))
 }).optional(),
   "transactions": zod.array(zod.object({
   "id": zod.string().uuid(),

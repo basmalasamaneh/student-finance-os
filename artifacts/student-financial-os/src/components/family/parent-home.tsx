@@ -12,6 +12,7 @@ import { ParentCreateAccountDialog, ParentWalletPanel, TopUpDialog } from '@/com
 import { AcceptCodeHost, useAcceptCode } from '@/pages/parent-children';
 import { apiErrorText, type Tx } from '@/features/money/money-model';
 import { FAMILY_REFETCH } from '@/features/family/family-view';
+import { isLive } from '@/components/requests/request-view-model';
 
 const linkCls = 'type-label inline-flex min-h-11 items-center gap-1 text-gold-ink underline-offset-4 hover:underline';
 
@@ -20,6 +21,9 @@ export function ParentHome({ name, t }: { name: string; t: Tx }) {
   const dash = useGetParentDashboard({ query: { queryKey: getGetParentDashboardQueryKey(), ...FAMILY_REFETCH } });
   const wallet = useGetParentWallet({ query: { queryKey: getGetParentWalletQueryKey(), ...FAMILY_REFETCH } });
   const accept = useAcceptCode();
+  // Counts only children whose link shares requests (server omits `requests` otherwise).
+  const shared = dash.data?.children.filter((c) => c.requests) ?? [];
+  const openRequests = dash.isSuccess && shared.length ? shared.reduce((n, c) => n + (c.requests?.items.filter(isLive).length ?? 0), 0) : null;
   const [acctOpen, setAcctOpen] = useState(false);
   const [topUp, setTopUp] = useState<{ open: boolean; id?: string }>({ open: false });
   const retry = (q: { refetch: () => Promise<unknown>; isFetching: boolean }) => <RetryButton label={t('Try again', 'إعادة المحاولة')} busyLabel={t('Retrying…', 'جارٍ المحاولة…')} busy={q.isFetching} onClick={() => void q.refetch()} />;
@@ -44,7 +48,8 @@ export function ParentHome({ name, t }: { name: string; t: Tx }) {
       <section className="border-t border-divider py-6" aria-label={t('Shortcuts', 'اختصارات')}>
         <ul className="flex flex-col gap-1">
           <li><Link href="/parent/allowances" className={linkCls} data-testid="link-home-allowances">{t('Manage allowances', 'إدارة المصروفات')}</Link></li>
-          <li><Link href="/parent/requests" className={linkCls} data-testid="link-home-requests">{t('Requests — coming soon', 'الطلبات — قريباً')}</Link></li>
+          <li><Link href="/parent/requests" className={linkCls} data-testid="link-home-requests">{openRequests === null ? t('Review requests', 'مراجعة الطلبات')
+            : openRequests > 0 ? t(`Review requests · ${openRequests} open`, `مراجعة الطلبات · ${openRequests} مفتوحة`) : t('Requests · nothing open', 'الطلبات · لا شيء مفتوح')}</Link></li>
           <li><Link href={dash.data?.goalFundingPath ?? '/goals/fund'} className={linkCls} data-testid="link-home-fund-goal">{t('Fund a goal you were invited to', 'تمويل هدف دُعيت إليه')}</Link>
             <p className="type-caption text-muted-foreground">{t('Goal funding needs a separate goal invitation and stays simulated external — it doesn’t use this wallet.', 'تمويل الأهداف يحتاج دعوة هدف منفصلة ويبقى خارجياً تجريبياً — لا يستخدم هذه المحفظة.')}</p></li>
         </ul>
