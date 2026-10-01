@@ -35,6 +35,7 @@ import ParentChildrenPage, { ParentChildDetailPage } from '@/pages/parent-childr
 import ParentAllowancesPage from '@/pages/parent-allowances';
 import ParentRequestsPage, { ParentRequestDetailPage } from '@/pages/parent-requests';
 import LearnPage from '@/pages/learn';
+import AssistantPage from '@/pages/assistant';
 import UpcomingPage from '@/pages/upcoming';
 import { invalidateUpcoming } from '@/features/upcoming/upcoming-model';
 import FamilyRequestsPage, { FamilyRequestDetailPage } from '@/pages/family-requests';
@@ -90,6 +91,7 @@ function Router() {
           <Route path="/goals/fund" component={ParentFundPage} />
           <Route path="/goals/:id" component={GoalDetailPage} />
           <Route path="/learn" component={LearnPage} />
+          <Route path="/assistant" component={AssistantPage} />
           <Route path="/family" component={FamilyPage} />
           <Route path="/family/requests" component={FamilyRequestsPage} />
           <Route path="/family/requests/:id" component={FamilyRequestDetailPage} />

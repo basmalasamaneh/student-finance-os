@@ -25,6 +25,8 @@ import type {
   AllowanceAction,
   AllowanceInput,
   AllowanceRetryInput,
+  AssistantAnswer,
+  AssistantQuery,
   Budget,
   BudgetInput,
   Campus,
@@ -134,6 +136,91 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getQueryAssistantUrl = () => {
+
+
+
+
+  return `/api/assistant/query`
+}
+
+/**
+ * Student-only stateless read-only assistant. Requires session and trusted mutation origin. Only question, language and optional lastQuestion reach the intent planner; goalId remains server-local.
+ */
+export const queryAssistant = async (assistantQuery: AssistantQuery, options?: Parameters<typeof customFetch>[1]): Promise<AssistantAnswer> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AssistantAnswer>(getQueryAssistantUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(assistantQuery)
+  }
+);}
+
+
+
+
+
+export const getQueryAssistantMutationKey = () => ['queryAssistant'] as const;
+
+export const getQueryAssistantMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queryAssistant>>, TError,QueryAssistantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof queryAssistant>>, TError,QueryAssistantMutationVariables, TContext> => {
+
+const mutationKey = getQueryAssistantMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof queryAssistant>>, QueryAssistantMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  queryAssistant(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QueryAssistantMutationResult = NonNullable<Awaited<ReturnType<typeof queryAssistant>>>
+    export type QueryAssistantMutationBody = BodyType<AssistantQuery>
+    export type QueryAssistantMutationError = ErrorType<void>
+    export type QueryAssistantMutationVariables = {data: BodyType<AssistantQuery>}
+
+    export const useQueryAssistant = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof queryAssistant>>, TError,QueryAssistantMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof queryAssistant>>,
+        TError,
+        QueryAssistantMutationVariables,
+        TContext
+      > => {
+      return useMutation(getQueryAssistantMutationOptions(options));
+    }
 
 export const getListScheduledItemsUrl = () => {
 

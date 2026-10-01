@@ -8,6 +8,68 @@
 import * as zod from 'zod';
 
 
+/**
+ * Student-only stateless read-only assistant. Requires session and trusted mutation origin. Only question, language and optional lastQuestion reach the intent planner; goalId remains server-local.
+ */
+export const queryAssistantBodyQuestionMax = 1000;
+
+export const queryAssistantBodyLastQuestionMax = 1000;
+
+
+
+export const QueryAssistantBody = zod.object({
+  "question": zod.string().min(1).max(queryAssistantBodyQuestionMax),
+  "language": zod.enum(['en', 'ar']),
+  "lastQuestion": zod.string().min(1).max(queryAssistantBodyLastQuestionMax).optional(),
+  "goalId": zod.string().uuid().optional()
+})
+
+export const queryAssistantResponseFactsItemMinorRegExp = new RegExp('^-?[0-9]+$');
+
+
+export const QueryAssistantResponse = zod.object({
+  "status": zod.enum(['answered', 'clarify', 'refused']),
+  "language": zod.enum(['en', 'ar']),
+  "intent": zod.string(),
+  "message": zod.string(),
+  "asOf": zod.string().datetime({"offset":true}),
+  "period": zod.union([zod.object({
+  "from": zod.string().date(),
+  "to": zod.string().date()
+}),zod.null()]),
+  "comparisonPeriod": zod.union([zod.object({
+  "from": zod.string().date(),
+  "to": zod.string().date()
+}),zod.null()]),
+  "facts": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "minor": zod.string().regex(queryAssistantResponseFactsItemMinorRegExp).describe('Exact integer minor units; use BigInt'),
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "basis": zod.enum(['actual', 'estimated']),
+  "provenance": zod.enum(['ledger', 'goals', 'forecast']),
+  "policy": zod.string(),
+  "category": zod.string().optional(),
+  "date": zod.string().optional(),
+  "rank": zod.number().int().optional(),
+  "previousMinor": zod.string().optional(),
+  "deltaMinor": zod.string().optional(),
+  "changePercent": zod.string().nullish().describe('Exact rounded 2-decimal percent; null when previous is zero')
+})),
+  "warnings": zod.array(zod.string()),
+  "links": zod.array(zod.object({
+  "label": zod.string(),
+  "href": zod.string()
+})),
+  "goalChoices": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string()
+})),
+  "simulated": zod.boolean(),
+  "policy": zod.string()
+})
+
+
 export const listScheduledItemsResponseOneNameMax = 160;
 
 export const listScheduledItemsResponseOneAmountMinorMax = 9007199254740991;

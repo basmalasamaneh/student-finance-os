@@ -27,6 +27,27 @@ tags:
   - name: notifications
     description: Owner-only durable in-app inbox with current consent checks
 paths:
+  /assistant/query:
+    post:
+      operationId: queryAssistant
+      tags: [assistant]
+      description: Student-only stateless read-only assistant. Requires session and trusted mutation origin. Only question, language and optional lastQuestion reach the intent planner; goalId remains server-local.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AssistantQuery" }
+      responses:
+        "200":
+          description: Deterministic localized facts or clarification/refusal
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssistantAnswer" }
+        "400": { description: Invalid strict body }
+        "401": { description: Session required }
+        "403": { description: Student role and trusted origin required }
+        "429": { description: Owner concurrency or bounded rate limit exceeded }
+        "503": { description: AI provider unavailable or invalid planner output; retry explicitly }
   /scheduled-items:
     get:
       operationId: listScheduledItems
@@ -1004,6 +1025,69 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    AssistantQuery:
+      type: object
+      additionalProperties: false
+      required: [question, language]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 1000 }
+        language: { type: string, enum: [en, ar] }
+        lastQuestion: { type: string, minLength: 1, maxLength: 1000 }
+        goalId: { type: string, format: uuid }
+    AssistantFact:
+      type: object
+      additionalProperties: false
+      required: [key, label, minor, currency, basis, provenance, policy]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        minor: { type: string, pattern: '^-?[0-9]+$', description: Exact integer minor units; use BigInt, never floating-point sums }
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        basis: { type: string, enum: [actual, estimated] }
+        provenance: { type: string, enum: [ledger, goals, forecast] }
+        policy: { type: string }
+        category: { type: string }
+        date: { type: string }
+        rank: { type: integer }
+        previousMinor: { type: string }
+        deltaMinor: { type: string }
+        changePercent: { type: [string, "null"], description: Exact rounded 2-decimal percent; null when previous is zero }
+    AssistantPeriod:
+      type: object
+      required: [from, to]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+    AssistantGoalChoice:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+    AssistantLink:
+      type: object
+      required: [label, href]
+      properties:
+        label: { type: string }
+        href: { type: string }
+    AssistantAnswer:
+      type: object
+      additionalProperties: false
+      required: [status, language, intent, message, asOf, period, comparisonPeriod, facts, warnings, links, goalChoices, simulated, policy]
+      properties:
+        status: { type: string, enum: [answered, clarify, refused] }
+        language: { type: string, enum: [en, ar] }
+        intent: { type: string }
+        message: { type: string }
+        asOf: { type: string, format: date-time }
+        period: { oneOf: [{ $ref: "#/components/schemas/AssistantPeriod" }, { type: "null" }] }
+        comparisonPeriod: { oneOf: [{ $ref: "#/components/schemas/AssistantPeriod" }, { type: "null" }] }
+        facts: { type: array, items: { $ref: "#/components/schemas/AssistantFact" } }
+        warnings: { type: array, items: { type: string } }
+        links: { type: array, items: { $ref: "#/components/schemas/AssistantLink" } }
+        goalChoices: { type: array, items: { $ref: "#/components/schemas/AssistantGoalChoice" } }
+        simulated: { type: boolean }
+        policy: { type: string }
     FamilyMoneyRequestInput:
       type: object
       additionalProperties: false

@@ -1,0 +1,74 @@
+# Prompt 12 — scope and verification
+
+**Current: explicitly user-authorized Prompt 12 DELIVERED; targeted critical browser and live HTTP flows PASS with explicit limits. Prompt 13 is not started.** This document separates implementation inspection, reported automated gates, earlier real-provider handler smoke and later main-agent-reported live/browser evidence. It is not a new full-suite pass, exhaustive regression, a full visual/device audit or a promise of 100% AI interpretation.
+
+Contract: `docs/prompt12-api.md`, `lib/api-spec/openapi.yaml` and generated clients/Zod. Inspected implementation: `artifacts/api-server/src/lib/assistant.ts`, `assistant-math.ts`, `assistant-planner.ts`, `src/routes/assistant.ts`; frontend `artifacts/student-financial-os/src/pages/assistant.tsx`, route/navigation registration and EN/AR dictionary. Inspected tests: `artifacts/api-server/test/assistant.test.mjs` and `assistant-integration.test.mjs`. Automated outcomes below are implementation-worker reports, not documentation-agent reruns; live/browser outcomes are main-agent reported. No workflows, tests, builds or browser checks were run for this documentation update. Only sanitized synthetic amounts and screenshot reference IDs are recorded; no private identifiers, records, credentials, provider bodies or financial logs are reproduced.
+
+## Implemented scope
+
+| Area | Implementation / boundary |
+|---|---|
+| Entry and authorization | Student `/assistant`, registered route and student navigation, calls `POST /api/assistant/query`. Server derives owner from the verified student session, never body identity. Existing same-origin/CSRF requirements apply to this POST despite its financial read-only behavior. No parent/admin financial assistant or expanded family consent. |
+| Real AI role | Configured Replit OpenAI integration, `gpt-5.4-mini`, plans strict allowlisted intent JSON. It is a real provider integration, not a canned keyword replacement. Usage consumes Replit credits; no free/unlimited-use promise. Provider cannot execute tools, SQL or financial mutations and does not generate answer prose or amounts. |
+| Grounded answers | Deterministic bilingual server templates use owner-scoped, read-only repeatable-read snapshots. Full selected ledger totals, not latest-N/paginated UI rows; transfers, student goal contributions and reserve accounts are excluded under existing policy. Facts expose provenance, actual/estimated basis, period, as-of and policy. “Actual” means recorded in the app's **simulated** ledger, not real-bank funds. |
+| Supported questions | Recorded food, campus cafeteria, books, campus bookstore and transportation spending; category ranking; upcoming payments; expected income; reserved savings; monthly goal requirement; projected balance; summary/comparison and bounded explanation/pattern/organization modes. Food/books include their campus subsets; cafeteria/bookstore are narrower. Ranking is within each currency, never across currencies. |
+| Exact money | Signed integer minor strings and BigInt aggregation, deltas and half-up percentage rounding; separate ILS/USD/JOD, no FX. ILS/USD use 2 decimals and JOD 3. Zero previous baseline yields unknown percentage, not invented growth. UI validates strings with BigInt, uses finance-core formatting within safe bounds and exact BigInt formatting beyond them; it does not calculate financial totals. |
+| Existing goals/forecast | Reuses `ownerGoals` and `forecastSnapshot`, not new planning formulas. Savings is all currently reserved goal funds including archived goals, not income minus spending. Monthly requirement uses the existing selected active goal metric; multiple goals ask for selection. Forecast estimates retain posted-allowance exclusion, possible ordinary-income-today double-count uncertainty, max/manual-goal reconciliation and undated allocations without invented due dates. |
+| Periods and qualifiers | Actual default is month-to-date; forecast default is today through month-end. Inclusive UTC ranges are bounded to 366 days. Future actuals, past/future-only forecasts, incomplete/ambiguous ranges and incompatible comparisons clarify. Account/merchant/currency/location/exclusion/threshold filters and goal-name lookup are unsupported. Strict qualifier flags and executor checks clarify incompatible scopes instead of knowingly ignoring them. |
+| Safety and refusals | Investment, financial-product and loan recommendations, high-risk advice, guaranteed outcomes, other-owner access and money-moving requests are outside scope and refused. Existing loan income records are not a loan recommendation. EN/AR refusal templates are implemented; real-provider smoke samples advice refusal, not every loan/product wording. |
+| Failure and limits | Explicit sanitized errors; provider timeout/failure/invalid output yields localized `503 ASSISTANT_UNAVAILABLE`, no fabricated answer. No automatic POST/provider retries. Owner rate/concurrency and bounded global limits apply. UI explicit Retry with the same failed request passed the targeted intercepted-503/browser recovery check below. |
+
+Explanations/patterns describe recorded concentration or measured comparisons, not invented causes or future outcomes. Guardrails and samples **do not prove perfect interpretation of every adversarial, ambiguous or qualified question**. No affordability workflow, purchase verdict or Prompt 13 feature is implemented; forecast links lead to existing `/plan` and `/upcoming`.
+
+## Privacy, persistence and preserved behavior
+
+- With fixed planner instructions, OpenAI receives only the current question, optional previous **user question**, language and server UTC clock. No server financial rows, balances, profile, names, IDs, selected goal ID, generated answers or snapshots are sent. This is not an absolute “no financial data ever” claim: financial/personal details a user types into either question also reach the provider. EN/AR composer privacy copy discloses this.
+- Conversation, requests, answers and failures are held in **page component state**, not browser storage or a conversation-history database. The frontend uses generated plain `queryAssistant`, deliberately **not** the generated `useQueryAssistant` hook, to avoid retaining private variables/answers in shared TanStack mutation cache.
+- Clear aborts and invalidates in-flight requests and removes turns/failures; account change additionally resets the draft. Unmount aborts and invalidates requests and discards component state. Held-response clear and Home/back empty-state behavior passed the targeted browser sequence below. Account-switch handling remains code-inspected, not separately browser-proven; none of these boundaries promises deletion of provider-side records.
+- No Prompt 12 schema change or additive migration is needed or reported. No conversation-history table, persisted financial snapshot or private-field logging is introduced by the assistant. Provider exceptions are collapsed to a sanitized unavailable error rather than logging/rethrowing SDK bodies.
+- Financial access is read-only. Prompts 1–11 routes, authentication, ledger posting, exact-money rules, existing planning formulas, allowances, requests, goals and separately scoped family/original goal-funding consent remain unchanged. No bank/wallet provider, real payment, loan engine, notification engine or external notification delivery is added.
+
+## Reported automated evidence — distinct checkpoints
+
+| Gate | Reported outcome | Evidence boundary |
+|---|---|---|
+| Latest assistant unit/integration run | **PASS — 14 tests** | `assistant.test.mjs` plus `assistant-integration.test.mjs`, reported in `docs/prompt12-api.md` after review. Test declarations include an opt-in provider review test; counts describe the reported run, not every environment's default execution. |
+| Prior assistant/forecast run | **PASS — 18 tests** | Earlier implementation-worker-reported combined checkpoint. Separate scope/time from the latest 14-test assistant run; **do not sum these to 32 or present them as independent disjoint coverage**. |
+| API typecheck | **PASS** | Latest backend handoff/contract report; compile evidence, not live endpoint proof. |
+| Frontend typecheck | **PASS** | Frontend worker report; not browser evidence. |
+| Frontend production build | **PASS** | Frontend worker report; not layout/interaction proof. |
+| Real-provider EN/AR food smoke | **PASS — two queries** | Opt-in `ASSISTANT_REAL_SMOKE=1` integration test invokes the **route handler directly** with real provider intent planning and compares facts with the local executor. It bypasses live HTTP/session/CSRF middleware and browser rendering. |
+| Real-provider review smoke | **PASS — four calls** | Opt-in `ASSISTANT_REVIEW_SMOKE=1`: EN/AR advice refusal, EN general books and AR all-food scope using discriminating local fixtures. Provider sees question/language/clock, not fixtures. Targeted samples only. |
+| Live HTTP and critical browser flows | **PASS — targeted, main-agent reported** | Later live/backend and browser sequences below supersede the earlier preview-404/pending checkpoint for sampled successful requests. Direct handler smoke alone did not establish this pass. No exhaustive session/role/origin/CSRF rejection-matrix coverage is claimed. |
+
+Inspected unit assertions cover strict input/plan schemas and role/identity/tool/SQL injection, bounded limiter, UTC/leap/date/comparison guards, full 250+ row aggregation, reserve/transfer/foreign-owner exclusion, separate currencies, very large exact totals and zero-baseline percentages. Deterministic EN/AR executor cases cover the ten required question scenarios and safety/clarification. Review cases reject goal IDs on unrelated intents, incompatible categories/modes and unsupported/ambiguous qualifiers before financial reads; discriminating food/cafeteria and books/bookstore fixtures preserve explicit dates.
+
+The DB integration test requires `DATABASE_URL` and existing students, seeds no application data, asserts transaction read-only mode and compares whole owner-ledger totals and existing goal/forecast adapters in repeatable-read transactions. It checks unchanged ledger row count; that assertion is targeted evidence, not an exhaustive certification that every column or financial flow is unchanged.
+
+## Actual live HTTP and browser evidence
+
+All results here are **main-agent reported**. Amounts belong to a synthetic owner in the app's simulated ledger, not real-bank activity.
+
+| Check | Result / evidence boundary |
+|---|---|
+| Live endpoint and read-only financial behavior | **PASS — targeted.** Synthetic top-up 100 and one Other payment 7 produced balance 93. The same two immutable ledger rows and balance 93 were verified before and after all assistant requests in the tested sequence. No assistant request posted money. This is not exhaustive concurrency/ledger certification. |
+| EN/AR category ranking | **PASS.** English ranked **Other 7**; Arabic ranked **أخرى 7**. The top-up was not misclassified as spending. |
+| Monthly summary | **PASS.** Recorded income 100, spending 7, net cashflow 93, consistent with the two ledger entries. |
+| Arabic forecast and sources | **PASS.** Assistant projection 93 matched the existing planning forecast through month-end at 93. Source destinations `/plan` and `/upcoming` were correct. This sample does not exhaustively verify all forecast assumptions or currencies. |
+| Explicit unavailable state and Retry | **PASS.** Intercepted provider-unavailable HTTP 503 displayed no fabricated answer and an explicit Retry. Retrying after releasing the interception succeeded against the real backend and returned spending 7. This checks rendering/recovery, not a live provider outage. |
+| Clear while a response is held | **PASS.** Cleared history while holding a synthetic valid response; releasing that late response did not repopulate the conversation. Navigating Home and back showed an empty conversation. The held response tests lifecycle handling, not real-provider financial accuracy. |
+| Narrow responsive/RTL samples | **PASS — EN/light 390px and AR/dark 320px.** No horizontal overflow in inspected samples; source/policy text wrapped, and the 44px composer action remained above bottom tabs. Real hardware keyboard and safe-area behavior were not verified. |
+| Unsupported wording / interpretation boundary | **Clarified as designed; limit retained.** An “other expenses” question was treated as an unsupported filter and asked for clarification rather than guessing. The successful generic ranking/summary does not imply support for arbitrary category-filter wording or perfect interpretation. |
+
+Sanitized screenshot reference IDs: **qg57os**, **je4hnh**, **eon9sf**, **pwtg86**, **bjyvug**, **rfnlsf**. References only; no private screenshots or PII are embedded.
+
+## Remaining limits and historical gates
+
+- Advice and cross-user prompt requests were **not browser-retested**. Earlier backend real-provider EN/AR advice refusal remains reported evidence, distinct from these later browser sequences; automated owner/role checks do not certify every natural-language attack.
+- Goal-choice interactions, account-switch clearing, every source-link/refresh/loading/empty/error permutation, multi-currency/large-value UI cases and the complete live session/role/origin/CSRF rejection matrix are not exhaustively browser-tested.
+- The two sampled viewports are not the full screen × EN/AR × Light/Dark × viewport matrix. Comprehensive keyboard/accessibility and physical-device keyboard/notch/safe-area/gesture/PWA/privacy behavior remain unverified.
+- Latest backend **14 assistant tests**, frontend typecheck/build PASS and the earlier separate **18-test assistant/forecast checkpoint** remain distinct reported gates, never summed. No new full backend/workspace regression-suite pass or zero-regression claim is made.
+
+Preserve the existing Gold semantic tokens/shared components, mobile-first sheets and confirmations, safe areas/44px targets, EN/AR/RTL, Light/Dark, accessible focus and reduced motion. No second styling system, raw colors, service worker or offline financial caching. Local PIN/privacy UX remains convenience, not authentication or guaranteed screenshot prevention.
+
+Historical qualified gates in `docs/gold-phase6-verification.md`, Prompt 8/9/10 reports and `docs/prompt11-verification.md` remain unchanged, including Prompt 10's admin/browser/device limitations and Prompt 11's final mobile Filter-sheet separate browser-retest gap. Old “Prompt 12 not started/no AI” statements in historical reports describe their original checkpoint, not current authorization; current real intent planning does not retroactively close any historical gate. **Prompt 13 is not started and requires separate authorization.**

@@ -5,6 +5,127 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type AssistantQueryLanguage = typeof AssistantQueryLanguage[keyof typeof AssistantQueryLanguage];
+
+
+export const AssistantQueryLanguage = {
+  en: 'en',
+  ar: 'ar',
+} as const;
+
+export interface AssistantQuery {
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  question: string;
+  language: AssistantQueryLanguage;
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  lastQuestion?: string;
+  goalId?: string;
+}
+
+export type AssistantFactCurrency = typeof AssistantFactCurrency[keyof typeof AssistantFactCurrency];
+
+
+export const AssistantFactCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export type AssistantFactBasis = typeof AssistantFactBasis[keyof typeof AssistantFactBasis];
+
+
+export const AssistantFactBasis = {
+  actual: 'actual',
+  estimated: 'estimated',
+} as const;
+
+export type AssistantFactProvenance = typeof AssistantFactProvenance[keyof typeof AssistantFactProvenance];
+
+
+export const AssistantFactProvenance = {
+  ledger: 'ledger',
+  goals: 'goals',
+  forecast: 'forecast',
+} as const;
+
+export interface AssistantFact {
+  key: string;
+  label: string;
+  /**
+     * Exact integer minor units; use BigInt
+     * @pattern ^-?[0-9]+$
+     */
+  minor: string;
+  currency: AssistantFactCurrency;
+  basis: AssistantFactBasis;
+  provenance: AssistantFactProvenance;
+  policy: string;
+  category?: string;
+  date?: string;
+  rank?: number;
+  previousMinor?: string;
+  deltaMinor?: string;
+  /**
+     * Exact rounded 2-decimal percent; null when previous is zero
+     * @nullable
+     */
+  changePercent?: string | null;
+}
+
+export interface AssistantPeriod {
+  from: string;
+  to: string;
+}
+
+export interface AssistantGoalChoice {
+  id: string;
+  name: string;
+}
+
+export interface AssistantLink {
+  label: string;
+  href: string;
+}
+
+export type AssistantAnswerStatus = typeof AssistantAnswerStatus[keyof typeof AssistantAnswerStatus];
+
+
+export const AssistantAnswerStatus = {
+  answered: 'answered',
+  clarify: 'clarify',
+  refused: 'refused',
+} as const;
+
+export type AssistantAnswerLanguage = typeof AssistantAnswerLanguage[keyof typeof AssistantAnswerLanguage];
+
+
+export const AssistantAnswerLanguage = {
+  en: 'en',
+  ar: 'ar',
+} as const;
+
+export interface AssistantAnswer {
+  status: AssistantAnswerStatus;
+  language: AssistantAnswerLanguage;
+  intent: string;
+  message: string;
+  asOf: string;
+  period: AssistantPeriod | null;
+  comparisonPeriod: AssistantPeriod | null;
+  facts: AssistantFact[];
+  warnings: string[];
+  links: AssistantLink[];
+  goalChoices: AssistantGoalChoice[];
+  simulated: boolean;
+  policy: string;
+}
+
 export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
 
 

@@ -61,7 +61,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 5 } },
   { id: 'afford', path: '/afford', icon: Scale, labelKey: 'nav.afford', group: 'plan', roles: ['student'], implemented: false },
   { id: 'campus', path: '/campus', icon: ShoppingBag, labelKey: 'nav.campus', schoolLabelKey: 'nav.campus.school', mobileLabelKey: 'nav.group.campus', group: 'campus', roles: ['student'], implemented: true, mobile: { student: 3 }, universityOnly: true },
-  { id: 'assistant', path: '/assistant', icon: MessageCircle, labelKey: 'nav.assistant', group: 'campus', roles: ['student'], implemented: false },
+  { id: 'assistant', path: '/assistant', icon: MessageCircle, labelKey: 'nav.assistant', group: 'campus', roles: ['student'], implemented: true },
   { id: 'learn', path: '/learn', icon: BookOpen, labelKey: 'nav.learn', group: 'plan', roles: ['student', 'parent'], implemented: true, schoolMobile: 3 },
   { id: 'family', path: '/family', icon: HeartHandshake, labelKey: 'nav.family', group: 'family', roles: ['student'], implemented: true },
   // Parent
