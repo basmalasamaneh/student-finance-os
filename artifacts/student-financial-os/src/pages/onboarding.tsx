@@ -18,6 +18,7 @@ import { Page, PageHeader, Section } from '@/components/layout/page';
 import { useI18n } from '@/features/i18n/i18n-provider';
 import { useAccount } from '@/features/auth/account';
 import { cn } from '@/lib/utils';
+import { CampusPickerField, UniversityPickerField, useCatalogPicker } from '@/components/campus/catalog-picker';
 
 type Text = (en: string, ar: string) => string;
 const study = [['school','School student','طالب مدرسة'],['university','University student','طالب جامعة']] as const;
@@ -200,6 +201,7 @@ export default function OnboardingPage({ editing = false }: { editing?: boolean 
   const residence = draft.residence;
   const commute = draft.commute;
   const isUni = (education?.studentType ?? 'university') !== 'school';
+  const picker = useCatalogPicker(education, (next) => setDraft(old => ({ ...old, education: next })), isUni && step === 'education');
   const cOff = education?.studentType === 'university' ? 4 : 2;
   const qCount = step === 'education' ? (isUni ? 9 : 7) : step === 'residence' ? ((residence?.type ?? 'family') === 'family' ? 2 : 7) : step === 'commute' ? cOff + 3 : 1;
   const pager = useQuestionPager(qCount, step);
@@ -239,7 +241,7 @@ export default function OnboardingPage({ editing = false }: { editing?: boolean 
             <Row><Field q={q(4)} label={t('Grade / level','الصف / المرحلة')}><Input required value={education?.grade ?? ''} onChange={e=>field('education','grade',e.target.value)}/></Field><Field q={q(5)} label={t('Allowance frequency','تكرار المصروف')}><Select t={t} options={frequencies.filter(([v])=>!['biweekly','one_time'].includes(v))} value={education?.allowanceFrequency ?? 'monthly'} onChange={v=>field('education','allowanceFrequency',v)}/></Field></Row>
             <AmountField q={q(6)} t={t} label={t('Typical allowance','المصروف المعتاد')} value={education?.typicalAllowance} onChange={v=>field('education','typicalAllowance',v)}/>
           </> : <>
-            <Row><Field q={q(2)} label={t('University','الجامعة')}><Input autoComplete="organization" enterKeyHint="next" required value={education?.university ?? ''} onChange={e=>field('education','university',e.target.value)}/></Field><Field q={q(3)} label={t('Campus','الحرم الجامعي')}><Input required value={education?.campus ?? ''} onChange={e=>field('education','campus',e.target.value)}/></Field></Row>
+            <Row><Field q={q(2)} label={t('University','الجامعة')}><UniversityPickerField p={picker} t={t} lang={lang} /></Field><Field q={q(3)} label={t('Campus','الحرم الجامعي')}><CampusPickerField p={picker} t={t} lang={lang} /></Field></Row>
             <Row><Field q={q(4)} label={t('City','المدينة')}><Input autoComplete="address-level2" enterKeyHint="next" required value={education?.city ?? ''} onChange={e=>field('education','city',e.target.value)}/></Field><Field q={q(5)} label={t('Faculty','الكلية')}><Input required value={education?.faculty ?? ''} onChange={e=>field('education','faculty',e.target.value)}/></Field></Row>
             <Row><Field q={q(6)} label={t('Major','التخصص')}><Input required value={education?.major ?? ''} onChange={e=>field('education','major',e.target.value)}/></Field><Field q={q(7)} label={t('Academic year / level','السنة / المرحلة الأكاديمية')}><Input required value={education?.academicYear ?? ''} onChange={e=>field('education','academicYear',e.target.value)}/></Field></Row>
             <Field q={q(8)} label={t('Study status','حالة الدراسة')}><Input required value={education?.studyStatus ?? ''} onChange={e=>field('education','studyStatus',e.target.value)}/></Field>

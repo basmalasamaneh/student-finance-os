@@ -16,6 +16,11 @@ import { NotificationCenter } from '@/components/requests/notification-inbox';
 import { canReachScroll } from '@/components/gestures/gesture-math';
 import { createScrollController, type NavKind } from './scroll-memory';
 
+function useStudentMode() {
+  const { data } = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), staleTime: 30_000 } });
+  return data?.education?.studentType;
+}
+
 function useLabel() {
   const { t } = useI18n();
   const { data } = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), staleTime: 30_000 } });
@@ -60,6 +65,7 @@ const SIDEBAR_KEY = 'sfos.sidebarCollapsed';
 function Sidebar() {
   const { t, lang, dir } = useI18n();
   const { role } = useAccount();
+  const mode = useStudentMode();
   const [location] = useLocation();
   const label = useLabel();
   const [collapsed, setCollapsed] = useState(() => { try { return localStorage.getItem(SIDEBAR_KEY) === '1'; } catch { return false; } });
@@ -71,7 +77,7 @@ function Sidebar() {
       <aside className="chrome sticky top-0 hidden h-[100dvh] w-[76px] shrink-0 flex-col items-center border-e border-sidebar-border bg-sidebar py-4 lg:flex">
         <Brand collapsed />
         <nav aria-label={t('a11y.mainNav')} className="mt-4 flex flex-1 flex-col items-center gap-1 overflow-y-auto border-t border-sidebar-border pt-4">
-          {itemsForRole(role).map((item) => {
+          {itemsForRole(role, mode).map((item) => {
             const active = isActive(item, location);
             const Icon = item.icon;
             return (
@@ -105,7 +111,7 @@ function Sidebar() {
         </Button></div>
       </div>
       <nav aria-label={t('a11y.mainNav')} className="flex-1 overflow-y-auto border-t border-sidebar-border px-3 pb-6 pt-4">
-        {groupedForRole(role).map(([group, items]) => (
+        {groupedForRole(role, mode).map(([group, items]) => (
           <div key={group} className="mb-4">
             <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">{t(GROUP_LABEL[group])}</p>
             <ul className="flex flex-col">
@@ -153,13 +159,14 @@ function Sidebar() {
 function Rail() {
   const { t, dir } = useI18n();
   const { role } = useAccount();
+  const mode = useStudentMode();
   const [location] = useLocation();
   const label = useLabel();
   return (
     <aside className="chrome sticky top-0 hidden h-[100dvh] w-[76px] shrink-0 flex-col items-center border-e border-sidebar-border bg-sidebar py-4 min-[769px]:flex lg:hidden">
       <Brand collapsed />
       <nav aria-label={t('a11y.mainNav')} className="mt-4 flex flex-1 flex-col items-center gap-1 overflow-y-auto border-t border-sidebar-border pt-4">
-        {itemsForRole(role).map((item) => {
+        {itemsForRole(role, mode).map((item) => {
           const active = isActive(item, location);
           const Icon = item.icon;
           return (
@@ -189,9 +196,10 @@ function Rail() {
 function usePageTitle() {
   const { t } = useI18n();
   const { role } = useAccount();
+  const mode = useStudentMode();
   const [location] = useLocation();
   const label = useLabel();
-  const match = itemsForRole(role).find((i) => isActive(i, location));
+  const match = itemsForRole(role, mode).find((i) => isActive(i, location));
   return match ? label(match) : t('app.name');
 }
 
@@ -280,6 +288,7 @@ function Segmented({ label, value, options, onChange, testId }: { label: string;
 function MoreSheet() {
   const { t, lang, setLang } = useI18n();
   const { role } = useAccount();
+  const mode = useStudentMode();
   const { theme, setTheme } = useTheme();
   const [location] = useLocation();
   const label = useLabel();
@@ -325,7 +334,7 @@ function MoreSheet() {
           <p className="type-caption">{t('a11y.moreNav')}</p>
         </div>
         <nav aria-label={t('a11y.moreNav')} className="mt-2">
-          {groupedForRole(role).map(([group, items]) => (
+          {groupedForRole(role, mode).map(([group, items]) => (
             <div key={group} className="border-t border-divider py-2 first:border-t-0">
               <p className="type-caption pb-0.5 pt-1 text-muted-foreground">{t(GROUP_LABEL[group])}</p>
               <ul>
@@ -384,9 +393,10 @@ function MoreSheet() {
 function BottomNav() {
   const { t } = useI18n();
   const { role } = useAccount();
+  const mode = useStudentMode();
   const [location] = useLocation();
   const label = useLabel();
-  const primary = mobileItemsForRole(role);
+  const primary = mobileItemsForRole(role, mode);
 
   return (
     <nav aria-label={t('a11y.mobileNav')} className="tabbar chrome fixed inset-x-0 bottom-0 z-40 border-t border-divider transition-transform duration-200 min-[769px]:hidden">

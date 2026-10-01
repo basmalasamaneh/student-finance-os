@@ -34,6 +34,7 @@ import type {
   CampusProductInput,
   CampusService,
   CampusServiceInput,
+  CampusSpendingSummary,
   CampusUniversity,
   CampusUniversityInput,
   CommuteOverride,
@@ -56,6 +57,7 @@ import type {
   FinanceSummary,
   FinanceTransaction,
   FinancialPlan,
+  GetCampusSpendingSummaryParams,
   GetFinanceHistoryParams,
   GoalConsentInput,
   GoalContributionReceipt,
@@ -3985,6 +3987,87 @@ export function useGetFinanceSummary<TData = Awaited<ReturnType<typeof getFinanc
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetFinanceSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetCampusSpendingSummaryUrl = (params?: GetCampusSpendingSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/campus/spending-summary?${stringifiedParams}` : `/api/campus/spending-summary`
+}
+
+/**
+ * Student-only full owner ledger campus-payment spending by UTC month. Historical receipt categories are used even for disabled services. No currency conversion.
+ */
+export const getCampusSpendingSummary = async (params?: GetCampusSpendingSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<CampusSpendingSummary> => {
+
+  return customFetch<CampusSpendingSummary>(getGetCampusSpendingSummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCampusSpendingSummaryQueryKey = (params?: GetCampusSpendingSummaryParams,) => {
+    return [
+    `/api/campus/spending-summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCampusSpendingSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getCampusSpendingSummary>>, TError = ErrorType<void>>(params?: GetCampusSpendingSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampusSpendingSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCampusSpendingSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCampusSpendingSummary>>> = ({ signal }) => getCampusSpendingSummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCampusSpendingSummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCampusSpendingSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getCampusSpendingSummary>>>
+export type GetCampusSpendingSummaryQueryError = ErrorType<void>
+
+
+
+export function useGetCampusSpendingSummary<TData = Awaited<ReturnType<typeof getCampusSpendingSummary>>, TError = ErrorType<void>>(
+ params?: GetCampusSpendingSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCampusSpendingSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCampusSpendingSummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

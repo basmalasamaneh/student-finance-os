@@ -34,6 +34,7 @@ import FamilyPage from '@/pages/family';
 import ParentChildrenPage, { ParentChildDetailPage } from '@/pages/parent-children';
 import ParentAllowancesPage from '@/pages/parent-allowances';
 import ParentRequestsPage, { ParentRequestDetailPage } from '@/pages/parent-requests';
+import LearnPage from '@/pages/learn';
 import FamilyRequestsPage, { FamilyRequestDetailPage } from '@/pages/family-requests';
 
 // Design/reference surfaces stay out of the ordinary account startup bundle.
@@ -65,6 +66,7 @@ function Router() {
           <Route path="/goals" component={GoalsPage} />
           <Route path="/goals/fund" component={ParentFundPage} />
           <Route path="/goals/:id" component={GoalDetailPage} />
+          <Route path="/learn" component={LearnPage} />
           <Route path="/family" component={FamilyPage} />
           <Route path="/family/requests" component={FamilyRequestsPage} />
           <Route path="/family/requests/:id" component={FamilyRequestDetailPage} />

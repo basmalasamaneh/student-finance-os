@@ -6,11 +6,13 @@ import {
   SaveProfileBody, GetProfileResponse, SaveProfileResponse, CompleteProfileResponse,
   CreateIncomeBody, UpdateIncomeBody, CreateIncomeResponse, UpdateIncomeResponse,
   CreateScholarshipBody, UpdateScholarshipBody, CreateScholarshipResponse, UpdateScholarshipResponse,
+  type Education,
 } from "@workspace/api-zod";
 import { ApiError } from "../lib/http-errors";
 import { estimateCommute, hashPassword, hasValidOptionalDates, isStudentProfileComplete, isTrustedMutationOrigin, newSessionToken, normalizeEmail, signupLimitReached, tokenHash, verifyPassword } from "../lib/credentials";
 import { requireOwner, requirePrincipal, type TrustedPrincipal } from "../lib/authorization";
 import { allowanceProjection } from "../lib/allowance-projection";
+import { canonicalEducation } from "../lib/campus";
 
 const router: IRouter = Router();
 const secret = process.env.SESSION_SECRET;
@@ -97,7 +99,7 @@ async function profile(req: Request) {
   return {
     ...account(user),
     ...(user.role === "student" ? { allowanceProjection: (await allowanceProjection(user.id)).dto } : {}),
-    ...(user.education ? { education: user.education } : {}),
+    ...(user.education ? { education: await canonicalEducation(user.education as Education) } : {}),
     ...(user.residence ? { residence: user.residence } : {}),
     ...(user.commute ? { commute: user.commute } : {}),
     incomes: incomeRows.map((row) => ({ ...(row.data as object), id: row.id })),
@@ -210,7 +212,7 @@ router.put("/profile", async (req, res) => {
     changes.name = input.name.trim();
   }
   if (user.role !== "student" && (input.education || input.residence || input.commute)) throw new ApiError("FORBIDDEN");
-  if (input.education) changes.education = input.education;
+  if (input.education) changes.education = await canonicalEducation(input.education);
   if (input.residence) {
     const r = input.residence;
     if (r.type !== "family" && r.type !== "other" && !r.monthlyRent) throw new ApiError("BAD_REQUEST");
@@ -234,7 +236,8 @@ router.put("/profile", async (req, res) => {
 router.post("/profile/complete", async (req, res) => {
   const user = await current(req);
   if (user.role === "student") {
-    if (!isStudentProfileComplete(user.education, user.residence, user.commute)) throw new ApiError("BAD_REQUEST");
+    const education = user.education ? await canonicalEducation(user.education as Education) : user.education;
+    if (!isStudentProfileComplete(education, user.residence, user.commute)) throw new ApiError("BAD_REQUEST");
   }
   await db.update(users).set({ onboardingCompleted: true }).where(eq(users.id, user.id));
   res.json(CompleteProfileResponse.parse(await profile(req)));

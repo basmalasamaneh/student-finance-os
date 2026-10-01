@@ -1,3 +1,4 @@
+import { PullToRefresh } from '@/components/gestures/pull-to-refresh';
 import { useState } from 'react';
 import { Building2, MapPin, Pencil, Plus } from 'lucide-react';
 import { getListCampusCatalogQueryKey, useListCampusCatalog, type CampusService } from '@workspace/api-client-react';
@@ -21,6 +22,14 @@ function IntegrationStatus({ t }: { t: Tx }) {
       <span className="type-caption rounded-full border border-primary/40 bg-primary-soft px-2 py-0.5 font-medium text-gold-ink">{t('Simulated', 'محاكاة')}</span>
       <span aria-disabled="true" title={t('Not available in the prototype', 'غير متاح في النموذج')} className="type-caption rounded-full border border-dashed border-input px-2 py-0.5 text-muted-foreground">{t('Connected · coming soon', 'متصل · قريباً')}</span>
     </div>
+  );
+}
+
+function MetaList({ items, t }: { items: [string, string | undefined][]; t: Tx }) {
+  return (
+    <dl className="grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
+      {items.map(([k, v]) => <div key={k} className="flex min-w-0 gap-2"><dt className="type-caption shrink-0 text-muted-foreground">{k}:</dt><dd className="type-caption min-w-0 truncate">{v || <span className="text-muted-foreground">{t('Not configured', 'غير مُعد')}</span>}</dd></div>)}
+    </dl>
   );
 }
 
@@ -69,6 +78,7 @@ export default function AdminCampusPage() {
         lede={t('Configure universities, campuses, merchants and demo prices. All payments are simulated; no real institution is connected.', 'اضبط الجامعات والأحرام والتجار والأسعار التجريبية. كل المدفوعات محاكاة؛ لا توجد مؤسسة حقيقية متصلة.')}
         actions={<Button onClick={() => setTarget({ kind: 'university' })} data-testid="button-add-university"><Plus aria-hidden />{t('Add university', 'إضافة جامعة')}</Button>} />
 
+      <PullToRefresh onRefresh={() => q.refetch()} label={t('Refreshing…', 'جارٍ التحديث…')}>
       {q.isPending ? <SkeletonRows rows={4} label={t('Loading catalog…', 'جارٍ تحميل الكتالوج…')} />
         : q.isError ? <StatePanel tone="error" title={t('Catalog did not load', 'تعذّر تحميل الكتالوج')} body={t('Try again in a moment.', 'حاول بعد قليل.')} action={<RetryButton label={t('Retry', 'إعادة المحاولة')} busyLabel="…" busy={q.isRefetching} onClick={() => q.refetch()} />} />
           : !q.data.length ? <StatePanel tone="empty" icon={<Building2 className="size-[18px]" aria-hidden />} title={t('No universities configured', 'لا جامعات مُعدّة')} body={t('Add a fictional university to begin. Students can also load the demo catalog from Campus.', 'أضف جامعة وهمية للبدء. يمكن للطلاب أيضاً تحميل الكتالوج التجريبي من صفحة الحرم.')} />
@@ -78,14 +88,18 @@ export default function AdminCampusPage() {
                   <section key={u.id} className="flex flex-col gap-4 border-t border-divider pt-6" data-testid={`section-university-${u.id}`}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <h2 className="type-title">{u.name} <span className="font-normal text-muted-foreground" lang="ar" dir="rtl">· {u.arabicName}</span></h2>
-                      <Button size="sm" variant="outline" onClick={() => setTarget({ kind: 'campus', universityId: u.id })} data-testid={`button-add-campus-${u.id}`}><Plus aria-hidden />{t('Add campus', 'إضافة حرم')}</Button>
+                      <div className="flex flex-wrap gap-2"><Button size="sm" variant="ghost" onClick={() => setTarget({ kind: 'university', university: u })} data-testid={`button-edit-university-${u.id}`}><Pencil aria-hidden />{t('Edit', 'تعديل')}</Button>
+                      <Button size="sm" variant="outline" onClick={() => setTarget({ kind: 'campus', universityId: u.id })} data-testid={`button-add-campus-${u.id}`}><Plus aria-hidden />{t('Add campus', 'إضافة حرم')}</Button></div>
                     </div>
+                    <MetaList t={t} items={[[t('City', 'المدينة'), u.city], [t('Tuition', 'الرسوم'), u.tuitionConfiguration], [t('Scholarships', 'المنح'), u.scholarshipConfiguration], [t('Housing', 'السكن'), u.housingAvailability], [t('Transportation', 'المواصلات'), u.transportationContext]]} />
                     {u.campuses.length ? u.campuses.map((c) => (
                       <div key={c.id} className="flex flex-col gap-1 ps-3 sm:ps-5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <h3 className="type-subtitle inline-flex items-center gap-1.5"><MapPin className="size-4 text-gold-ink" aria-hidden />{c.name} <span className="font-normal text-muted-foreground" lang="ar" dir="rtl">· {c.arabicName}</span></h3>
-                          <Button size="sm" variant="ghost" onClick={() => setTarget({ kind: 'service', campusId: c.id })} data-testid={`button-add-service-${c.id}`}><Plus aria-hidden />{t('Add service', 'إضافة خدمة')}</Button>
+                          <div className="flex flex-wrap gap-2"><Button size="sm" variant="ghost" onClick={() => setTarget({ kind: 'campus', universityId: u.id, campus: c })} data-testid={`button-edit-campus-${c.id}`}><Pencil aria-hidden />{t('Edit', 'تعديل')}</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setTarget({ kind: 'service', campusId: c.id })} data-testid={`button-add-service-${c.id}`}><Plus aria-hidden />{t('Add service', 'إضافة خدمة')}</Button></div>
                         </div>
+                        <MetaList t={t} items={[[t('City', 'المدينة'), c.city], [t('Location', 'الموقع'), c.locationDescription], [t('Transportation', 'المواصلات'), c.transportationContext], [t('Housing', 'السكن'), c.housingContext]]} />
                         {c.services.length ? <ul className="divide-y divide-divider">{c.services.map((s) => <ServiceBlock key={s.id} s={s} onEdit={setTarget} t={t} />)}</ul>
                           : <p className="type-caption py-2 text-muted-foreground">{t('No services yet.', 'لا خدمات بعد.')}</p>}
                       </div>
@@ -101,6 +115,7 @@ export default function AdminCampusPage() {
         <FutureIntegrations t={t} />
       </section>
 
+      </PullToRefresh>
       <AdminCatalogDialog target={target} onClose={() => setTarget(null)} t={t} />
     </Page>
   );

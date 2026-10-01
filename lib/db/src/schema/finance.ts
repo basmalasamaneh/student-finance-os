@@ -78,6 +78,11 @@ export const universities = pgTable("campus_universities", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   arabicName: text("arabic_name").notNull(),
+  city: text("city").notNull().default(""),
+  housingAvailability: text("housing_availability").notNull().default(""),
+  transportationContext: text("transportation_context").notNull().default(""),
+  tuitionConfiguration: text("tuition_configuration").notNull().default(""),
+  scholarshipConfiguration: text("scholarship_configuration").notNull().default(""),
   demo: boolean("demo").notNull().default(false),
 }, t => [uniqueIndex("campus_university_name_unique").on(t.name)]);
 export const campuses = pgTable("campus_locations", {
@@ -85,6 +90,10 @@ export const campuses = pgTable("campus_locations", {
   universityId: uuid("university_id").notNull().references(() => universities.id),
   name: text("name").notNull(),
   arabicName: text("arabic_name").notNull(),
+  city: text("city").notNull().default(""),
+  locationDescription: text("location_description").notNull().default(""),
+  transportationContext: text("transportation_context").notNull().default(""),
+  housingContext: text("housing_context").notNull().default(""),
 }, t => [uniqueIndex("campus_location_unique").on(t.universityId, t.name)]);
 export const campusServices = pgTable("campus_services", {
   id: uuid("id").primaryKey().defaultRandom(),

@@ -17,4 +17,20 @@ export interface CampusUniversityInput {
      * @maxLength 160
      */
   arabicName: string;
+  /** @maxLength 160 */
+  city?: string;
+  /**
+     * Admin-configured plain text; empty means not configured, not unavailable.
+     * @maxLength 2000
+     */
+  housingAvailability?: string;
+  /** @maxLength 2000 */
+  transportationContext?: string;
+  /**
+     * Admin-configured informational text only; never a payment price or forecast.
+     * @maxLength 2000
+     */
+  tuitionConfiguration?: string;
+  /** @maxLength 2000 */
+  scholarshipConfiguration?: string;
 }

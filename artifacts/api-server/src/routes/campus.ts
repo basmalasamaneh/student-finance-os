@@ -7,11 +7,13 @@ import {
   UpdateCampusServiceBody, UpdateCampusServiceResponse, CreateCampusProductBody, CreateCampusProductResponse,
   UpdateCampusProductBody, UpdateCampusProductResponse, CreateCampusPaymentBody, CreateCampusPaymentResponse,
   UpdateCampusUniversityBody, UpdateCampusUniversityResponse, UpdateCampusBody, UpdateCampusResponse,
+  GetCampusSpendingSummaryResponse,
 } from "@workspace/api-zod";
 import { requireRole, requirePrincipal, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
 import { once, lockedAccounts, post, checked } from "../lib/finance";
 import { historyDetail } from "./finance-history";
+import { campusSpendingSummary, campusSummaryQuery } from "../lib/campus";
 
 const router: IRouter = Router();
 const student = (req: Request) => requireRole(req.res?.locals.principal as TrustedPrincipal | undefined, "student").userId;
@@ -33,9 +35,9 @@ async function catalog() {
     db.select().from(universities), db.select().from(campuses), db.select().from(campusServices), db.select().from(campusProducts),
   ]);
   return us.map(u => ({
-    id: u.id, name: u.name, arabicName: u.arabicName,
+    ...u,
     campuses: cs.filter(c => c.universityId === u.id).map(c => ({
-      id: c.id, universityId: c.universityId, name: c.name, arabicName: c.arabicName,
+      ...c,
       services: ss.filter(s => s.campusId === c.id).map(s => ({
         id: s.id, universityId: u.id, campusId: c.id, name: s.name, arabicName: s.arabicName,
         category: s.category, description: s.description, location: s.location, active: s.active,
@@ -45,6 +47,10 @@ async function catalog() {
     })),
   }));
 }
+router.get("/campus/spending-summary", async (req, res): Promise<void> => {
+  const userId = student(req);
+  res.json(GetCampusSpendingSummaryResponse.parse(await campusSpendingSummary(userId, campusSummaryQuery(req.query))));
+});
 router.get("/campus/catalog", async (req, res) => {
   const principal = requirePrincipal(req.res?.locals.principal as TrustedPrincipal | undefined);
   if (!principal.roles.some(r => r === "student" || r === "admin")) throw new ApiError("FORBIDDEN");

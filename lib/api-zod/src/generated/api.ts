@@ -2767,13 +2767,104 @@ export const GetFinanceSummaryResponse = zod.object({
 })
 
 
+/**
+ * Student-only full owner ledger campus-payment spending by UTC month. Historical receipt categories are used even for disabled services. No currency conversion.
+ */
+export const getCampusSpendingSummaryQueryMonthRegExp = new RegExp('^[0-9]{4}-(0[1-9]|1[0-2])$');
+
+
+export const GetCampusSpendingSummaryQueryParams = zod.object({
+  "month": zod.coerce.string().regex(getCampusSpendingSummaryQueryMonthRegExp).optional().describe('UTC YYYY-MM; omitted means current UTC month. Years 0001–9999.'),
+  "campusId": zod.coerce.string().uuid().optional(),
+  "serviceId": zod.coerce.string().uuid().optional()
+})
+
+export const getCampusSpendingSummaryResponseTotalsItemSpendingMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemSpendingMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemFoodMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemFoodMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemBooksMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemBooksMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemPrintingMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemPrintingMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemTransportationMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemTransportationMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemFeesMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemFeesMinorMax = 9007199254740991;
+
+export const getCampusSpendingSummaryResponseTotalsItemOtherMinorMin = 0;
+export const getCampusSpendingSummaryResponseTotalsItemOtherMinorMax = 9007199254740991;
+
+
+
+export const GetCampusSpendingSummaryResponse = zod.object({
+  "month": zod.string(),
+  "campusId": zod.string().uuid().nullable(),
+  "serviceId": zod.string().uuid().nullable(),
+  "totals": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "spending": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemSpendingMinorMin).max(getCampusSpendingSummaryResponseTotalsItemSpendingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "food": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemFoodMinorMin).max(getCampusSpendingSummaryResponseTotalsItemFoodMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "books": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemBooksMinorMin).max(getCampusSpendingSummaryResponseTotalsItemBooksMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "printing": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemPrintingMinorMin).max(getCampusSpendingSummaryResponseTotalsItemPrintingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "transportation": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemTransportationMinorMin).max(getCampusSpendingSummaryResponseTotalsItemTransportationMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "fees": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemFeesMinorMin).max(getCampusSpendingSummaryResponseTotalsItemFeesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "other": zod.object({
+  "minor": zod.number().int().min(getCampusSpendingSummaryResponseTotalsItemOtherMinorMin).max(getCampusSpendingSummaryResponseTotalsItemOtherMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}))
+})
+
+
 export const listCampusCatalogResponseOneNameMax = 160;
 
 export const listCampusCatalogResponseOneArabicNameMax = 160;
 
+export const listCampusCatalogResponseOneCityMax = 160;
+
+export const listCampusCatalogResponseOneHousingAvailabilityMax = 2000;
+
+export const listCampusCatalogResponseOneTransportationContextMax = 2000;
+
+export const listCampusCatalogResponseOneTuitionConfigurationMax = 2000;
+
+export const listCampusCatalogResponseOneScholarshipConfigurationMax = 2000;
+
 export const listCampusCatalogResponseTwoCampusesItemOneNameMax = 160;
 
 export const listCampusCatalogResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemOneCityMax = 160;
+
+export const listCampusCatalogResponseTwoCampusesItemOneLocationDescriptionMax = 2000;
+
+export const listCampusCatalogResponseTwoCampusesItemOneTransportationContextMax = 2000;
+
+export const listCampusCatalogResponseTwoCampusesItemOneHousingContextMax = 2000;
 
 export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
 
@@ -2794,13 +2885,22 @@ export const listCampusCatalogResponseTwoCampusesItemTwoServicesItemTwoProductsI
 
 export const ListCampusCatalogResponseItem = zod.object({
   "name": zod.string().min(1).max(listCampusCatalogResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(listCampusCatalogResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseOneArabicNameMax),
+  "city": zod.string().max(listCampusCatalogResponseOneCityMax).optional(),
+  "housingAvailability": zod.string().max(listCampusCatalogResponseOneHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(listCampusCatalogResponseOneTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(listCampusCatalogResponseOneTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(listCampusCatalogResponseOneScholarshipConfigurationMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "campuses": zod.array(zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemOneNameMax),
-  "arabicName": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(listCampusCatalogResponseTwoCampusesItemOneArabicNameMax),
+  "city": zod.string().max(listCampusCatalogResponseTwoCampusesItemOneCityMax).optional(),
+  "locationDescription": zod.string().max(listCampusCatalogResponseTwoCampusesItemOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(listCampusCatalogResponseTwoCampusesItemOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(listCampusCatalogResponseTwoCampusesItemOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -2841,9 +2941,27 @@ export const installCampusDemoResponseOneNameMax = 160;
 
 export const installCampusDemoResponseOneArabicNameMax = 160;
 
+export const installCampusDemoResponseOneCityMax = 160;
+
+export const installCampusDemoResponseOneHousingAvailabilityMax = 2000;
+
+export const installCampusDemoResponseOneTransportationContextMax = 2000;
+
+export const installCampusDemoResponseOneTuitionConfigurationMax = 2000;
+
+export const installCampusDemoResponseOneScholarshipConfigurationMax = 2000;
+
 export const installCampusDemoResponseTwoCampusesItemOneNameMax = 160;
 
 export const installCampusDemoResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemOneCityMax = 160;
+
+export const installCampusDemoResponseTwoCampusesItemOneLocationDescriptionMax = 2000;
+
+export const installCampusDemoResponseTwoCampusesItemOneTransportationContextMax = 2000;
+
+export const installCampusDemoResponseTwoCampusesItemOneHousingContextMax = 2000;
 
 export const installCampusDemoResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
 
@@ -2864,13 +2982,22 @@ export const installCampusDemoResponseTwoCampusesItemTwoServicesItemTwoProductsI
 
 export const InstallCampusDemoResponseItem = zod.object({
   "name": zod.string().min(1).max(installCampusDemoResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(installCampusDemoResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseOneArabicNameMax),
+  "city": zod.string().max(installCampusDemoResponseOneCityMax).optional(),
+  "housingAvailability": zod.string().max(installCampusDemoResponseOneHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(installCampusDemoResponseOneTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(installCampusDemoResponseOneTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(installCampusDemoResponseOneScholarshipConfigurationMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "campuses": zod.array(zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemOneNameMax),
-  "arabicName": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(installCampusDemoResponseTwoCampusesItemOneArabicNameMax),
+  "city": zod.string().max(installCampusDemoResponseTwoCampusesItemOneCityMax).optional(),
+  "locationDescription": zod.string().max(installCampusDemoResponseTwoCampusesItemOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(installCampusDemoResponseTwoCampusesItemOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(installCampusDemoResponseTwoCampusesItemOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -2908,20 +3035,53 @@ export const createCampusUniversityBodyNameMax = 160;
 
 export const createCampusUniversityBodyArabicNameMax = 160;
 
+export const createCampusUniversityBodyCityMax = 160;
+
+export const createCampusUniversityBodyHousingAvailabilityMax = 2000;
+
+export const createCampusUniversityBodyTransportationContextMax = 2000;
+
+export const createCampusUniversityBodyTuitionConfigurationMax = 2000;
+
+export const createCampusUniversityBodyScholarshipConfigurationMax = 2000;
+
 
 
 export const CreateCampusUniversityBody = zod.object({
   "name": zod.string().min(1).max(createCampusUniversityBodyNameMax),
-  "arabicName": zod.string().min(1).max(createCampusUniversityBodyArabicNameMax)
+  "arabicName": zod.string().min(1).max(createCampusUniversityBodyArabicNameMax),
+  "city": zod.string().max(createCampusUniversityBodyCityMax).optional(),
+  "housingAvailability": zod.string().max(createCampusUniversityBodyHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(createCampusUniversityBodyTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(createCampusUniversityBodyTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(createCampusUniversityBodyScholarshipConfigurationMax).optional()
 })
 
 export const createCampusUniversityResponseOneNameMax = 160;
 
 export const createCampusUniversityResponseOneArabicNameMax = 160;
 
+export const createCampusUniversityResponseOneCityMax = 160;
+
+export const createCampusUniversityResponseOneHousingAvailabilityMax = 2000;
+
+export const createCampusUniversityResponseOneTransportationContextMax = 2000;
+
+export const createCampusUniversityResponseOneTuitionConfigurationMax = 2000;
+
+export const createCampusUniversityResponseOneScholarshipConfigurationMax = 2000;
+
 export const createCampusUniversityResponseTwoCampusesItemOneNameMax = 160;
 
 export const createCampusUniversityResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemOneCityMax = 160;
+
+export const createCampusUniversityResponseTwoCampusesItemOneLocationDescriptionMax = 2000;
+
+export const createCampusUniversityResponseTwoCampusesItemOneTransportationContextMax = 2000;
+
+export const createCampusUniversityResponseTwoCampusesItemOneHousingContextMax = 2000;
 
 export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
 
@@ -2942,13 +3102,22 @@ export const createCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProd
 
 export const CreateCampusUniversityResponse = zod.object({
   "name": zod.string().min(1).max(createCampusUniversityResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(createCampusUniversityResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseOneArabicNameMax),
+  "city": zod.string().max(createCampusUniversityResponseOneCityMax).optional(),
+  "housingAvailability": zod.string().max(createCampusUniversityResponseOneHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(createCampusUniversityResponseOneTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(createCampusUniversityResponseOneTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(createCampusUniversityResponseOneScholarshipConfigurationMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "campuses": zod.array(zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemOneNameMax),
-  "arabicName": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(createCampusUniversityResponseTwoCampusesItemOneArabicNameMax),
+  "city": zod.string().max(createCampusUniversityResponseTwoCampusesItemOneCityMax).optional(),
+  "locationDescription": zod.string().max(createCampusUniversityResponseTwoCampusesItemOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(createCampusUniversityResponseTwoCampusesItemOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(createCampusUniversityResponseTwoCampusesItemOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -2989,20 +3158,53 @@ export const updateCampusUniversityBodyNameMax = 160;
 
 export const updateCampusUniversityBodyArabicNameMax = 160;
 
+export const updateCampusUniversityBodyCityMax = 160;
+
+export const updateCampusUniversityBodyHousingAvailabilityMax = 2000;
+
+export const updateCampusUniversityBodyTransportationContextMax = 2000;
+
+export const updateCampusUniversityBodyTuitionConfigurationMax = 2000;
+
+export const updateCampusUniversityBodyScholarshipConfigurationMax = 2000;
+
 
 
 export const UpdateCampusUniversityBody = zod.object({
   "name": zod.string().min(1).max(updateCampusUniversityBodyNameMax),
-  "arabicName": zod.string().min(1).max(updateCampusUniversityBodyArabicNameMax)
+  "arabicName": zod.string().min(1).max(updateCampusUniversityBodyArabicNameMax),
+  "city": zod.string().max(updateCampusUniversityBodyCityMax).optional(),
+  "housingAvailability": zod.string().max(updateCampusUniversityBodyHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(updateCampusUniversityBodyTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(updateCampusUniversityBodyTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(updateCampusUniversityBodyScholarshipConfigurationMax).optional()
 })
 
 export const updateCampusUniversityResponseOneNameMax = 160;
 
 export const updateCampusUniversityResponseOneArabicNameMax = 160;
 
+export const updateCampusUniversityResponseOneCityMax = 160;
+
+export const updateCampusUniversityResponseOneHousingAvailabilityMax = 2000;
+
+export const updateCampusUniversityResponseOneTransportationContextMax = 2000;
+
+export const updateCampusUniversityResponseOneTuitionConfigurationMax = 2000;
+
+export const updateCampusUniversityResponseOneScholarshipConfigurationMax = 2000;
+
 export const updateCampusUniversityResponseTwoCampusesItemOneNameMax = 160;
 
 export const updateCampusUniversityResponseTwoCampusesItemOneArabicNameMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneCityMax = 160;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneLocationDescriptionMax = 2000;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneTransportationContextMax = 2000;
+
+export const updateCampusUniversityResponseTwoCampusesItemOneHousingContextMax = 2000;
 
 export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemOneNameMax = 160;
 
@@ -3023,13 +3225,22 @@ export const updateCampusUniversityResponseTwoCampusesItemTwoServicesItemTwoProd
 
 export const UpdateCampusUniversityResponse = zod.object({
   "name": zod.string().min(1).max(updateCampusUniversityResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseOneArabicNameMax),
+  "city": zod.string().max(updateCampusUniversityResponseOneCityMax).optional(),
+  "housingAvailability": zod.string().max(updateCampusUniversityResponseOneHousingAvailabilityMax).optional().describe('Admin-configured plain text; empty means not configured, not unavailable.'),
+  "transportationContext": zod.string().max(updateCampusUniversityResponseOneTransportationContextMax).optional(),
+  "tuitionConfiguration": zod.string().max(updateCampusUniversityResponseOneTuitionConfigurationMax).optional().describe('Admin-configured informational text only; never a payment price or forecast.'),
+  "scholarshipConfiguration": zod.string().max(updateCampusUniversityResponseOneScholarshipConfigurationMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "campuses": zod.array(zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemOneNameMax),
-  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(updateCampusUniversityResponseTwoCampusesItemOneArabicNameMax),
+  "city": zod.string().max(updateCampusUniversityResponseTwoCampusesItemOneCityMax).optional(),
+  "locationDescription": zod.string().max(updateCampusUniversityResponseTwoCampusesItemOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(updateCampusUniversityResponseTwoCampusesItemOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(updateCampusUniversityResponseTwoCampusesItemOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -3066,17 +3277,37 @@ export const createCampusBodyNameMax = 160;
 
 export const createCampusBodyArabicNameMax = 160;
 
+export const createCampusBodyCityMax = 160;
+
+export const createCampusBodyLocationDescriptionMax = 2000;
+
+export const createCampusBodyTransportationContextMax = 2000;
+
+export const createCampusBodyHousingContextMax = 2000;
+
 
 
 export const CreateCampusBody = zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(createCampusBodyNameMax),
-  "arabicName": zod.string().min(1).max(createCampusBodyArabicNameMax)
+  "arabicName": zod.string().min(1).max(createCampusBodyArabicNameMax),
+  "city": zod.string().max(createCampusBodyCityMax).optional(),
+  "locationDescription": zod.string().max(createCampusBodyLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(createCampusBodyTransportationContextMax).optional(),
+  "housingContext": zod.string().max(createCampusBodyHousingContextMax).optional()
 })
 
 export const createCampusResponseOneNameMax = 160;
 
 export const createCampusResponseOneArabicNameMax = 160;
+
+export const createCampusResponseOneCityMax = 160;
+
+export const createCampusResponseOneLocationDescriptionMax = 2000;
+
+export const createCampusResponseOneTransportationContextMax = 2000;
+
+export const createCampusResponseOneHousingContextMax = 2000;
 
 export const createCampusResponseTwoServicesItemOneNameMax = 160;
 
@@ -3098,7 +3329,11 @@ export const createCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax 
 export const CreateCampusResponse = zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(createCampusResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(createCampusResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(createCampusResponseOneArabicNameMax),
+  "city": zod.string().max(createCampusResponseOneCityMax).optional(),
+  "locationDescription": zod.string().max(createCampusResponseOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(createCampusResponseOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(createCampusResponseOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -3138,17 +3373,37 @@ export const updateCampusBodyNameMax = 160;
 
 export const updateCampusBodyArabicNameMax = 160;
 
+export const updateCampusBodyCityMax = 160;
+
+export const updateCampusBodyLocationDescriptionMax = 2000;
+
+export const updateCampusBodyTransportationContextMax = 2000;
+
+export const updateCampusBodyHousingContextMax = 2000;
+
 
 
 export const UpdateCampusBody = zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(updateCampusBodyNameMax),
-  "arabicName": zod.string().min(1).max(updateCampusBodyArabicNameMax)
+  "arabicName": zod.string().min(1).max(updateCampusBodyArabicNameMax),
+  "city": zod.string().max(updateCampusBodyCityMax).optional(),
+  "locationDescription": zod.string().max(updateCampusBodyLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(updateCampusBodyTransportationContextMax).optional(),
+  "housingContext": zod.string().max(updateCampusBodyHousingContextMax).optional()
 })
 
 export const updateCampusResponseOneNameMax = 160;
 
 export const updateCampusResponseOneArabicNameMax = 160;
+
+export const updateCampusResponseOneCityMax = 160;
+
+export const updateCampusResponseOneLocationDescriptionMax = 2000;
+
+export const updateCampusResponseOneTransportationContextMax = 2000;
+
+export const updateCampusResponseOneHousingContextMax = 2000;
 
 export const updateCampusResponseTwoServicesItemOneNameMax = 160;
 
@@ -3170,7 +3425,11 @@ export const updateCampusResponseTwoServicesItemTwoProductsItemOnePriceMinorMax 
 export const UpdateCampusResponse = zod.object({
   "universityId": zod.string().uuid(),
   "name": zod.string().min(1).max(updateCampusResponseOneNameMax),
-  "arabicName": zod.string().min(1).max(updateCampusResponseOneArabicNameMax)
+  "arabicName": zod.string().min(1).max(updateCampusResponseOneArabicNameMax),
+  "city": zod.string().max(updateCampusResponseOneCityMax).optional(),
+  "locationDescription": zod.string().max(updateCampusResponseOneLocationDescriptionMax).optional(),
+  "transportationContext": zod.string().max(updateCampusResponseOneTransportationContextMax).optional(),
+  "housingContext": zod.string().max(updateCampusResponseOneHousingContextMax).optional()
 }).and(zod.object({
   "id": zod.string().uuid(),
   "services": zod.array(zod.object({
@@ -3731,11 +3990,13 @@ export const GetProfileResponse = zod.object({
 }).optional(),
   "university": zod.string().max(getProfileResponseEducationUniversityMax).optional(),
   "campus": zod.string().max(getProfileResponseEducationCampusMax).optional(),
+  "universityId": zod.string().uuid().optional(),
+  "campusId": zod.string().uuid().optional(),
   "faculty": zod.string().max(getProfileResponseEducationFacultyMax).optional(),
   "major": zod.string().max(getProfileResponseEducationMajorMax).optional(),
   "academicYear": zod.string().max(getProfileResponseEducationAcademicYearMax).optional(),
   "studyStatus": zod.string().max(getProfileResponseEducationStudyStatusMax).optional()
-}).optional(),
+}).optional().describe('Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.'),
   "residence": zod.object({
   "type": zod.enum(['family', 'university_housing', 'shared', 'private', 'other']),
   "city": zod.string().max(getProfileResponseResidenceCityMax),
@@ -3887,11 +4148,13 @@ export const SaveProfileBody = zod.object({
 }).optional(),
   "university": zod.string().max(saveProfileBodyEducationUniversityMax).optional(),
   "campus": zod.string().max(saveProfileBodyEducationCampusMax).optional(),
+  "universityId": zod.string().uuid().optional(),
+  "campusId": zod.string().uuid().optional(),
   "faculty": zod.string().max(saveProfileBodyEducationFacultyMax).optional(),
   "major": zod.string().max(saveProfileBodyEducationMajorMax).optional(),
   "academicYear": zod.string().max(saveProfileBodyEducationAcademicYearMax).optional(),
   "studyStatus": zod.string().max(saveProfileBodyEducationStudyStatusMax).optional()
-}).optional(),
+}).optional().describe('Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.'),
   "residence": zod.object({
   "type": zod.enum(['family', 'university_housing', 'shared', 'private', 'other']),
   "city": zod.string().max(saveProfileBodyResidenceCityMax),
@@ -4077,11 +4340,13 @@ export const SaveProfileResponse = zod.object({
 }).optional(),
   "university": zod.string().max(saveProfileResponseEducationUniversityMax).optional(),
   "campus": zod.string().max(saveProfileResponseEducationCampusMax).optional(),
+  "universityId": zod.string().uuid().optional(),
+  "campusId": zod.string().uuid().optional(),
   "faculty": zod.string().max(saveProfileResponseEducationFacultyMax).optional(),
   "major": zod.string().max(saveProfileResponseEducationMajorMax).optional(),
   "academicYear": zod.string().max(saveProfileResponseEducationAcademicYearMax).optional(),
   "studyStatus": zod.string().max(saveProfileResponseEducationStudyStatusMax).optional()
-}).optional(),
+}).optional().describe('Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.'),
   "residence": zod.object({
   "type": zod.enum(['family', 'university_housing', 'shared', 'private', 'other']),
   "city": zod.string().max(saveProfileResponseResidenceCityMax),
@@ -4304,11 +4569,13 @@ export const CompleteProfileResponse = zod.object({
 }).optional(),
   "university": zod.string().max(completeProfileResponseEducationUniversityMax).optional(),
   "campus": zod.string().max(completeProfileResponseEducationCampusMax).optional(),
+  "universityId": zod.string().uuid().optional(),
+  "campusId": zod.string().uuid().optional(),
   "faculty": zod.string().max(completeProfileResponseEducationFacultyMax).optional(),
   "major": zod.string().max(completeProfileResponseEducationMajorMax).optional(),
   "academicYear": zod.string().max(completeProfileResponseEducationAcademicYearMax).optional(),
   "studyStatus": zod.string().max(completeProfileResponseEducationStudyStatusMax).optional()
-}).optional(),
+}).optional().describe('Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.'),
   "residence": zod.object({
   "type": zod.enum(['family', 'university_housing', 'shared', 'private', 'other']),
   "city": zod.string().max(completeProfileResponseResidenceCityMax),

@@ -1513,6 +1513,22 @@ export interface CampusUniversityInput {
      * @maxLength 160
      */
   arabicName: string;
+  /** @maxLength 160 */
+  city?: string;
+  /**
+     * Admin-configured plain text; empty means not configured, not unavailable.
+     * @maxLength 2000
+     */
+  housingAvailability?: string;
+  /** @maxLength 2000 */
+  transportationContext?: string;
+  /**
+     * Admin-configured informational text only; never a payment price or forecast.
+     * @maxLength 2000
+     */
+  tuitionConfiguration?: string;
+  /** @maxLength 2000 */
+  scholarshipConfiguration?: string;
 }
 
 export interface CampusInput {
@@ -1527,6 +1543,14 @@ export interface CampusInput {
      * @maxLength 160
      */
   arabicName: string;
+  /** @maxLength 160 */
+  city?: string;
+  /** @maxLength 2000 */
+  locationDescription?: string;
+  /** @maxLength 2000 */
+  transportationContext?: string;
+  /** @maxLength 2000 */
+  housingContext?: string;
 }
 
 export type CampusServiceInputCategory = typeof CampusServiceInputCategory[keyof typeof CampusServiceInputCategory];
@@ -1605,6 +1629,35 @@ export type CampusUniversity = CampusUniversityInput & {
   id: string;
   campuses: Campus[];
 };
+
+export type CampusSpendingCurrencyTotalCurrency = typeof CampusSpendingCurrencyTotalCurrency[keyof typeof CampusSpendingCurrencyTotalCurrency];
+
+
+export const CampusSpendingCurrencyTotalCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface CampusSpendingCurrencyTotal {
+  currency: CampusSpendingCurrencyTotalCurrency;
+  spending: Amount;
+  food: Amount;
+  books: Amount;
+  printing: Amount;
+  transportation: Amount;
+  fees: Amount;
+  other: Amount;
+}
+
+export interface CampusSpendingSummary {
+  month: string;
+  /** @nullable */
+  campusId: string | null;
+  /** @nullable */
+  serviceId: string | null;
+  totals: CampusSpendingCurrencyTotal[];
+}
 
 export type CampusPaymentInputItemsItem = {
   productId: string;
@@ -1696,6 +1749,9 @@ export const EducationAllowanceFrequency = {
   irregular: 'irregular',
 } as const;
 
+/**
+ * Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.
+ */
 export interface Education {
   studentType: EducationStudentType;
   /** @maxLength 160 */
@@ -1710,6 +1766,8 @@ export interface Education {
   university?: string;
   /** @maxLength 160 */
   campus?: string;
+  universityId?: string;
+  campusId?: string;
   /** @maxLength 160 */
   faculty?: string;
   /** @maxLength 160 */
@@ -1808,4 +1866,14 @@ export const GetFinanceHistoryAmountCurrency = {
   USD: 'USD',
   JOD: 'JOD',
 } as const;
+
+export type GetCampusSpendingSummaryParams = {
+/**
+ * UTC YYYY-MM; omitted means current UTC month. Years 0001–9999.
+ * @pattern ^[0-9]{4}-(0[1-9]|1[0-2])$
+ */
+month?: string;
+campusId?: string;
+serviceId?: string;
+};
 

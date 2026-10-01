@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import {
-  useCreateCampus, useCreateCampusProduct, useCreateCampusService, useCreateCampusUniversity, useUpdateCampusProduct, useUpdateCampusService,
-  type CampusProduct, type CampusService, type CampusServiceInputCategory, type AmountCurrency,
+  useCreateCampus, useUpdateCampus, useUpdateCampusUniversity, getGetProfileQueryKey, useCreateCampusProduct, useCreateCampusService, useCreateCampusUniversity, useUpdateCampusProduct, useUpdateCampusService,
+  type Campus, type CampusUniversity, type CampusProduct, type CampusService, type CampusServiceInputCategory, type AmountCurrency,
 } from '@workspace/api-client-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,8 @@ import { AmountInput, Field, inputClass } from '@/components/money/fields';
 import { amountErrorText, apiErrorText, CATEGORY_LABEL, parseAmountInput, useRefreshFinance, type Tx } from '@/features/money/money-model';
 
 export type AdminTarget =
-  | { kind: 'university' }
-  | { kind: 'campus'; universityId: string }
+  | { kind: 'university'; university?: CampusUniversity }
+  | { kind: 'campus'; universityId: string; campus?: Campus }
   | { kind: 'service'; campusId: string; service?: CampusService }
   | { kind: 'product'; serviceId: string; product?: CampusProduct };
 
@@ -64,7 +65,10 @@ function Toggle({ id, label, hint, checked, onChange }: { id: string; label: str
 
 export function AdminCatalogDialog({ target, onClose, t }: { target: AdminTarget | null; onClose: () => void; t: Tx }) {
   const refresh = useRefreshFinance();
+  const qc = useQueryClient();
   const uniM = useCreateCampusUniversity(); const campusM = useCreateCampus();
+  const uniU = useUpdateCampusUniversity(); const campusU = useUpdateCampus();
+  const [meta, setMeta] = useState<Record<string, string>>({});
   const svcC = useCreateCampusService(); const svcU = useUpdateCampusService();
   const prodC = useCreateCampusProduct(); const prodU = useUpdateCampusProduct();
   const [name, setName] = useState(''); const [ar, setAr] = useState('');
@@ -76,12 +80,16 @@ export function AdminCatalogDialog({ target, onClose, t }: { target: AdminTarget
 
   useEffect(() => {
     if (!target) return;
-    [uniM, campusM, svcC, svcU, prodC, prodU].forEach((m) => m.reset());
+    [uniM, campusM, uniU, campusU, svcC, svcU, prodC, prodU].forEach((m) => m.reset());
     const s = target.kind === 'service' ? target.service : undefined;
     const p = target.kind === 'product' ? target.product : undefined;
-    const src = s ?? p;
+    const u = target.kind === 'university' ? target.university : undefined;
+    const c = target.kind === 'campus' ? target.campus : undefined;
+    const src = s ?? p ?? u ?? c;
+    setMeta(u ? { city: u.city ?? '', housingAvailability: u.housingAvailability ?? '', transportationContext: u.transportationContext ?? '', tuitionConfiguration: u.tuitionConfiguration ?? '', scholarshipConfiguration: u.scholarshipConfiguration ?? '' }
+      : c ? { city: c.city ?? '', locationDescription: c.locationDescription ?? '', transportationContext: c.transportationContext ?? '', housingContext: c.housingContext ?? '' } : {});
     setName(src?.name ?? ''); setAr(src?.arabicName ?? ''); setCategory(s?.category ?? 'food');
-    setDescription(s?.description ?? ''); setLocation(s?.location ?? ''); setActive(src?.active ?? true); setPaymentEnabled(s?.paymentEnabled ?? true);
+    setDescription(s?.description ?? ''); setLocation(s?.location ?? ''); setActive((s ?? p)?.active ?? true); setPaymentEnabled(s?.paymentEnabled ?? true);
     setCurrency(p?.price.currency ?? 'ILS');
     setPrice(p ? minorToDecimal(p.price.minor, p.price.currency === 'JOD' ? 3 : 2) : '');
     setErrors({});
@@ -89,7 +97,7 @@ export function AdminCatalogDialog({ target, onClose, t }: { target: AdminTarget
   }, [target]);
 
   if (!target) return null;
-  const done = () => { void refresh(); onClose(); };
+  const done = () => { void refresh(); void qc.invalidateQueries({ queryKey: getGetProfileQueryKey() }); onClose(); };
   const baseErrors = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = t('Required.', 'مطلوب.');
@@ -98,17 +106,37 @@ export function AdminCatalogDialog({ target, onClose, t }: { target: AdminTarget
   };
 
   if (target.kind === 'university' || target.kind === 'campus') {
-    const m = target.kind === 'university' ? uniM : campusM;
+    const isUni = target.kind === 'university';
+    const editing = isUni ? target.university : target.campus;
+    const m = isUni ? (target.university ? uniU : uniM) : (target.campus ? campusU : campusM);
+    const fields: [string, string, string, number][] = isUni
+      ? [['city', 'City', 'المدينة', 160], ['tuitionConfiguration', 'Tuition information', 'معلومات الرسوم', 2000], ['scholarshipConfiguration', 'Scholarship information', 'معلومات المنح', 2000], ['housingAvailability', 'Housing availability', 'توفر السكن', 2000], ['transportationContext', 'Transportation context', 'سياق المواصلات', 2000]]
+      : [['city', 'City', 'المدينة', 160], ['locationDescription', 'Location description', 'وصف الموقع', 2000], ['transportationContext', 'Transportation context', 'سياق المواصلات', 2000], ['housingContext', 'Housing context', 'سياق السكن', 2000]];
     const submit = () => {
-      const e = baseErrors(); setErrors(e); if (Object.keys(e).length) return;
-      if (target.kind === 'university') uniM.mutate({ data: { name: name.trim(), arabicName: ar.trim() } }, { onSuccess: done });
-      else campusM.mutate({ data: { universityId: target.universityId, name: name.trim(), arabicName: ar.trim() } }, { onSuccess: done });
+      const e = baseErrors();
+      for (const [k, , , max] of fields) if ((meta[k] ?? '').length > max) e[k] = t(`Max ${max} characters.`, `حد أقصى ${max} حرف.`);
+      setErrors(e); if (Object.keys(e).length) return;
+      const extra = Object.fromEntries(fields.map(([k]) => [k, (meta[k] ?? '').trim()]));
+      if (target.kind === 'university') {
+        const data = { name: name.trim(), arabicName: ar.trim(), ...extra };
+        if (target.university) uniU.mutate({ id: target.university.id, data }, { onSuccess: done }); else uniM.mutate({ data }, { onSuccess: done });
+      } else {
+        const data = { universityId: target.universityId, name: name.trim(), arabicName: ar.trim(), ...extra };
+        if (target.campus) campusU.mutate({ id: target.campus.id, data }, { onSuccess: done }); else campusM.mutate({ data }, { onSuccess: done });
+      }
     };
     return (
-      <Shell open onClose={onClose} t={t} busy={m.isPending} error={m.error} onSubmit={submit}
-        title={target.kind === 'university' ? t('Add university', 'إضافة جامعة') : t('Add campus', 'إضافة حرم')}
-        desc={t('Use fictional names for demo data. Real institutions need a signed integration.', 'استخدم أسماء وهمية للبيانات التجريبية. المؤسسات الحقيقية تحتاج تكاملاً موقعاً.')}>
+      <Shell edit={!isUni && !!editing} open onClose={onClose} t={t} busy={m.isPending} error={m.error} onSubmit={submit}
+        title={isUni ? (editing ? t('Edit university', 'تعديل الجامعة') : t('Add university', 'إضافة جامعة')) : (editing ? t('Edit campus', 'تعديل الحرم') : t('Add campus', 'إضافة حرم'))}
+        desc={t('Use fictional names for demo data. Details are informational text only — leave empty for "not configured"; they never create charges or plans.', 'استخدم أسماء وهمية للبيانات التجريبية. التفاصيل نص معلوماتي فقط — اتركها فارغة لـ«غير مُعد»؛ لا تُنشئ رسوماً أو خططاً.')}>
         <Names name={name} ar={ar} setName={setName} setAr={setAr} errors={errors} t={t} />
+        {fields.map(([k, en, arL, max]) => (
+          <Field key={k} id={`cat-${k}`} label={t(`${en} (optional)`, `${arL} (اختياري)`)} error={errors[k]}>
+            {max > 160
+              ? <textarea id={`cat-${k}`} rows={3} maxLength={max} value={meta[k] ?? ''} onChange={(ev) => setMeta((o) => ({ ...o, [k]: ev.target.value }))} className={`${inputClass} py-2`} data-testid={`input-meta-${k}`} />
+              : <input id={`cat-${k}`} maxLength={max} value={meta[k] ?? ''} onChange={(ev) => setMeta((o) => ({ ...o, [k]: ev.target.value }))} className={inputClass} data-testid={`input-meta-${k}`} />}
+          </Field>
+        ))}
       </Shell>
     );
   }

@@ -1,6 +1,8 @@
 import { Link } from 'wouter';
 import { GoalsHomeBlock } from './goals-block';
-import type { Profile } from '@workspace/api-client-react';
+import type { FinanceSummary, Profile } from '@workspace/api-client-react';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { ActualIncomeSpending } from './finance-blocks';
 import { formatDate } from '@workspace/finance-core';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { useI18n } from '@/features/i18n/i18n-provider';
@@ -107,7 +109,7 @@ export function UniversityPlanning({ profile, upcoming, t }: { profile: Profile;
   );
 }
 
-export function SchoolPlanning({ profile, incomes, today, t }: { profile: Profile; incomes: HomeIncome[]; today: string; t: T }) {
+export function SchoolPlanning({ profile, incomes, today, summary, t }: { profile: Profile; incomes: HomeIncome[]; today: string; summary: UseQueryResult<FinanceSummary, unknown>; t: T }) {
   const fmt = useDay();
   const e = profile.education;
   const weekly = weeklyAllowance(e?.typicalAllowance, e?.allowanceFrequency);
@@ -130,7 +132,11 @@ export function SchoolPlanning({ profile, incomes, today, t }: { profile: Profil
           {next ? <><p className="type-label">{fmt(next.day)}</p><MoneyDisplay value={next.income.amount} size="sm" tone="planned" /></>
             : <><p className="type-label">{t('Date unknown', 'الموعد غير معروف')}</p><p className="type-caption text-muted-foreground">{t('Add an expected date to an active parent allowance to see it here.', 'أضف تاريخاً متوقعاً لمصروف أهل نشط ليظهر هنا.')}</p></>}
         </div>
-        <Unavailable testId="status-school-spending" label={t('Spending', 'الإنفاق')} body={t('Appears once purchases are recorded. Nothing is estimated from your allowance.', 'يظهر بعد تسجيل المشتريات. لا نقدّر شيئاً من مصروفك.')} />
+        <div data-testid="status-school-spending">
+          <p className="type-caption pb-1 text-muted-foreground">{t('Spending this month', 'الإنفاق هذا الشهر')}</p>
+          <ActualIncomeSpending summary={summary} kind="spending" t={t} />
+          <p className="type-caption pt-1 text-muted-foreground">{t('Recorded purchases only, per currency. Nothing is estimated from your allowance.', 'المشتريات المسجلة فقط، لكل عملة. لا نقدّر شيئاً من مصروفك.')}</p>
+        </div>
         <div data-testid="status-school-savings"><p className="type-caption pb-1 text-muted-foreground">{t('Savings', 'الادخار')}</p><GoalsHomeBlock t={t} limit={1} /></div>
       </div>
     </HomeBlock>

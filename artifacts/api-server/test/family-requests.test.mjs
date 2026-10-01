@@ -268,7 +268,8 @@ test("family requests: exact paired income, different-key concurrency, rollback,
     const fundKey = randomUUID();
     const funded = await goals("post", "/parent/goals/:id/contributions", 2, fundingBody, { id: goal.id }, fundKey);
     assert.deepEqual(await goals("post", "/parent/goals/:id/contributions", 2, fundingBody, { id: goal.id }, fundKey), funded);
-    assert.equal((await f("get", "/parent/wallet", 2)).accounts[0].balance.minor, 50);
+    // The wallet now also contains USD; SQL without ORDER BY has no first-account guarantee.
+    assert.equal((await f("get", "/parent/wallet", 2)).accounts.find(a => a.id === wallet.id).balance.minor, 50);
     assert.equal((await inbox(2)).items.filter(x => x.type === "goal_funded").length, 1);
     assert.equal((await inbox(0)).items.filter(x => x.type === "goal_funded").length, 1);
     await consent(none);

@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { SlidersHorizontal } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PullToRefresh } from '@/components/gestures/pull-to-refresh';
 import { Link } from 'wouter';
 import { BookOpen, Bus, Coffee, Landmark, MapPin, Minus, Plus, Printer, ShoppingBag, Store } from 'lucide-react';
 import {
-  getListCampusCatalogQueryKey, getListFinanceAccountsQueryKey, useInstallCampusDemo, useListCampusCatalog, useListFinanceAccounts,
+  getGetProfileQueryKey, useGetProfile, getListCampusCatalogQueryKey, getListFinanceAccountsQueryKey, useInstallCampusDemo, useListCampusCatalog, useListFinanceAccounts,
   type CampusService,
 } from '@workspace/api-client-react';
 import { Page, PageHeader, SectionHeading } from '@/components/layout/page';
@@ -10,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Notice, RetryButton, SkeletonRows, StatePanel } from '@/components/states/state-panel';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { CheckoutDialog, type CartLine } from '@/components/campus/checkout-dialog';
+import { CampusSpendingSummaryView } from '@/components/campus/campus-spending-summary';
+import { inputClass } from '@/components/money/fields';
 import { FutureIntegrations } from '@/components/campus/future-integrations';
 import { useAccount } from '@/features/auth/account';
 import { apiErrorText, CATEGORY_LABEL, exactLine, exactSum, label, useRefreshFinance, useTx } from '@/features/money/money-model';
@@ -33,6 +39,14 @@ export default function CampusPage() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [checkout, setCheckout] = useState(false);
   const [paid, setPaid] = useState(false);
+  const profileQ = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), staleTime: 10_000 } });
+  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [scope, setScope] = useState<'campus' | 'all'>('campus');
+  const [sumService, setSumService] = useState('');
+  const initFor = useRef<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const qc = useQueryClient();
+  const pullRefresh = () => Promise.all([catalogQ.refetch(), profileQ.refetch(), accountsQ.refetch(), qc.invalidateQueries({ queryKey: ['/api/campus/spending-summary'] })]);
 
   const catalog = useMemo(() => catalogQ.data ?? [], [catalogQ.data]);
   const uni = catalog.find((u) => u.id === uniId) ?? catalog[0];
@@ -41,6 +55,26 @@ export default function CampusPage() {
   const service: CampusService | undefined = services.find((s) => s.id === serviceId);
 
   useEffect(() => { setCart({}); }, [serviceId]);
+  // Initialise once per saved profile pair from the student's linked university/campus IDs.
+  const savedUni = profileQ.data?.education?.universityId;
+  const savedCampus = profileQ.data?.education?.campusId;
+  useEffect(() => {
+    const key = `${savedUni ?? ''}:${savedCampus ?? ''}`;
+    if (!savedUni || !catalog.length || initFor.current === key) return;
+    const u = catalog.find((x) => x.id === savedUni);
+    if (!u) return;
+    initFor.current = key;
+    setUniId(u.id);
+    setCampusId(u.campuses.some((c) => c.id === savedCampus) ? savedCampus! : '');
+    setServiceId('');
+  }, [savedUni, savedCampus, catalog]);
+  useEffect(() => { setSumService(''); }, [campus?.id, scope]);
+  const summaryParams = useMemo(() => {
+    const p: { month: string; campusId?: string; serviceId?: string } = { month };
+    if (scope === 'campus' && campus) p.campusId = campus.id;
+    if (scope === 'campus' && sumService) p.serviceId = sumService;
+    return p;
+  }, [month, scope, campus, sumService]);
 
   const lines: CartLine[] = useMemo(() => (service?.products ?? []).filter((p) => p.active && (cart[p.id] ?? 0) > 0).map((p) => ({ product: p, quantity: cart[p.id]! })), [service, cart]);
   const currencies = new Set(lines.map((l) => l.product.price.currency));
@@ -58,6 +92,7 @@ export default function CampusPage() {
       <PageHeader eyebrow={t('CAMPUS · SIMULATED', 'الحرم · محاكاة')} title={t('Campus payments', 'المدفوعات الجامعية')}
         lede={t('Pay cafeterias, bookstores and printing centers from your Student Wallet. Every payment is simulated and recorded with a receipt.', 'ادفع للكافتيريا والمكتبة ومركز الطباعة من محفظتك الطلابية. كل دفعة محاكاة وتُسجَّل بإيصال.')} />
 
+      <PullToRefresh onRefresh={pullRefresh} label={t('Refreshing…', 'جارٍ التحديث…')}>
       {catalogQ.isPending ? <SkeletonRows rows={4} label={t('Loading campus catalog…', 'جارٍ تحميل الكتالوج…')} />
         : catalogQ.isError ? <StatePanel tone="error" title={t('Catalog did not load', 'تعذّر تحميل الكتالوج')} body={t('Try again in a moment.', 'حاول بعد قليل.')} action={<RetryButton label={t('Retry', 'إعادة المحاولة')} busyLabel="…" busy={catalogQ.isRefetching} onClick={() => catalogQ.refetch()} />} />
           : !catalog.length ? (
@@ -148,6 +183,44 @@ export default function CampusPage() {
               {accountsQ.data && !accountsQ.data.length ? <Link href="/money" className="type-label -mt-6 text-gold-ink underline-offset-4 hover:underline" data-testid="link-go-money">{t('Go to Money', 'الذهاب إلى المال')}</Link> : null}
             </div>
           )}
+
+      {catalog.length ? (
+        <section className="mt-12 flex flex-col gap-4 border-t border-divider pt-8" aria-labelledby="campus-spending-title" data-testid="section-campus-spending">
+          <SectionHeading id="campus-spending" title={t('Monthly campus spending', 'الإنفاق الجامعي الشهري')} meta={t('All recorded payments · per currency', 'كل المدفوعات المسجلة · لكل عملة')} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" className="min-h-11" onClick={() => setFiltersOpen(true)} data-testid="button-spending-filters"><SlidersHorizontal aria-hidden />{t('Filters', 'الفلاتر')}</Button>
+            <span className="type-caption rounded-full bg-muted px-3 py-1" data-testid="text-filter-month">{new Date(`${month}-01T00:00:00Z`).toLocaleDateString(t('en-GB', 'ar'), { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+            <span className="type-caption rounded-full bg-muted px-3 py-1">{scope === 'campus' && campus ? name(campus) : t('All campuses', 'كل الأحرام')}</span>
+            {sumService ? <span className="type-caption rounded-full bg-muted px-3 py-1">{(() => { const sv = campus?.services.find((x) => x.id === sumService); return sv ? name(sv) : ''; })()}</span> : null}
+          </div>
+          <Dialog open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md" data-testid="sheet-spending-filters">
+              <DialogHeader><DialogTitle>{t('Spending filters', 'فلاتر الإنفاق')}</DialogTitle><DialogDescription>{t('Changes apply immediately.', 'تُطبَّق التغييرات فوراً.')}</DialogDescription></DialogHeader>
+            <div className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1"><span className="type-caption text-muted-foreground">{t('Month (UTC)', 'الشهر (UTC)')}</span>
+              <input type="month" dir="ltr" className={inputClass} value={month} max={new Date().toISOString().slice(0, 7)} onChange={(e) => { if (/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)) setMonth(e.target.value); }} data-testid="input-spending-month" /></label>
+            <label className="flex flex-col gap-1"><span className="type-caption text-muted-foreground">{t('Campus', 'الحرم')}</span>
+              <select className={inputClass} value={scope} onChange={(e) => setScope(e.target.value as 'campus' | 'all')} data-testid="select-spending-campus">
+                {campus ? <option value="campus">{name(campus)}</option> : null}
+                <option value="all">{t('All campuses', 'كل الأحرام')}</option>
+              </select></label>
+            <label className="flex flex-col gap-1"><span className="type-caption text-muted-foreground">{t('Service', 'الخدمة')}</span>
+              <select className={inputClass} value={sumService} disabled={scope !== 'campus' || !campus} onChange={(e) => setSumService(e.target.value)} data-testid="select-spending-service">
+                <option value="">{t('All services', 'كل الخدمات')}</option>
+                {(campus?.services ?? []).map((s) => <option key={s.id} value={s.id}>{name(s)}{s.active ? '' : ` · ${t('inactive', 'غير نشطة')}`}</option>)}
+              </select></label>
+          </div>
+              <DialogFooter className="gap-2 pt-2">
+                <Button variant="outline" onClick={() => { setMonth(new Date().toISOString().slice(0, 7)); setScope('campus'); setSumService(''); }} data-testid="button-reset-filters">{t('Reset', 'إعادة ضبط')}</Button>
+                <Button onClick={() => setFiltersOpen(false)} data-testid="button-close-filters">{t('Done', 'تم')}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <CampusSpendingSummaryView params={summaryParams} t={t} />
+        </section>
+      ) : null}
+
+      </PullToRefresh>
 
       <section className="mt-12 flex flex-col gap-3 border-t border-divider pt-8">
         <SectionHeading id="future" title={t('Future payment rails', 'قنوات دفع مستقبلية')} meta={t('Not connected', 'غير متصلة')} />

@@ -18,4 +18,12 @@ export interface CampusInput {
      * @maxLength 160
      */
   arabicName: string;
+  /** @maxLength 160 */
+  city?: string;
+  /** @maxLength 2000 */
+  locationDescription?: string;
+  /** @maxLength 2000 */
+  transportationContext?: string;
+  /** @maxLength 2000 */
+  housingContext?: string;
 }

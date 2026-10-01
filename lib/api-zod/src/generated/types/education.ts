@@ -9,6 +9,9 @@ import type { Amount } from './amount';
 import type { EducationAllowanceFrequency } from './educationAllowanceFrequency';
 import type { EducationStudentType } from './educationStudentType';
 
+/**
+ * Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs.
+ */
 export interface Education {
   studentType: EducationStudentType;
   /** @maxLength 160 */
@@ -23,6 +26,8 @@ export interface Education {
   university?: string;
   /** @maxLength 160 */
   campus?: string;
+  universityId?: string;
+  campusId?: string;
   /** @maxLength 160 */
   faculty?: string;
   /** @maxLength 160 */

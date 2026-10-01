@@ -428,6 +428,24 @@ paths:
         "200":
           description: Derived per-currency monthly cashflow and category totals, not a budget or forecast
           content: { application/json: { schema: { $ref: "#/components/schemas/FinanceSummary" } } }
+  /campus/spending-summary:
+    get:
+      operationId: getCampusSpendingSummary
+      tags: [Campus]
+      description: Student-only full owner ledger campus-payment spending by UTC month. Historical receipt categories are used even for disabled services. No currency conversion.
+      parameters:
+        - { name: month, in: query, schema: { type: string, pattern: "^[0-9]{4}-(0[1-9]|1[0-2])$" }, description: "UTC YYYY-MM; omitted means current UTC month. Years 0001–9999." }
+        - { name: campusId, in: query, schema: { type: string, format: uuid } }
+        - { name: serviceId, in: query, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Exact totals for currencies with matching payments; empty totals when there are none.
+          content: { application/json: { schema: { $ref: "#/components/schemas/CampusSpendingSummary" } } }
+        "400": { description: "Invalid month, query, or campus/service mismatch" }
+        "401": { description: Authentication required }
+        "403": { description: Student role required }
+        "404": { description: Unknown campus or service }
+        "409": { description: Aggregate exceeds the exact safe-integer money limit }
   /campus/catalog:
     get:
       operationId: listCampusCatalog
@@ -1712,6 +1730,11 @@ components:
       properties:
         name: { type: string, minLength: 1, maxLength: 160 }
         arabicName: { type: string, minLength: 1, maxLength: 160 }
+        city: { type: string, maxLength: 160 }
+        housingAvailability: { type: string, maxLength: 2000, description: "Admin-configured plain text; empty means not configured, not unavailable." }
+        transportationContext: { type: string, maxLength: 2000 }
+        tuitionConfiguration: { type: string, maxLength: 2000, description: "Admin-configured informational text only; never a payment price or forecast." }
+        scholarshipConfiguration: { type: string, maxLength: 2000 }
     CampusUniversity:
       allOf:
         - { $ref: "#/components/schemas/CampusUniversityInput" }
@@ -1728,6 +1751,10 @@ components:
         universityId: { type: string, format: uuid }
         name: { type: string, minLength: 1, maxLength: 160 }
         arabicName: { type: string, minLength: 1, maxLength: 160 }
+        city: { type: string, maxLength: 160 }
+        locationDescription: { type: string, maxLength: 2000 }
+        transportationContext: { type: string, maxLength: 2000 }
+        housingContext: { type: string, maxLength: 2000 }
     Campus:
       allOf:
         - { $ref: "#/components/schemas/CampusInput" }
@@ -1776,6 +1803,26 @@ components:
           required: [id]
           properties:
             id: { type: string, format: uuid }
+    CampusSpendingSummary:
+      type: object
+      required: [month, campusId, serviceId, totals]
+      properties:
+        month: { type: string }
+        campusId: { type: ["string", "null"], format: uuid }
+        serviceId: { type: ["string", "null"], format: uuid }
+        totals: { type: array, items: { $ref: "#/components/schemas/CampusSpendingCurrencyTotal" } }
+    CampusSpendingCurrencyTotal:
+      type: object
+      required: [currency, spending, food, books, printing, transportation, fees, other]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        spending: { $ref: "#/components/schemas/Amount" }
+        food: { $ref: "#/components/schemas/Amount" }
+        books: { $ref: "#/components/schemas/Amount" }
+        printing: { $ref: "#/components/schemas/Amount" }
+        transportation: { $ref: "#/components/schemas/Amount" }
+        fees: { $ref: "#/components/schemas/Amount" }
+        other: { $ref: "#/components/schemas/Amount" }
     CampusPaymentInput:
       type: object
       additionalProperties: false
@@ -1835,6 +1882,7 @@ components:
       type: object
       additionalProperties: false
       required: [studentType]
+      description: "Education is replaced as a whole when supplied to PUT /profile. For university mode supply both catalog IDs or neither; catalog IDs must identify a campus belonging to that university and names are server-canonicalized. Omit both IDs for legacy/manual text. Switching to school clears university-specific fields and catalog IDs."
       properties:
         studentType: { type: string, enum: [school, university] }
         school: { type: string, maxLength: 160 }
@@ -1844,6 +1892,8 @@ components:
         typicalAllowance: { $ref: "#/components/schemas/Amount" }
         university: { type: string, maxLength: 160 }
         campus: { type: string, maxLength: 160 }
+        universityId: { type: string, format: uuid }
+        campusId: { type: string, format: uuid }
         faculty: { type: string, maxLength: 160 }
         major: { type: string, maxLength: 160 }
         academicYear: { type: string, maxLength: 100 }

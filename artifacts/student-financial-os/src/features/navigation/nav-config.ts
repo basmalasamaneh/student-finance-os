@@ -4,6 +4,7 @@ import {
   CalendarClock,
   Goal,
   GraduationCap,
+  BookOpen,
   Home,
   HeartHandshake,
   Inbox,
@@ -41,6 +42,10 @@ export interface NavItem {
   implemented: boolean;
   /** Order in the mobile bottom bar (max 5; "More" lives in the header). */
   mobile?: Partial<Record<NavRole, number>>;
+  /** Prompt 10: hidden from school-student navigation (route stays reachable). */
+  universityOnly?: boolean;
+  /** Prompt 10: bottom-tab order used only for school students. */
+  schoolMobile?: number;
 }
 
 const ALL: readonly NavRole[] = ['student', 'parent', 'admin'];
@@ -55,8 +60,9 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'plan', path: '/plan', icon: MapIcon, labelKey: 'nav.plan', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 4 } },
   { id: 'goals', path: '/goals', icon: Goal, labelKey: 'nav.goals', group: 'plan', roles: ['student'], implemented: true, mobile: { student: 5 } },
   { id: 'afford', path: '/afford', icon: Scale, labelKey: 'nav.afford', group: 'plan', roles: ['student'], implemented: false },
-  { id: 'campus', path: '/campus', icon: ShoppingBag, labelKey: 'nav.campus', schoolLabelKey: 'nav.campus.school', mobileLabelKey: 'nav.group.campus', group: 'campus', roles: ['student'], implemented: true, mobile: { student: 3 } },
+  { id: 'campus', path: '/campus', icon: ShoppingBag, labelKey: 'nav.campus', schoolLabelKey: 'nav.campus.school', mobileLabelKey: 'nav.group.campus', group: 'campus', roles: ['student'], implemented: true, mobile: { student: 3 }, universityOnly: true },
   { id: 'assistant', path: '/assistant', icon: MessageCircle, labelKey: 'nav.assistant', group: 'campus', roles: ['student'], implemented: false },
+  { id: 'learn', path: '/learn', icon: BookOpen, labelKey: 'nav.learn', group: 'plan', roles: ['student', 'parent'], implemented: true, schoolMobile: 3 },
   { id: 'family', path: '/family', icon: HeartHandshake, labelKey: 'nav.family', group: 'family', roles: ['student'], implemented: true },
   // Parent
   { id: 'children', path: '/parent/children', icon: Users, labelKey: 'nav.children', group: 'family', roles: ['parent'], implemented: true, mobile: { parent: 2 } },
@@ -86,19 +92,22 @@ export const GROUP_LABEL: Record<NavGroup, TranslationKey> = {
   system: 'nav.group.system',
 };
 
-export function itemsForRole(role: NavRole) {
-  return NAV_ITEMS.filter((i) => i.roles.includes(role));
+export function itemsForRole(role: NavRole, mode?: string) {
+  const school = role === 'student' && mode === 'school';
+  return NAV_ITEMS.filter((i) => i.roles.includes(role) && !(school && i.universityOnly));
 }
 
-export function mobileItemsForRole(role: NavRole) {
-  return itemsForRole(role)
-    .filter((i) => i.mobile?.[role] !== undefined)
-    .sort((a, b) => (a.mobile![role]! - b.mobile![role]!));
+export function mobileItemsForRole(role: NavRole, mode?: string) {
+  const school = role === 'student' && mode === 'school';
+  const order = (i: NavItem) => (school && i.schoolMobile !== undefined ? i.schoolMobile : i.mobile?.[role]);
+  return itemsForRole(role, mode)
+    .filter((i) => order(i) !== undefined)
+    .sort((a, b) => order(a)! - order(b)!);
 }
 
-export function groupedForRole(role: NavRole) {
+export function groupedForRole(role: NavRole, mode?: string) {
   const groups = new Map<NavGroup, NavItem[]>();
-  for (const item of itemsForRole(role)) {
+  for (const item of itemsForRole(role, mode)) {
     const list = groups.get(item.group) ?? [];
     list.push(item);
     groups.set(item.group, list);

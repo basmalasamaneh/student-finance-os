@@ -10,6 +10,8 @@ import { AccountsBlock, ActualIncomeSpending, BalanceBlock, LedgerBlock, Request
 import { EstimateList, HomeBlock, type T } from './home-primitives';
 import { GoalsHomeBlock } from './goals-block';
 import { PlanTotalsBlock } from './plan-totals-block';
+import { UniversityContext } from './university-context';
+import { SchoolLinks } from './school-links';
 import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
 import { applyAllowanceAdjustment, deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
 
@@ -61,11 +63,11 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
       <div className="grid grid-cols-1 gap-x-12 border-t border-divider md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <HomeBlock id="balance" title={t('Available balance', 'الرصيد المتاح')} className="border-t-0">
           <BalanceBlock summary={summary} t={t} hidden={hidden} onToggleHidden={toggleHidden} accountCount={accounts.data?.length}
-            actions={accounts.data?.length ? <nav aria-label={t('Quick actions', 'إجراءات سريعة')} className="grid grid-cols-4 gap-2">
+            actions={accounts.data?.length ? <nav aria-label={t('Quick actions', 'إجراءات سريعة')} className={isSchool ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-4 gap-2'}>
               <button type="button" className={qaCls} onClick={() => setMovement('add')} data-testid="button-quick-add"><Plus className="size-5" aria-hidden /><span className="type-caption font-medium">{t('Add money', 'إضافة مال')}</span></button>
               <button type="button" className={qaCls} onClick={() => setMovement('send')} data-testid="button-quick-send"><ArrowUpRight className="size-5" aria-hidden /><span className="type-caption font-medium">{t('Send', 'إرسال')}</span></button>
               <button type="button" className={qaCls} onClick={() => setRequestOpen(true)} data-testid="button-quick-request"><HandCoins className="size-5" aria-hidden /><span className="type-caption font-medium">{t('Request', 'طلب')}</span></button>
-              <Link href="/campus" className={qaCls} data-testid="link-quick-campus"><ShoppingBag className="size-5" aria-hidden /><span className="type-caption font-medium">{t('Pay campus', 'دفع في الحرم')}</span></Link>
+              {isSchool ? null : <Link href="/campus" className={qaCls} data-testid="link-quick-campus"><ShoppingBag className="size-5" aria-hidden /><span className="type-caption font-medium">{t('Pay campus', 'دفع في الحرم')}</span></Link>}
             </nav> : undefined} />
         </HomeBlock>
         <HomeBlock id="accounts" title={t('Total accounts', 'إجمالي الحسابات')} meta={accounts.data ? t(`${accounts.data.length} total`, `${accounts.data.length} حساب`) : undefined} className="md:border-t-0">
@@ -99,20 +101,20 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
 
       {/* Profile-specific planning */}
       {e ? isSchool
-        ? <SchoolPlanning profile={profile} incomes={incomes} today={today} t={t} />
-        : <UniversityPlanning profile={profile} upcoming={upcoming} t={t} />
+        ? <><SchoolLinks t={t} /><SchoolPlanning profile={profile} incomes={incomes} today={today} summary={summary} t={t} /></>
+        : <><UniversityPlanning profile={profile} upcoming={upcoming} t={t} /><UniversityContext profile={profile} t={t} /></>
         : null}
 
       <PlanTotalsBlock t={t} />
 
       {/* 7 Savings, 8 Campus */}
-      <div className="grid grid-cols-1 gap-x-12 md:grid-cols-2">
+      <div className={isSchool ? 'grid grid-cols-1' : 'grid grid-cols-1 gap-x-12 md:grid-cols-2'}>
         <HomeBlock id="savings" title={t('Savings goals', 'أهداف الادخار')}>
           <GoalsHomeBlock t={t} />
         </HomeBlock>
-        <HomeBlock id="campus" title={t('Campus activity', 'نشاط الحرم')}>
+        {isSchool ? null : <HomeBlock id="campus" title={t('Campus activity', 'نشاط الحرم')}>
           <LedgerBlock summary={summary} which="campus" t={t} />
-        </HomeBlock>
+        </HomeBlock>}
       </div>
 
       {/* 9 Insight */}
