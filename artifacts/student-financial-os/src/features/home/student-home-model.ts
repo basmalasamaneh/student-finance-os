@@ -61,6 +61,8 @@ export type CurrencyEstimate = {
   currency: HomeCurrency;
   result: ExactResult;
   sourceCount: number;
+  /** Exact adjustmentMonthly from managed parent allowance schedules, already included in result. */
+  allowanceAdjustment?: number;
 };
 
 export type MonthlyIncomeEstimate = {
@@ -174,4 +176,29 @@ export function deriveInsight(input: {
     if (tenths !== null) return { kind: 'cost-share', cost, tenths, currency: amount.currency };
   }
   return { kind: 'estimate-ready', sources: est.byCurrency.reduce((n, c) => n + c.sourceCount, 0), currencies: est.byCurrency.length };
+}
+
+/**
+ * Add server allowanceProjection.totals[].adjustmentMonthly to a profile-based estimate,
+ * per matching currency only (no FX, no duplication: adjustment is the exact delta from the
+ * inclusive-envelope reconciliation). Currencies absent from profile income get their own row.
+ */
+export function applyAllowanceAdjustment(
+  estimate: MonthlyIncomeEstimate,
+  totals: readonly { currency: HomeCurrency; adjustmentMonthly: { minor: number } }[] | undefined,
+): MonthlyIncomeEstimate {
+  if (!totals?.length) return estimate;
+  const rows = new Map(estimate.byCurrency.map((c) => [c.currency, { ...c }]));
+  for (const tot of totals) {
+    const adj = tot.adjustmentMonthly.minor;
+    if (!adj) continue;
+    const row = rows.get(tot.currency) ?? { currency: tot.currency, result: { ok: true, minor: 0 } as ExactResult, sourceCount: 0 };
+    if (row.result.ok) {
+      const sum = BigInt(row.result.minor) + BigInt(adj);
+      row.result = sum > BigInt(Number.MAX_SAFE_INTEGER) || sum < -BigInt(Number.MAX_SAFE_INTEGER) ? { ok: false, reason: 'overflow' } : { ok: true, minor: Number(sum) };
+    }
+    row.allowanceAdjustment = (row.allowanceAdjustment ?? 0) + adj;
+    rows.set(tot.currency, row);
+  }
+  return { ...estimate, byCurrency: CURRENCY_ORDER.filter((c) => rows.has(c)).map((c) => rows.get(c)!) };
 }

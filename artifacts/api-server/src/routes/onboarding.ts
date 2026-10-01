@@ -10,6 +10,7 @@ import {
 import { ApiError } from "../lib/http-errors";
 import { estimateCommute, hashPassword, hasValidOptionalDates, isStudentProfileComplete, isTrustedMutationOrigin, newSessionToken, normalizeEmail, signupLimitReached, tokenHash, verifyPassword } from "../lib/credentials";
 import { requireOwner, requirePrincipal, type TrustedPrincipal } from "../lib/authorization";
+import { allowanceProjection } from "../lib/allowance-projection";
 
 const router: IRouter = Router();
 const secret = process.env.SESSION_SECRET;
@@ -95,6 +96,7 @@ async function profile(req: Request) {
   ]);
   return {
     ...account(user),
+    ...(user.role === "student" ? { allowanceProjection: (await allowanceProjection(user.id)).dto } : {}),
     ...(user.education ? { education: user.education } : {}),
     ...(user.residence ? { residence: user.residence } : {}),
     ...(user.commute ? { commute: user.commute } : {}),

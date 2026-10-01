@@ -32,6 +32,7 @@ export const transactionDto = (t: typeof financeTransactions.$inferSelect, conte
     add: "Simulated funds added", receive: "Simulated funds received", deposit: "Simulated deposit",
     withdrawal: "Simulated withdrawal", payment: "Simulated payment", transfer: "Account transfer",
     send: "Student transfer", request_fulfillment: "Fulfilled money request",
+    allowance: "Parent allowance (simulated)",
     savings: t.goalFundingSource === "parent_simulated" ? "Simulated parent goal funding" : "Reserved goal contribution",
   } as Record<string, string>)[t.kind] ?? "Ledger transaction",
   source: t.direction === "credit"
@@ -75,6 +76,7 @@ export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect,
   merchantName?: string; items?: unknown; note?: string;
   universityId?: string; campusId?: string; universityName?: string; campusName?: string;
   relatedGoalId?: string; goalFundingSource?: "student_account" | "parent_simulated"; goalFundingActorId?: string;
+  parentTransferId?: string;
 }) {
   if (account.type === "goal_reserve" && !(details.relatedGoalId && details.kind === "savings" && delta > 0n)) throw new ApiError("NOT_FOUND");
   if (delta < 0n && account.balanceMinor < -delta) throw new ApiError("INSUFFICIENT_FUNDS");
@@ -89,6 +91,7 @@ export async function post(tx: Tx, account: typeof financeAccounts.$inferSelect,
     universityId: details.universityId, campusId: details.campusId,
     universityName: details.universityName, campusName: details.campusName,
     relatedGoalId: details.relatedGoalId, goalFundingSource: details.goalFundingSource, goalFundingActorId: details.goalFundingActorId,
+    parentTransferId: details.parentTransferId,
   }).returning();
   await tx.insert(financeEvents).values({
     transactionId: entry!.id, userId: account.userId, eventType: "finance.transaction.posted",

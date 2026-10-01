@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AllowanceProjection } from './allowanceProjection';
 import type { Budget } from './budget';
 import type { Commute } from './commute';
 import type { CommuteOverride } from './commuteOverride';
@@ -21,6 +22,7 @@ import type { Scholarship } from './scholarship';
 import type { UpcomingPlanItem } from './upcomingPlanItem';
 
 export interface FinancialPlan {
+  allowanceProjection?: AllowanceProjection;
   asOf: string;
   estimate: boolean;
   policy: string;

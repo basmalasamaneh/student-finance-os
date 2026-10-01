@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   divideHalfUp, monthlyEquivalent, weeklyAllowance, estimateMonthlyIncome, upcomingIncomes,
-  nextAllowance, toDay, shareTenths, formatTenths, deriveInsight, type HomeIncome,
+  nextAllowance, toDay, applyAllowanceAdjustment, shareTenths, formatTenths, deriveInsight, type HomeIncome,
 } from './student-home-model.ts';
 
 const inc = (id: string, minor: number, frequency: HomeIncome['frequency'], extra: Partial<HomeIncome> = {}): HomeIncome => ({
@@ -82,4 +82,29 @@ test('insight is deterministic', () => {
   assert.equal(shareTenths(1, 3), 333);
   assert.equal(shareTenths(1, 0), null);
   assert.equal(formatTenths(153), '15.3');
+});
+
+test('allowance adjustment: distinct currency gets its own row, no FX', () => {
+  const base = estimateMonthlyIncome([inc('a', 100000, 'monthly')]);
+  const r = applyAllowanceAdjustment(base, [{ currency: 'USD', adjustmentMonthly: { minor: 25000 } }]);
+  assert.deepEqual(r.byCurrency.map((c) => [c.currency, c.result]), [['ILS', { ok: true, minor: 100000 }], ['USD', { ok: true, minor: 25000 }]]);
+  assert.equal(r.byCurrency[1].sourceCount, 0);
+  assert.equal(r.byCurrency[1].allowanceAdjustment, 25000);
+});
+
+test('allowance adjustment: manual envelope is not duplicated', () => {
+  // Manual parent allowance 500/month; schedule 800/month → server adjustment = max − manual = 300.
+  const base = estimateMonthlyIncome([inc('p', 50000, 'monthly', { source: 'parent_allowance' }), inc('w', 120000, 'monthly')]);
+  const r = applyAllowanceAdjustment(base, [{ currency: 'ILS', adjustmentMonthly: { minor: 30000 } }]);
+  assert.deepEqual(r.byCurrency[0].result, { ok: true, minor: 200000 });
+  // Schedule smaller than envelope → zero adjustment → estimate unchanged and unflagged.
+  const same = applyAllowanceAdjustment(base, [{ currency: 'ILS', adjustmentMonthly: { minor: 0 } }]);
+  assert.deepEqual(same.byCurrency, base.byCurrency);
+  assert.equal(applyAllowanceAdjustment(base, undefined), base);
+});
+
+test('allowance adjustment overflow is reported, not wrapped', () => {
+  const base = estimateMonthlyIncome([inc('a', Number.MAX_SAFE_INTEGER, 'monthly')]);
+  const r = applyAllowanceAdjustment(base, [{ currency: 'ILS', adjustmentMonthly: { minor: 1 } }]);
+  assert.deepEqual(r.byCurrency[0].result, { ok: false, reason: 'overflow' });
 });

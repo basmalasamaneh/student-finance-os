@@ -11,7 +11,7 @@ import { EstimateList, HomeBlock, type T } from './home-primitives';
 import { GoalsHomeBlock } from './goals-block';
 import { PlanTotalsBlock } from './plan-totals-block';
 import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
-import { deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
+import { applyAllowanceAdjustment, deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -31,7 +31,9 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
   const incomes = profile.incomes as HomeIncome[];
   const e = profile.education;
   const isSchool = e?.studentType === 'school';
-  const estimate = useMemo(() => estimateMonthlyIncome(incomes), [incomes]);
+  const projection = profile.allowanceProjection;
+  const estimate = useMemo(() => applyAllowanceAdjustment(estimateMonthlyIncome(incomes), projection?.totals), [incomes, projection]);
+  const adjusted = estimate.byCurrency.some((c) => c.allowanceAdjustment);
   const upcoming = useMemo(() => upcomingIncomes(incomes, today), [incomes, today]);
   const insight = useMemo(() => deriveInsight({
     studentType: e?.studentType, incomes, commuteMonthly: profile.commute?.monthlyEstimate,
@@ -78,6 +80,7 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
           <p className="type-caption pb-1 text-muted-foreground">{t('Planning estimate (profile)', 'تقدير تخطيطي (الملف)')}</p>
           {estimate.byCurrency.length ? <EstimateList items={estimate.byCurrency} t={t} testId="text-monthly-income" />
             : <p className="type-label">{estimate.activeCount ? t('No recurring income to estimate', 'لا دخل متكرر للتقدير') : t('No active income saved', 'لا يوجد دخل نشط محفوظ')}</p>}
+          {adjusted && <p className="type-caption pt-2 text-muted-foreground" data-testid="text-allowance-envelope">{t('Includes scheduled parent allowances. Your plan counts the larger of the allowance in your profile or the schedules — never both.', 'يشمل مصروفات ولي الأمر المجدولة. تحتسب خطتك الأكبر بين المصروف في ملفك أو الجداول — لا كليهما.')} <Link href="/family" className="text-gold-ink underline-offset-4 hover:underline" data-testid="link-allowance-details">{t('Details', 'التفاصيل')}</Link></p>}
           {estimate.excluded > 0 && <p className="type-caption pt-2 text-muted-foreground">{t(`${estimate.excluded} one-time or irregular source${estimate.excluded === 1 ? '' : 's'} not included.`, `مصادر لمرة واحدة أو غير منتظمة غير مشمولة: ${estimate.excluded}`)}</p>}
           {!estimate.activeCount && <Link href="/profile" className="type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid="link-add-income">{t('Add income sources', 'أضف مصادر دخل')}</Link>}
         </HomeBlock>

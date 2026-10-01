@@ -30,6 +30,10 @@ import PlanPage from '@/pages/plan';
 import GoalsPage from '@/pages/goals';
 import GoalDetailPage from '@/pages/goal-detail';
 import ParentFundPage from '@/pages/parent-fund';
+import FamilyPage from '@/pages/family';
+import ParentChildrenPage, { ParentChildDetailPage } from '@/pages/parent-children';
+import ParentAllowancesPage from '@/pages/parent-allowances';
+import ParentRequestsPage from '@/pages/parent-requests';
 
 // Design/reference surfaces stay out of the ordinary account startup bundle.
 const HomePage = lazy(() => import('@/pages/home'));
@@ -60,6 +64,11 @@ function Router() {
           <Route path="/goals" component={GoalsPage} />
           <Route path="/goals/fund" component={ParentFundPage} />
           <Route path="/goals/:id" component={GoalDetailPage} />
+          <Route path="/family" component={FamilyPage} />
+          <Route path="/parent/children" component={ParentChildrenPage} />
+          <Route path="/parent/children/:id" component={ParentChildDetailPage} />
+          <Route path="/parent/allowances" component={ParentAllowancesPage} />
+          <Route path="/parent/requests" component={ParentRequestsPage} />
           <Route path="/admin/institutions" component={AdminCampusPage} />
           {FUTURE_ROUTES.map((item) => (
             <Route key={item.id} path={item.path}>

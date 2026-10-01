@@ -1,3 +1,4 @@
+import { ParentOnly } from '@/components/family/parent-only';
 import { Link } from 'wouter';
 import { getGetProfileQueryKey, useGetProfile, type Profile } from '@workspace/api-client-react';
 import { Page, PageHeader, Section } from '@/components/layout/page';
@@ -5,6 +6,8 @@ import { useI18n } from '@/features/i18n/i18n-provider';
 import { useAccount } from '@/features/auth/account';
 import { Button } from '@/components/ui/button';
 import { StudentDashboard } from '@/components/home/student-dashboard';
+import { FAMILY_REFETCH } from '@/features/family/family-view';
+import { ParentHome } from '@/components/family/parent-home';
 
 type T = (en: string, ar: string) => string;
 
@@ -32,7 +35,15 @@ export default function AccountHome() {
   const account = useAccount();
   const { lang } = useI18n();
   const t: T = (en, ar) => (lang === 'ar' ? ar : en);
-  const { data, isPending, isError, isRefetching, refetch } = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), staleTime: 10_000 } });
+  if (account.role === 'parent') return <ParentOnly t={t}><Page><ParentHome name={account.name} t={t} /></Page></ParentOnly>;
+  return <ProfileHome />;
+}
+
+function ProfileHome() {
+  const account = useAccount();
+  const { lang } = useI18n();
+  const t: T = (en, ar) => (lang === 'ar' ? ar : en);
+  const { data, isPending, isError, isRefetching, refetch } = useGetProfile({ query: { queryKey: getGetProfileQueryKey(), ...FAMILY_REFETCH } });
   return (
     <Page>
       {isPending ? <HomeSkeleton t={t} />

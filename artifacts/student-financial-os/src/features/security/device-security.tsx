@@ -247,6 +247,8 @@ function AccountSecurity({ accountId, children }: { accountId: string; children:
     document.documentElement.removeAttribute('data-device-privacy');
     try { sessionStorage.removeItem(`${key}.privacy`); } catch { /* not required to return */ }
     setCovered(false);
+    // Documented signal for confidential views (parent-freshness.ts) to revalidate. No auth effect.
+    window.dispatchEvent(new CustomEvent('sfos:privacy-resume'));
     const current = stateRef.current;
     if (current.pin && current.idleMinutes && Date.now() - lastActivity.current >= current.idleMinutes * 60_000) lockNow();
   };

@@ -7,7 +7,7 @@ import type { Tx } from '@/features/money/money-model';
 import { FREQUENCY, INCOME_SOURCE, formatUtcDate, lbl } from '@/features/planning/planning-model';
 import { EmptyRow } from './plan-shared';
 
-const UPCOMING_SRC: Record<string, [string, string]> = { income: ['Expected income', 'دخل متوقع'], recurring: ['Recurring expense', 'مصروف متكرر'], line: ['Plan line', 'بند خطة'] };
+const UPCOMING_SRC: Record<string, [string, string]> = { income: ['Expected income', 'دخل متوقع'], recurring: ['Recurring expense', 'مصروف متكرر'], line: ['Plan line', 'بند خطة'], allowance: ['Parent allowance', 'مصروف ولي الأمر'] };
 
 export function IncomeSection({ plan, t }: { plan: FinancialPlan; t: Tx }) {
   const { locale } = useI18n();
@@ -30,6 +30,24 @@ export function IncomeSection({ plan, t }: { plan: FinancialPlan; t: Tx }) {
           ))}
         </ul>
       )}
+
+      {plan.allowanceProjection?.totals.some((x) => x.scheduledMonthly.minor > 0) ? (
+        <div className="pt-5" data-testid="block-managed-allowance">
+          <h3 className="type-caption pb-1 font-medium uppercase tracking-wide text-gold-ink">{t('Managed parent allowance · read-only', 'مصروف ولي الأمر المُدار · للعرض فقط')}</h3>
+          <ul className="divide-y divide-divider">
+            {plan.allowanceProjection.totals.filter((x) => x.scheduledMonthly.minor > 0).map((x) => (
+              <li key={x.currency} className="flex items-center justify-between gap-4 py-3" data-testid={`row-managed-allowance-${x.currency}`}>
+                <div className="min-w-0">
+                  <p className="type-label">{t('Scheduled by a parent', 'مجدول من ولي الأمر')}</p>
+                  <p className="type-caption text-muted-foreground">{t('Counted: larger of your profile allowance or schedules — not both', 'المحتسب: الأكبر بين مصروف ملفك أو الجداول — لا كليهما')} · <MoneyDisplay value={x.effectiveMonthly} size="sm" tone="projected" /></p>
+                </div>
+                <span className="type-caption text-muted-foreground">{t('per month', 'شهرياً')} <MoneyDisplay value={x.scheduledMonthly} size="sm" tone="projected" /></span>
+              </li>
+            ))}
+          </ul>
+          <Link href="/family" className="type-caption inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid="link-managed-allowance">{t('See family allowances', 'عرض مصروفات العائلة')}</Link>
+        </div>
+      ) : null}
 
       {plan.irregularIncome.length ? (
         <div className="pt-5">

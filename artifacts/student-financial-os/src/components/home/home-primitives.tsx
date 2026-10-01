@@ -41,7 +41,7 @@ export function EstimateList({ items, t, testId }: { items: CurrencyEstimate[]; 
           {c.result.ok
             ? <MoneyDisplay value={{ minor: c.result.minor, currency: c.currency }} size="lg" tone="projected" />
             : <span className="type-label text-destructive">{t(`${c.currency} estimate too large to display exactly`, `تقدير ${c.currency} أكبر من أن يُعرض بدقة`)}</span>}
-          <span className="type-caption text-muted-foreground">{t(`${c.sourceCount} recurring source${c.sourceCount === 1 ? '' : 's'}`, `مصادر متكررة: ${c.sourceCount}`)}</span>
+          <span className="type-caption text-muted-foreground">{t(`${c.sourceCount} recurring source${c.sourceCount === 1 ? '' : 's'}`, `مصادر متكررة: ${c.sourceCount}`)}{c.allowanceAdjustment ? ` · ${t('incl. scheduled parent allowance', 'يشمل مصروف ولي الأمر المجدول')}` : ''}</span>
         </li>
       ))}
     </ul>

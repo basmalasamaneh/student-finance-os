@@ -729,3 +729,7 @@ input[type='date']::-webkit-calendar-picker-indicator { cursor: pointer; opacity
 
 /* Grabber handle only: no browser panning so the drag is ours; sheet content keeps native scroll. */
 .sheet-grabber, .sheet-grabber-always { touch-action: none; }
+
+/* Parent freshness gate: set synchronously in the return-event handler, before paint. */
+html[data-parent-refreshing] [data-parent-confidential],
+html[data-parent-refreshing] [data-parent-confidential-portal] { visibility: hidden !important; }

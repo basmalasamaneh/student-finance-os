@@ -5,6 +5,100 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface FamilyPermissions {
+  monthlySummary: boolean;
+  balance: boolean;
+  goals: boolean;
+  allowance: boolean;
+  requests: boolean;
+  transactions: boolean;
+  upcomingPayments: boolean;
+  campusSpending: boolean;
+}
+
+export interface FamilyConsentInput {
+  permissions: FamilyPermissions;
+  /** @nullable */
+  receivingAccountId: string | null;
+}
+
+export type FamilyLinkStatus = typeof FamilyLinkStatus[keyof typeof FamilyLinkStatus];
+
+
+export const FamilyLinkStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  declined: 'declined',
+  revoked: 'revoked',
+} as const;
+
+export interface FamilyLink {
+  id: string;
+  status: FamilyLinkStatus;
+  permissions: FamilyPermissions;
+  /** @nullable */
+  receivingAccountId: string | null;
+  parentName?: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface FamilyInvitationReceipt {
+  link: FamilyLink;
+  token: string;
+}
+
+export type FamilyDecisionInputAction = typeof FamilyDecisionInputAction[keyof typeof FamilyDecisionInputAction];
+
+
+export const FamilyDecisionInputAction = {
+  accept: 'accept',
+  decline: 'decline',
+} as const;
+
+export interface FamilyDecisionInput {
+  /**
+     * @minLength 43
+     * @maxLength 43
+     */
+  token: string;
+  action: FamilyDecisionInputAction;
+}
+
+export type FamilyDecisionStatus = typeof FamilyDecisionStatus[keyof typeof FamilyDecisionStatus];
+
+
+export const FamilyDecisionStatus = {
+  accepted: 'accepted',
+  declined: 'declined',
+} as const;
+
+export interface FamilyDecision {
+  status: FamilyDecisionStatus;
+  childId?: string;
+  childName?: string;
+}
+
+export type AllowanceInputKind = typeof AllowanceInputKind[keyof typeof AllowanceInputKind];
+
+
+export const AllowanceInputKind = {
+  oneTime: 'oneTime',
+  recurring: 'recurring',
+} as const;
+
+/**
+ * @nullable
+ */
+export type AllowanceInputFrequency = typeof AllowanceInputFrequency[keyof typeof AllowanceInputFrequency] | null;
+
+
+export const AllowanceInputFrequency = {
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+} as const;
+
 export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
 
 
@@ -21,6 +115,489 @@ export interface GoalPositiveAmount {
      */
   minor: number;
   currency: GoalPositiveAmountCurrency;
+}
+
+export interface AllowanceInput {
+  parentAccountId: string;
+  amount: GoalPositiveAmount;
+  kind: AllowanceInputKind;
+  /** @nullable */
+  frequency: AllowanceInputFrequency;
+  nextPayment: string;
+  startDate: string;
+  /** @nullable */
+  endDate: string | null;
+  /** @maxLength 500 */
+  note: string;
+}
+
+export type AllowanceStatus = typeof AllowanceStatus[keyof typeof AllowanceStatus];
+
+
+export const AllowanceStatus = {
+  active: 'active',
+  paused: 'paused',
+  cancelled: 'cancelled',
+  completed: 'completed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type AllowanceLastFailure = typeof AllowanceLastFailure[keyof typeof AllowanceLastFailure] | null;
+
+
+export const AllowanceLastFailure = {
+  insufficient_funds: 'insufficient_funds',
+  balance_limit: 'balance_limit',
+} as const;
+
+export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
+
+
+export const AmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface Amount {
+  /**
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: AmountCurrency;
+}
+
+export type AllowanceOccurrenceStatus = typeof AllowanceOccurrenceStatus[keyof typeof AllowanceOccurrenceStatus];
+
+
+export const AllowanceOccurrenceStatus = {
+  posted: 'posted',
+  failed: 'failed',
+  cancelled: 'cancelled',
+} as const;
+
+/**
+ * @nullable
+ */
+export type AllowanceOccurrenceFailure = typeof AllowanceOccurrenceFailure[keyof typeof AllowanceOccurrenceFailure] | null;
+
+
+export const AllowanceOccurrenceFailure = {
+  insufficient_funds: 'insufficient_funds',
+  balance_limit: 'balance_limit',
+} as const;
+
+export interface AllowanceOccurrence {
+  id: string;
+  scheduledDate: string;
+  amount: Amount;
+  status: AllowanceOccurrenceStatus;
+  /** @nullable */
+  failure: AllowanceOccurrenceFailure;
+  transactionIds: string[];
+  attemptedAt: string;
+}
+
+export type Allowance = AllowanceInput & {
+  id: string;
+  childId: string;
+  status: AllowanceStatus;
+  /** @nullable */
+  lastFailure: AllowanceLastFailure;
+  occurrences: AllowanceOccurrence[];
+  createdAt: string;
+};
+
+export type AllowanceActionAction = typeof AllowanceActionAction[keyof typeof AllowanceActionAction];
+
+
+export const AllowanceActionAction = {
+  pause: 'pause',
+  resume: 'resume',
+  cancel: 'cancel',
+} as const;
+
+export interface AllowanceAction {
+  action: AllowanceActionAction;
+}
+
+export interface AllowanceRetryInput {
+  retry: true;
+}
+
+export interface ParentTopUpInput {
+  accountId: string;
+  amount: GoalPositiveAmount;
+  simulatedFundingAcknowledged: true;
+}
+
+export type FinanceAccountInputType = typeof FinanceAccountInputType[keyof typeof FinanceAccountInputType];
+
+
+export const FinanceAccountInputType = {
+  wallet: 'wallet',
+  bank: 'bank',
+  cash: 'cash',
+  other: 'other',
+} as const;
+
+export type FinanceAccountInputCurrency = typeof FinanceAccountInputCurrency[keyof typeof FinanceAccountInputCurrency];
+
+
+export const FinanceAccountInputCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FinanceAccountInput {
+  type: FinanceAccountInputType;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  currency: FinanceAccountInputCurrency;
+}
+
+export type FinanceAccount = FinanceAccountInput & {
+  id: string;
+  balance: Amount;
+};
+
+export type FinanceSemanticType = typeof FinanceSemanticType[keyof typeof FinanceSemanticType];
+
+
+export const FinanceSemanticType = {
+  income: 'income',
+  expense: 'expense',
+  transfer: 'transfer',
+  allowance: 'allowance',
+  refund: 'refund',
+  savings: 'savings',
+  withdrawal: 'withdrawal',
+  deposit: 'deposit',
+  payment: 'payment',
+  campus_payment: 'campus_payment',
+} as const;
+
+export type FinanceTransactionDirection = typeof FinanceTransactionDirection[keyof typeof FinanceTransactionDirection];
+
+
+export const FinanceTransactionDirection = {
+  credit: 'credit',
+  debit: 'debit',
+} as const;
+
+export type FinanceTransactionStatus = typeof FinanceTransactionStatus[keyof typeof FinanceTransactionStatus];
+
+
+export const FinanceTransactionStatus = {
+  simulated: 'simulated',
+  simulated_payment: 'simulated_payment',
+} as const;
+
+export interface FinanceReceiptItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPrice: Amount;
+  lineTotal: Amount;
+}
+
+/**
+ * @nullable
+ */
+export type FinanceTransactionGoalFundingSource = typeof FinanceTransactionGoalFundingSource[keyof typeof FinanceTransactionGoalFundingSource] | null;
+
+
+export const FinanceTransactionGoalFundingSource = {
+  student_account: 'student_account',
+  parent_simulated: 'parent_simulated',
+} as const;
+
+export interface FinanceTransaction {
+  id: string;
+  userId: string;
+  accountId: string;
+  kind: string;
+  type: FinanceSemanticType;
+  category: string;
+  direction: FinanceTransactionDirection;
+  amount: Amount;
+  balanceAfter: Amount;
+  status: FinanceTransactionStatus;
+  counterpartyAccountId?: string;
+  serviceId?: string;
+  merchantName?: string;
+  items?: FinanceReceiptItem[];
+  note?: string;
+  createdAt: string;
+  description: string;
+  /** @nullable */
+  source: string | null;
+  /** @nullable */
+  destination: string | null;
+  accountName?: string;
+  /** @nullable */
+  relatedGoalId: string | null;
+  /** @nullable */
+  goalFundingSource?: FinanceTransactionGoalFundingSource;
+  /** @nullable */
+  relatedBudgetId: string | null;
+  /** @nullable */
+  parentTransferId: string | null;
+  /** @nullable */
+  campusServiceId: string | null;
+  /** @nullable */
+  universityId: string | null;
+  /** @nullable */
+  campusId: string | null;
+  /** @nullable */
+  universityName?: string | null;
+  /** @nullable */
+  campusName?: string | null;
+  /** @nullable */
+  recurringExpenseId: string | null;
+}
+
+export interface ParentWallet {
+  accounts: FinanceAccount[];
+  transactions: FinanceTransaction[];
+  simulated: true;
+}
+
+export type FamilyActivityDirection = typeof FamilyActivityDirection[keyof typeof FamilyActivityDirection];
+
+
+export const FamilyActivityDirection = {
+  credit: 'credit',
+  debit: 'debit',
+} as const;
+
+export interface FamilyActivity {
+  id: string;
+  type: string;
+  amount: Amount;
+  direction: FamilyActivityDirection;
+  createdAt: string;
+}
+
+export type FamilyMonthlySummaryCurrency = typeof FamilyMonthlySummaryCurrency[keyof typeof FamilyMonthlySummaryCurrency];
+
+
+export const FamilyMonthlySummaryCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface FamilyMonthlySummary {
+  currency: FamilyMonthlySummaryCurrency;
+  income: Amount;
+  spending: Amount;
+  campusIncluded: boolean;
+}
+
+export type FamilyUpcomingSource = typeof FamilyUpcomingSource[keyof typeof FamilyUpcomingSource];
+
+
+export const FamilyUpcomingSource = {
+  allowance: 'allowance',
+  recurring: 'recurring',
+  income: 'income',
+  line: 'line',
+} as const;
+
+export interface FamilyUpcoming {
+  id: string;
+  date: string;
+  amount: Amount;
+  source: FamilyUpcomingSource;
+}
+
+export type FamilyRequestsStatus = typeof FamilyRequestsStatus[keyof typeof FamilyRequestsStatus];
+
+
+export const FamilyRequestsStatus = {
+  coming_soon: 'coming_soon',
+} as const;
+
+export interface FamilyRequests {
+  status: FamilyRequestsStatus;
+  /** @maxItems 0 */
+  items: string[];
+}
+
+/**
+ * Student-selected receiving account currency only; omitted without allowance permission. Does not disclose account ID or balance.
+ */
+export type ParentChildAllowanceCurrency = typeof ParentChildAllowanceCurrency[keyof typeof ParentChildAllowanceCurrency];
+
+
+export const ParentChildAllowanceCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export type SavingsGoalStatus = typeof SavingsGoalStatus[keyof typeof SavingsGoalStatus];
+
+
+export const SavingsGoalStatus = {
+  active: 'active',
+  paused: 'paused',
+  completed: 'completed',
+  archived: 'archived',
+} as const;
+
+/**
+ * Deliberately excludes student identity, accounts, notes, history and unrelated goals.
+ */
+export interface ParentFundingGoal {
+  id: string;
+  name: string;
+  target: Amount;
+  current: Amount;
+  remaining: Amount;
+  status: SavingsGoalStatus;
+  /** @nullable */
+  targetDate: string | null;
+}
+
+export interface ParentChild {
+  childId: string;
+  name: string;
+  permissions: FamilyPermissions;
+  /** Student-selected receiving account currency only; omitted without allowance permission. Does not disclose account ID or balance. */
+  allowanceCurrency?: ParentChildAllowanceCurrency;
+  balance?: Amount[];
+  monthlySummary?: FamilyMonthlySummary[];
+  income?: Amount[];
+  goals?: ParentFundingGoal[];
+  allowances?: Allowance[];
+  requests?: FamilyRequests;
+  transactions?: FamilyActivity[];
+  upcomingPayments?: FamilyUpcoming[];
+  campusSpending?: Amount[];
+}
+
+export type ParentDashboardRequestsStatus = typeof ParentDashboardRequestsStatus[keyof typeof ParentDashboardRequestsStatus];
+
+
+export const ParentDashboardRequestsStatus = {
+  coming_soon: 'coming_soon',
+} as const;
+
+export type ParentDashboardGoalFundingPath = typeof ParentDashboardGoalFundingPath[keyof typeof ParentDashboardGoalFundingPath];
+
+
+export const ParentDashboardGoalFundingPath = {
+  '/goals/fund': '/goals/fund',
+} as const;
+
+export interface ParentDashboard {
+  children: ParentChild[];
+  simulated: true;
+  requestsStatus: ParentDashboardRequestsStatus;
+  goalFundingPath: ParentDashboardGoalFundingPath;
+}
+
+export type AllowanceProjectionPolicy = typeof AllowanceProjectionPolicy[keyof typeof AllowanceProjectionPolicy];
+
+
+export const AllowanceProjectionPolicy = {
+  inclusive_parent_allowance_envelope: 'inclusive_parent_allowance_envelope',
+} as const;
+
+export type AllowanceProjectionTotalCurrency = typeof AllowanceProjectionTotalCurrency[keyof typeof AllowanceProjectionTotalCurrency];
+
+
+export const AllowanceProjectionTotalCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface AllowanceProjectionTotal {
+  currency: AllowanceProjectionTotalCurrency;
+  manualMonthly: Amount;
+  scheduledMonthly: Amount;
+  effectiveMonthly: Amount;
+  adjustmentMonthly: Amount;
+}
+
+export interface AllowanceProjection {
+  policy: AllowanceProjectionPolicy;
+  totals: AllowanceProjectionTotal[];
+  upcoming: FamilyUpcoming[];
+}
+
+export type StudentAllowanceKind = typeof StudentAllowanceKind[keyof typeof StudentAllowanceKind];
+
+
+export const StudentAllowanceKind = {
+  oneTime: 'oneTime',
+  recurring: 'recurring',
+} as const;
+
+/**
+ * @nullable
+ */
+export type StudentAllowanceFrequency = typeof StudentAllowanceFrequency[keyof typeof StudentAllowanceFrequency] | null;
+
+
+export const StudentAllowanceFrequency = {
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+} as const;
+
+export type StudentAllowanceStatus = typeof StudentAllowanceStatus[keyof typeof StudentAllowanceStatus];
+
+
+export const StudentAllowanceStatus = {
+  active: 'active',
+  paused: 'paused',
+  cancelled: 'cancelled',
+  completed: 'completed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type StudentAllowanceLastFailure = typeof StudentAllowanceLastFailure[keyof typeof StudentAllowanceLastFailure] | null;
+
+
+export const StudentAllowanceLastFailure = {
+  insufficient_funds: 'insufficient_funds',
+  balance_limit: 'balance_limit',
+} as const;
+
+export interface StudentAllowance {
+  id: string;
+  amount: Amount;
+  kind: StudentAllowanceKind;
+  /** @nullable */
+  frequency: StudentAllowanceFrequency;
+  nextPayment: string;
+  startDate: string;
+  /** @nullable */
+  endDate: string | null;
+  note: string;
+  status: StudentAllowanceStatus;
+  /** @nullable */
+  lastFailure: StudentAllowanceLastFailure;
+  occurrences: AllowanceOccurrence[];
+}
+
+export interface StudentFamily {
+  links: FamilyLink[];
+  projection: AllowanceProjection;
+  allowances: StudentAllowance[];
 }
 
 export type SavingsGoalInputPriority = typeof SavingsGoalInputPriority[keyof typeof SavingsGoalInputPriority];
@@ -51,16 +628,6 @@ export interface SavingsGoalInput {
   notes: string;
 }
 
-export type SavingsGoalStatus = typeof SavingsGoalStatus[keyof typeof SavingsGoalStatus];
-
-
-export const SavingsGoalStatus = {
-  active: 'active',
-  paused: 'paused',
-  completed: 'completed',
-  archived: 'archived',
-} as const;
-
 export type SavingsGoalCurrency = typeof SavingsGoalCurrency[keyof typeof SavingsGoalCurrency];
 
 
@@ -69,24 +636,6 @@ export const SavingsGoalCurrency = {
   USD: 'USD',
   JOD: 'JOD',
 } as const;
-
-export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
-
-
-export const AmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface Amount {
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: AmountCurrency;
-}
 
 export type SavingsGoal = SavingsGoalInput & ({
   id: string;
@@ -230,102 +779,6 @@ export interface GoalHistoryEntry {
   createdAt: string;
 }
 
-export type FinanceSemanticType = typeof FinanceSemanticType[keyof typeof FinanceSemanticType];
-
-
-export const FinanceSemanticType = {
-  income: 'income',
-  expense: 'expense',
-  transfer: 'transfer',
-  allowance: 'allowance',
-  refund: 'refund',
-  savings: 'savings',
-  withdrawal: 'withdrawal',
-  deposit: 'deposit',
-  payment: 'payment',
-  campus_payment: 'campus_payment',
-} as const;
-
-export type FinanceTransactionDirection = typeof FinanceTransactionDirection[keyof typeof FinanceTransactionDirection];
-
-
-export const FinanceTransactionDirection = {
-  credit: 'credit',
-  debit: 'debit',
-} as const;
-
-export type FinanceTransactionStatus = typeof FinanceTransactionStatus[keyof typeof FinanceTransactionStatus];
-
-
-export const FinanceTransactionStatus = {
-  simulated: 'simulated',
-  simulated_payment: 'simulated_payment',
-} as const;
-
-export interface FinanceReceiptItem {
-  productId: string;
-  name: string;
-  quantity: number;
-  unitPrice: Amount;
-  lineTotal: Amount;
-}
-
-/**
- * @nullable
- */
-export type FinanceTransactionGoalFundingSource = typeof FinanceTransactionGoalFundingSource[keyof typeof FinanceTransactionGoalFundingSource] | null;
-
-
-export const FinanceTransactionGoalFundingSource = {
-  student_account: 'student_account',
-  parent_simulated: 'parent_simulated',
-} as const;
-
-export interface FinanceTransaction {
-  id: string;
-  userId: string;
-  accountId: string;
-  kind: string;
-  type: FinanceSemanticType;
-  category: string;
-  direction: FinanceTransactionDirection;
-  amount: Amount;
-  balanceAfter: Amount;
-  status: FinanceTransactionStatus;
-  counterpartyAccountId?: string;
-  serviceId?: string;
-  merchantName?: string;
-  items?: FinanceReceiptItem[];
-  note?: string;
-  createdAt: string;
-  description: string;
-  /** @nullable */
-  source: string | null;
-  /** @nullable */
-  destination: string | null;
-  accountName?: string;
-  /** @nullable */
-  relatedGoalId: string | null;
-  /** @nullable */
-  goalFundingSource?: FinanceTransactionGoalFundingSource;
-  /** @nullable */
-  relatedBudgetId: string | null;
-  /** @nullable */
-  parentTransferId: string | null;
-  /** @nullable */
-  campusServiceId: string | null;
-  /** @nullable */
-  universityId: string | null;
-  /** @nullable */
-  campusId: string | null;
-  /** @nullable */
-  universityName?: string | null;
-  /** @nullable */
-  campusName?: string | null;
-  /** @nullable */
-  recurringExpenseId: string | null;
-}
-
 export interface GoalContributionReceipt {
   goal: SavingsGoal;
   entry: GoalHistoryEntry;
@@ -359,20 +812,6 @@ export interface GoalInvitationRedemption {
      */
   token: string;
   limitedConsentAcknowledged: true;
-}
-
-/**
- * Deliberately excludes student identity, accounts, notes, history and unrelated goals.
- */
-export interface ParentFundingGoal {
-  id: string;
-  name: string;
-  target: Amount;
-  current: Amount;
-  remaining: Amount;
-  status: SavingsGoalStatus;
-  /** @nullable */
-  targetDate: string | null;
 }
 
 export type ParentGoalContributionReceiptSource = typeof ParentGoalContributionReceiptSource[keyof typeof ParentGoalContributionReceiptSource];
@@ -749,6 +1188,7 @@ export type Scholarship = ScholarshipInput & {
 };
 
 export interface FinancialPlan {
+  allowanceProjection?: AllowanceProjection;
   asOf: string;
   estimate: boolean;
   policy: string;
@@ -785,40 +1225,6 @@ export interface FinanceRecipient {
   name: string;
   currency: FinanceRecipientCurrency;
 }
-
-export type FinanceAccountInputType = typeof FinanceAccountInputType[keyof typeof FinanceAccountInputType];
-
-
-export const FinanceAccountInputType = {
-  wallet: 'wallet',
-  bank: 'bank',
-  cash: 'cash',
-  other: 'other',
-} as const;
-
-export type FinanceAccountInputCurrency = typeof FinanceAccountInputCurrency[keyof typeof FinanceAccountInputCurrency];
-
-
-export const FinanceAccountInputCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface FinanceAccountInput {
-  type: FinanceAccountInputType;
-  /**
-     * @minLength 1
-     * @maxLength 120
-     */
-  name: string;
-  currency: FinanceAccountInputCurrency;
-}
-
-export type FinanceAccount = FinanceAccountInput & {
-  id: string;
-  balance: Amount;
-};
 
 export type FinanceMovementInputKind = typeof FinanceMovementInputKind[keyof typeof FinanceMovementInputKind];
 
@@ -1224,6 +1630,7 @@ export const ProfileRole = {
 } as const;
 
 export interface Profile {
+  allowanceProjection?: AllowanceProjection;
   name: string;
   email: string;
   role: ProfileRole;

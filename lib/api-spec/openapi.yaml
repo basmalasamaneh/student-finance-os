@@ -620,6 +620,207 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /family:
+    get:
+      operationId: getStudentFamily
+      responses:
+        "200":
+          description: Student-owned family links and allowance projection
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StudentFamily" }
+  /family/invitations:
+    post:
+      operationId: createFamilyInvitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FamilyConsentInput" }
+      responses:
+        "201":
+          description: Private single-use token, displayed once
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FamilyInvitationReceipt" }
+  /family/links/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      operationId: updateFamilyConsent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FamilyConsentInput" }
+      responses:
+        "200":
+          description: Updated student consent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FamilyLink" }
+    delete:
+      operationId: revokeFamilyLink
+      responses:
+        "204": { description: Revoked; financial history retained }
+  /parent/family-invitations/decide:
+    post:
+      operationId: decideFamilyInvitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FamilyDecisionInput" }
+      responses:
+        "200":
+          description: Accepted or declined without revealing unaccepted names
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FamilyDecision" }
+  /parent/dashboard:
+    get:
+      operationId: getParentDashboard
+      responses:
+        "200":
+          description: Accepted children with strictly permission-filtered sections
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ParentDashboard" }
+  /parent/children/{childId}:
+    parameters:
+      - { name: childId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      operationId: getParentChild
+      responses:
+        "200":
+          description: Current consent-filtered child
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ParentChild" }
+  /parent/wallet:
+    get:
+      operationId: getParentWallet
+      responses:
+        "200":
+          description: Parent-owned simulated accounts and ledger
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ParentWallet" }
+  /parent/wallet/accounts:
+    post:
+      operationId: createParentAccount
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FinanceAccountInput" }
+      responses:
+        "201":
+          description: Zero-balance account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FinanceAccount" }
+  /parent/wallet/topups:
+    post:
+      operationId: topUpParentWallet
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ParentTopUpInput" }
+      responses:
+        "201":
+          description: Explicit simulated external top-up
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FinanceTransaction" }
+  /parent/children/{childId}/allowances:
+    parameters:
+      - { name: childId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      operationId: listChildAllowances
+      responses:
+        "200":
+          description: Allowances funded by this parent only
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Allowance" } }
+    post:
+      operationId: createAllowance
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AllowanceInput" }
+      responses:
+        "201":
+          description: Schedule; due occurrences processed by server worker
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Allowance" }
+  /parent/children/{childId}/allowances/{id}:
+    parameters:
+      - { name: childId, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      operationId: updateAllowance
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AllowanceInput" }
+      responses:
+        "200":
+          description: Edited future schedule; immutable posted history
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Allowance" }
+  /parent/children/{childId}/allowances/{id}/status:
+    parameters:
+      - { name: childId, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      operationId: changeAllowanceStatus
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AllowanceAction" }
+      responses:
+        "200":
+          description: Updated schedule
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Allowance" }
+  /parent/children/{childId}/allowances/{id}/retry:
+    parameters:
+      - { name: childId, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      operationId: retryAllowance
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AllowanceRetryInput" }
+      responses:
+        "200":
+          description: Attempts the current due occurrence once; inspect lastFailure and occurrence status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Allowance" }
 components:
   parameters:
     IdempotencyKey:
@@ -628,6 +829,221 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    FamilyPermissions:
+      type: object
+      additionalProperties: false
+      required: [monthlySummary, balance, goals, allowance, requests, transactions, upcomingPayments, campusSpending]
+      properties:
+        monthlySummary: { type: boolean, default: false }
+        balance: { type: boolean, default: false }
+        goals: { type: boolean, default: false }
+        allowance: { type: boolean, default: false }
+        requests: { type: boolean, default: false }
+        transactions: { type: boolean, default: false }
+        upcomingPayments: { type: boolean, default: false }
+        campusSpending: { type: boolean, default: false }
+    FamilyConsentInput:
+      type: object
+      additionalProperties: false
+      required: [permissions, receivingAccountId]
+      properties:
+        permissions: { $ref: "#/components/schemas/FamilyPermissions" }
+        receivingAccountId: { type: [string, "null"], format: uuid }
+    FamilyLink:
+      type: object
+      required: [id, status, permissions, receivingAccountId, createdAt, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [pending, accepted, declined, revoked] }
+        permissions: { $ref: "#/components/schemas/FamilyPermissions" }
+        receivingAccountId: { type: [string, "null"], format: uuid }
+        parentName: { type: string }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+    FamilyInvitationReceipt:
+      type: object
+      required: [link, token]
+      properties:
+        link: { $ref: "#/components/schemas/FamilyLink" }
+        token: { type: string }
+    FamilyDecisionInput:
+      type: object
+      additionalProperties: false
+      required: [token, action]
+      properties:
+        token: { type: string, minLength: 43, maxLength: 43 }
+        action: { type: string, enum: [accept, decline] }
+    FamilyDecision:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [accepted, declined] }
+        childId: { type: string, format: uuid }
+        childName: { type: string }
+    AllowanceInput:
+      type: object
+      additionalProperties: false
+      required: [parentAccountId, amount, kind, frequency, nextPayment, startDate, endDate, note]
+      properties:
+        parentAccountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        kind: { type: string, enum: [oneTime, recurring] }
+        frequency: { type: [string, "null"], enum: [weekly, biweekly, monthly, null] }
+        nextPayment: { type: string, format: date }
+        startDate: { type: string, format: date }
+        endDate: { type: [string, "null"], format: date }
+        note: { type: string, maxLength: 500 }
+    Allowance:
+      allOf:
+        - { $ref: "#/components/schemas/AllowanceInput" }
+        - type: object
+          required: [id, childId, status, lastFailure, occurrences, createdAt]
+          properties:
+            id: { type: string, format: uuid }
+            childId: { type: string, format: uuid }
+            status: { type: string, enum: [active, paused, cancelled, completed] }
+            lastFailure: { type: [string, "null"], enum: [insufficient_funds, balance_limit, null] }
+            occurrences:
+              type: array
+              items: { $ref: "#/components/schemas/AllowanceOccurrence" }
+            createdAt: { type: string, format: date-time }
+    AllowanceOccurrence:
+      type: object
+      required: [id, scheduledDate, amount, status, failure, transactionIds, attemptedAt]
+      properties:
+        id: { type: string, format: uuid }
+        scheduledDate: { type: string, format: date }
+        amount: { $ref: "#/components/schemas/Amount" }
+        status: { type: string, enum: [posted, failed, cancelled] }
+        failure: { type: [string, "null"], enum: [insufficient_funds, balance_limit, null] }
+        transactionIds: { type: array, items: { type: string, format: uuid } }
+        attemptedAt: { type: string, format: date-time }
+    AllowanceAction:
+      type: object
+      additionalProperties: false
+      required: [action]
+      properties:
+        action: { type: string, enum: [pause, resume, cancel] }
+    AllowanceRetryInput:
+      type: object
+      additionalProperties: false
+      required: [retry]
+      properties:
+        retry: { type: boolean, enum: [true] }
+    ParentTopUpInput:
+      type: object
+      additionalProperties: false
+      required: [accountId, amount, simulatedFundingAcknowledged]
+      properties:
+        accountId: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        simulatedFundingAcknowledged: { type: boolean, enum: [true] }
+    ParentWallet:
+      type: object
+      required: [accounts, transactions, simulated]
+      properties:
+        accounts: { type: array, items: { $ref: "#/components/schemas/FinanceAccount" } }
+        transactions: { type: array, items: { $ref: "#/components/schemas/FinanceTransaction" } }
+        simulated: { type: boolean, enum: [true] }
+    FamilyActivity:
+      type: object
+      required: [id, type, amount, direction, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        amount: { $ref: "#/components/schemas/Amount" }
+        direction: { type: string, enum: [credit, debit] }
+        createdAt: { type: string, format: date-time }
+    FamilyMonthlySummary:
+      type: object
+      required: [currency, income, spending, campusIncluded]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        income: { $ref: "#/components/schemas/Amount" }
+        spending: { $ref: "#/components/schemas/Amount" }
+        campusIncluded: { type: boolean }
+    FamilyUpcoming:
+      type: object
+      required: [id, date, amount, source]
+      properties:
+        id: { type: string, format: uuid }
+        date: { type: string, format: date }
+        amount: { $ref: "#/components/schemas/Amount" }
+        source: { type: string, enum: [allowance, recurring, income, line] }
+    FamilyRequests:
+      type: object
+      required: [status, items]
+      properties:
+        status: { type: string, enum: [coming_soon] }
+        items: { type: array, maxItems: 0, items: { type: string } }
+    ParentChild:
+      type: object
+      required: [childId, name, permissions]
+      properties:
+        childId: { type: string, format: uuid }
+        name: { type: string }
+        permissions: { $ref: "#/components/schemas/FamilyPermissions" }
+        allowanceCurrency:
+          description: Student-selected receiving account currency only; omitted without allowance permission. Does not disclose account ID or balance.
+          type: string
+          enum: [ILS, USD, JOD]
+        balance: { type: array, items: { $ref: "#/components/schemas/Amount" } }
+        monthlySummary: { type: array, items: { $ref: "#/components/schemas/FamilyMonthlySummary" } }
+        income: { type: array, items: { $ref: "#/components/schemas/Amount" } }
+        goals: { type: array, items: { $ref: "#/components/schemas/ParentFundingGoal" } }
+        allowances: { type: array, items: { $ref: "#/components/schemas/Allowance" } }
+        requests: { $ref: "#/components/schemas/FamilyRequests" }
+        transactions: { type: array, items: { $ref: "#/components/schemas/FamilyActivity" } }
+        upcomingPayments: { type: array, items: { $ref: "#/components/schemas/FamilyUpcoming" } }
+        campusSpending: { type: array, items: { $ref: "#/components/schemas/Amount" } }
+    ParentDashboard:
+      type: object
+      required: [children, simulated, requestsStatus, goalFundingPath]
+      properties:
+        children: { type: array, items: { $ref: "#/components/schemas/ParentChild" } }
+        simulated: { type: boolean, enum: [true] }
+        requestsStatus: { type: string, enum: [coming_soon] }
+        goalFundingPath: { type: string, enum: [/goals/fund] }
+    AllowanceProjection:
+      type: object
+      required: [policy, totals, upcoming]
+      properties:
+        policy: { type: string, enum: [inclusive_parent_allowance_envelope] }
+        totals:
+          type: array
+          items: { $ref: "#/components/schemas/AllowanceProjectionTotal" }
+        upcoming: { type: array, items: { $ref: "#/components/schemas/FamilyUpcoming" } }
+    AllowanceProjectionTotal:
+      type: object
+      required: [currency, manualMonthly, scheduledMonthly, effectiveMonthly, adjustmentMonthly]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        manualMonthly: { $ref: "#/components/schemas/Amount" }
+        scheduledMonthly: { $ref: "#/components/schemas/Amount" }
+        effectiveMonthly: { $ref: "#/components/schemas/Amount" }
+        adjustmentMonthly: { $ref: "#/components/schemas/Amount" }
+    StudentFamily:
+      type: object
+      required: [links, projection, allowances]
+      properties:
+        links: { type: array, items: { $ref: "#/components/schemas/FamilyLink" } }
+        projection: { $ref: "#/components/schemas/AllowanceProjection" }
+        allowances: { type: array, items: { $ref: "#/components/schemas/StudentAllowance" } }
+    StudentAllowance:
+      type: object
+      required: [id, amount, kind, frequency, nextPayment, startDate, endDate, note, status, lastFailure, occurrences]
+      properties:
+        id: { type: string, format: uuid }
+        amount: { $ref: "#/components/schemas/Amount" }
+        kind: { type: string, enum: [oneTime, recurring] }
+        frequency: { type: [string, "null"], enum: [weekly, biweekly, monthly, null] }
+        nextPayment: { type: string, format: date }
+        startDate: { type: string, format: date }
+        endDate: { type: [string, "null"], format: date }
+        note: { type: string }
+        status: { type: string, enum: [active, paused, cancelled, completed] }
+        lastFailure: { type: [string, "null"], enum: [insufficient_funds, balance_limit, null] }
+        occurrences: { type: array, items: { $ref: "#/components/schemas/AllowanceOccurrence" } }
     GoalPositiveAmount:
       type: object
       additionalProperties: false
@@ -905,6 +1321,7 @@ components:
       type: object
       required: [asOf, estimate, policy, totals, costs, income, irregularIncome, irregularCount, upcoming, budgets, budgetCounts, recurringExpenses, lines, scholarships, commuteOverride]
       properties:
+        allowanceProjection: { $ref: "#/components/schemas/AllowanceProjection" }
         asOf: { type: string, format: date }
         estimate: { type: boolean }
         policy: { type: string }
@@ -1341,6 +1758,7 @@ components:
       type: object
       required: [name, email, role, onboardingCompleted, incomes, scholarships]
       properties:
+        allowanceProjection: { $ref: "#/components/schemas/AllowanceProjection" }
         name: { type: string }
         email: { type: string }
         role: { type: string, enum: [student, parent, admin] }

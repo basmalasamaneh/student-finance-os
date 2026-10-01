@@ -21,6 +21,10 @@ import type {
 
 import type {
   Account,
+  Allowance,
+  AllowanceAction,
+  AllowanceInput,
+  AllowanceRetryInput,
   Budget,
   BudgetInput,
   Campus,
@@ -34,6 +38,11 @@ import type {
   CampusUniversityInput,
   CommuteOverride,
   CommuteOverrideInput,
+  FamilyConsentInput,
+  FamilyDecision,
+  FamilyDecisionInput,
+  FamilyInvitationReceipt,
+  FamilyLink,
   FinanceAccount,
   FinanceAccountInput,
   FinanceHistoryFilterOptions,
@@ -58,9 +67,13 @@ import type {
   MoneyRequest,
   MoneyRequestDecision,
   MoneyRequestInput,
+  ParentChild,
+  ParentDashboard,
   ParentFundingGoal,
   ParentGoalContributionInput,
   ParentGoalContributionReceipt,
+  ParentTopUpInput,
+  ParentWallet,
   PlanLine,
   PlanLineInput,
   Profile,
@@ -74,6 +87,7 @@ import type {
   Scholarship,
   ScholarshipInput,
   SignUpInput,
+  StudentFamily,
   StudentGoalContributionInput
 } from './api.schemas';
 
@@ -5034,4 +5048,1176 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 
 
 
+
+export const getGetStudentFamilyUrl = () => {
+
+
+
+
+  return `/api/family`
+}
+
+export const getStudentFamily = async ( options?: Parameters<typeof customFetch>[1]): Promise<StudentFamily> => {
+
+  return customFetch<StudentFamily>(getGetStudentFamilyUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentFamilyQueryKey = () => {
+    return [
+    `/api/family`
+    ] as const;
+    }
+
+
+export const getGetStudentFamilyQueryOptions = <TData = Awaited<ReturnType<typeof getStudentFamily>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentFamily>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentFamilyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentFamily>>> = ({ signal }) => getStudentFamily({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentFamily>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentFamilyQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentFamily>>>
+export type GetStudentFamilyQueryError = ErrorType<unknown>
+
+
+
+export function useGetStudentFamily<TData = Awaited<ReturnType<typeof getStudentFamily>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentFamily>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentFamilyQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateFamilyInvitationUrl = () => {
+
+
+
+
+  return `/api/family/invitations`
+}
+
+export const createFamilyInvitation = async (familyConsentInput: FamilyConsentInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyInvitationReceipt> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyInvitationReceipt>(getCreateFamilyInvitationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyConsentInput)
+  }
+);}
+
+
+
+
+
+export const getCreateFamilyInvitationMutationKey = () => ['createFamilyInvitation'] as const;
+
+export const getCreateFamilyInvitationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFamilyInvitation>>, TError,CreateFamilyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFamilyInvitation>>, TError,CreateFamilyInvitationMutationVariables, TContext> => {
+
+const mutationKey = getCreateFamilyInvitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFamilyInvitation>>, CreateFamilyInvitationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFamilyInvitation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFamilyInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof createFamilyInvitation>>>
+    export type CreateFamilyInvitationMutationBody = BodyType<FamilyConsentInput>
+    export type CreateFamilyInvitationMutationError = ErrorType<unknown>
+    export type CreateFamilyInvitationMutationVariables = {data: BodyType<FamilyConsentInput>}
+
+    export const useCreateFamilyInvitation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFamilyInvitation>>, TError,CreateFamilyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFamilyInvitation>>,
+        TError,
+        CreateFamilyInvitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateFamilyInvitationMutationOptions(options));
+    }
+
+export const getUpdateFamilyConsentUrl = (id: string,) => {
+
+
+
+
+  return `/api/family/links/${id}`
+}
+
+export const updateFamilyConsent = async (id: string,
+    familyConsentInput: FamilyConsentInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyLink> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyLink>(getUpdateFamilyConsentUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyConsentInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateFamilyConsentMutationKey = () => ['updateFamilyConsent'] as const;
+
+export const getUpdateFamilyConsentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFamilyConsent>>, TError,UpdateFamilyConsentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateFamilyConsent>>, TError,UpdateFamilyConsentMutationVariables, TContext> => {
+
+const mutationKey = getUpdateFamilyConsentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateFamilyConsent>>, UpdateFamilyConsentMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateFamilyConsent(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateFamilyConsentMutationResult = NonNullable<Awaited<ReturnType<typeof updateFamilyConsent>>>
+    export type UpdateFamilyConsentMutationBody = BodyType<FamilyConsentInput>
+    export type UpdateFamilyConsentMutationError = ErrorType<unknown>
+    export type UpdateFamilyConsentMutationVariables = {id: string;data: BodyType<FamilyConsentInput>}
+
+    export const useUpdateFamilyConsent = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFamilyConsent>>, TError,UpdateFamilyConsentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateFamilyConsent>>,
+        TError,
+        UpdateFamilyConsentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateFamilyConsentMutationOptions(options));
+    }
+
+export const getRevokeFamilyLinkUrl = (id: string,) => {
+
+
+
+
+  return `/api/family/links/${id}`
+}
+
+export const revokeFamilyLink = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRevokeFamilyLinkUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRevokeFamilyLinkMutationKey = () => ['revokeFamilyLink'] as const;
+
+export const getRevokeFamilyLinkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeFamilyLink>>, TError,RevokeFamilyLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof revokeFamilyLink>>, TError,RevokeFamilyLinkMutationVariables, TContext> => {
+
+const mutationKey = getRevokeFamilyLinkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revokeFamilyLink>>, RevokeFamilyLinkMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  revokeFamilyLink(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RevokeFamilyLinkMutationResult = NonNullable<Awaited<ReturnType<typeof revokeFamilyLink>>>
+
+    export type RevokeFamilyLinkMutationError = ErrorType<unknown>
+    export type RevokeFamilyLinkMutationVariables = {id: string}
+
+    export const useRevokeFamilyLink = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revokeFamilyLink>>, TError,RevokeFamilyLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof revokeFamilyLink>>,
+        TError,
+        RevokeFamilyLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRevokeFamilyLinkMutationOptions(options));
+    }
+
+export const getDecideFamilyInvitationUrl = () => {
+
+
+
+
+  return `/api/parent/family-invitations/decide`
+}
+
+export const decideFamilyInvitation = async (familyDecisionInput: FamilyDecisionInput, options?: Parameters<typeof customFetch>[1]): Promise<FamilyDecision> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FamilyDecision>(getDecideFamilyInvitationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(familyDecisionInput)
+  }
+);}
+
+
+
+
+
+export const getDecideFamilyInvitationMutationKey = () => ['decideFamilyInvitation'] as const;
+
+export const getDecideFamilyInvitationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideFamilyInvitation>>, TError,DecideFamilyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof decideFamilyInvitation>>, TError,DecideFamilyInvitationMutationVariables, TContext> => {
+
+const mutationKey = getDecideFamilyInvitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decideFamilyInvitation>>, DecideFamilyInvitationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  decideFamilyInvitation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DecideFamilyInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof decideFamilyInvitation>>>
+    export type DecideFamilyInvitationMutationBody = BodyType<FamilyDecisionInput>
+    export type DecideFamilyInvitationMutationError = ErrorType<unknown>
+    export type DecideFamilyInvitationMutationVariables = {data: BodyType<FamilyDecisionInput>}
+
+    export const useDecideFamilyInvitation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decideFamilyInvitation>>, TError,DecideFamilyInvitationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof decideFamilyInvitation>>,
+        TError,
+        DecideFamilyInvitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDecideFamilyInvitationMutationOptions(options));
+    }
+
+export const getGetParentDashboardUrl = () => {
+
+
+
+
+  return `/api/parent/dashboard`
+}
+
+export const getParentDashboard = async ( options?: Parameters<typeof customFetch>[1]): Promise<ParentDashboard> => {
+
+  return customFetch<ParentDashboard>(getGetParentDashboardUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetParentDashboardQueryKey = () => {
+    return [
+    `/api/parent/dashboard`
+    ] as const;
+    }
+
+
+export const getGetParentDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getParentDashboard>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetParentDashboardQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getParentDashboard>>> = ({ signal }) => getParentDashboard({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getParentDashboard>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetParentDashboardQueryResult = NonNullable<Awaited<ReturnType<typeof getParentDashboard>>>
+export type GetParentDashboardQueryError = ErrorType<unknown>
+
+
+
+export function useGetParentDashboard<TData = Awaited<ReturnType<typeof getParentDashboard>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentDashboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetParentDashboardQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetParentChildUrl = (childId: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}`
+}
+
+export const getParentChild = async (childId: string, options?: Parameters<typeof customFetch>[1]): Promise<ParentChild> => {
+
+  return customFetch<ParentChild>(getGetParentChildUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetParentChildQueryKey = (childId: string,) => {
+    return [
+    `/api/parent/children/${childId}`
+    ] as const;
+    }
+
+
+export const getGetParentChildQueryOptions = <TData = Awaited<ReturnType<typeof getParentChild>>, TError = ErrorType<unknown>>(childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetParentChildQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getParentChild>>> = ({ signal }) => getParentChild(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: childId !== null && childId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getParentChild>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetParentChildQueryResult = NonNullable<Awaited<ReturnType<typeof getParentChild>>>
+export type GetParentChildQueryError = ErrorType<unknown>
+
+
+
+export function useGetParentChild<TData = Awaited<ReturnType<typeof getParentChild>>, TError = ErrorType<unknown>>(
+ childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentChild>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetParentChildQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetParentWalletUrl = () => {
+
+
+
+
+  return `/api/parent/wallet`
+}
+
+export const getParentWallet = async ( options?: Parameters<typeof customFetch>[1]): Promise<ParentWallet> => {
+
+  return customFetch<ParentWallet>(getGetParentWalletUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetParentWalletQueryKey = () => {
+    return [
+    `/api/parent/wallet`
+    ] as const;
+    }
+
+
+export const getGetParentWalletQueryOptions = <TData = Awaited<ReturnType<typeof getParentWallet>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentWallet>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetParentWalletQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getParentWallet>>> = ({ signal }) => getParentWallet({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getParentWallet>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetParentWalletQueryResult = NonNullable<Awaited<ReturnType<typeof getParentWallet>>>
+export type GetParentWalletQueryError = ErrorType<unknown>
+
+
+
+export function useGetParentWallet<TData = Awaited<ReturnType<typeof getParentWallet>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getParentWallet>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetParentWalletQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateParentAccountUrl = () => {
+
+
+
+
+  return `/api/parent/wallet/accounts`
+}
+
+export const createParentAccount = async (financeAccountInput: FinanceAccountInput, options?: Parameters<typeof customFetch>[1]): Promise<FinanceAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FinanceAccount>(getCreateParentAccountUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(financeAccountInput)
+  }
+);}
+
+
+
+
+
+export const getCreateParentAccountMutationKey = () => ['createParentAccount'] as const;
+
+export const getCreateParentAccountMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createParentAccount>>, TError,CreateParentAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createParentAccount>>, TError,CreateParentAccountMutationVariables, TContext> => {
+
+const mutationKey = getCreateParentAccountMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createParentAccount>>, CreateParentAccountMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createParentAccount(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateParentAccountMutationResult = NonNullable<Awaited<ReturnType<typeof createParentAccount>>>
+    export type CreateParentAccountMutationBody = BodyType<FinanceAccountInput>
+    export type CreateParentAccountMutationError = ErrorType<unknown>
+    export type CreateParentAccountMutationVariables = {data: BodyType<FinanceAccountInput>}
+
+    export const useCreateParentAccount = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createParentAccount>>, TError,CreateParentAccountMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createParentAccount>>,
+        TError,
+        CreateParentAccountMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateParentAccountMutationOptions(options));
+    }
+
+export const getTopUpParentWalletUrl = () => {
+
+
+
+
+  return `/api/parent/wallet/topups`
+}
+
+export const topUpParentWallet = async (parentTopUpInput: ParentTopUpInput, options?: Parameters<typeof customFetch>[1]): Promise<FinanceTransaction> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FinanceTransaction>(getTopUpParentWalletUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(parentTopUpInput)
+  }
+);}
+
+
+
+
+
+export const getTopUpParentWalletMutationKey = () => ['topUpParentWallet'] as const;
+
+export const getTopUpParentWalletMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof topUpParentWallet>>, TError,TopUpParentWalletMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof topUpParentWallet>>, TError,TopUpParentWalletMutationVariables, TContext> => {
+
+const mutationKey = getTopUpParentWalletMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof topUpParentWallet>>, TopUpParentWalletMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  topUpParentWallet(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TopUpParentWalletMutationResult = NonNullable<Awaited<ReturnType<typeof topUpParentWallet>>>
+    export type TopUpParentWalletMutationBody = BodyType<ParentTopUpInput>
+    export type TopUpParentWalletMutationError = ErrorType<unknown>
+    export type TopUpParentWalletMutationVariables = {data: BodyType<ParentTopUpInput>}
+
+    export const useTopUpParentWallet = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof topUpParentWallet>>, TError,TopUpParentWalletMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof topUpParentWallet>>,
+        TError,
+        TopUpParentWalletMutationVariables,
+        TContext
+      > => {
+      return useMutation(getTopUpParentWalletMutationOptions(options));
+    }
+
+export const getListChildAllowancesUrl = (childId: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}/allowances`
+}
+
+export const listChildAllowances = async (childId: string, options?: Parameters<typeof customFetch>[1]): Promise<Allowance[]> => {
+
+  return customFetch<Allowance[]>(getListChildAllowancesUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListChildAllowancesQueryKey = (childId: string,) => {
+    return [
+    `/api/parent/children/${childId}/allowances`
+    ] as const;
+    }
+
+
+export const getListChildAllowancesQueryOptions = <TData = Awaited<ReturnType<typeof listChildAllowances>>, TError = ErrorType<unknown>>(childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildAllowances>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListChildAllowancesQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChildAllowances>>> = ({ signal }) => listChildAllowances(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: childId !== null && childId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChildAllowances>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListChildAllowancesQueryResult = NonNullable<Awaited<ReturnType<typeof listChildAllowances>>>
+export type ListChildAllowancesQueryError = ErrorType<unknown>
+
+
+
+export function useListChildAllowances<TData = Awaited<ReturnType<typeof listChildAllowances>>, TError = ErrorType<unknown>>(
+ childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChildAllowances>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListChildAllowancesQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateAllowanceUrl = (childId: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}/allowances`
+}
+
+export const createAllowance = async (childId: string,
+    allowanceInput: AllowanceInput, options?: Parameters<typeof customFetch>[1]): Promise<Allowance> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Allowance>(getCreateAllowanceUrl(childId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(allowanceInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAllowanceMutationKey = () => ['createAllowance'] as const;
+
+export const getCreateAllowanceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAllowance>>, TError,CreateAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAllowance>>, TError,CreateAllowanceMutationVariables, TContext> => {
+
+const mutationKey = getCreateAllowanceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAllowance>>, CreateAllowanceMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  createAllowance(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAllowanceMutationResult = NonNullable<Awaited<ReturnType<typeof createAllowance>>>
+    export type CreateAllowanceMutationBody = BodyType<AllowanceInput>
+    export type CreateAllowanceMutationError = ErrorType<unknown>
+    export type CreateAllowanceMutationVariables = {childId: string;data: BodyType<AllowanceInput>}
+
+    export const useCreateAllowance = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAllowance>>, TError,CreateAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAllowance>>,
+        TError,
+        CreateAllowanceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateAllowanceMutationOptions(options));
+    }
+
+export const getUpdateAllowanceUrl = (childId: string,
+    id: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}/allowances/${id}`
+}
+
+export const updateAllowance = async (childId: string,
+    id: string,
+    allowanceInput: AllowanceInput, options?: Parameters<typeof customFetch>[1]): Promise<Allowance> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Allowance>(getUpdateAllowanceUrl(childId,id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(allowanceInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAllowanceMutationKey = () => ['updateAllowance'] as const;
+
+export const getUpdateAllowanceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAllowance>>, TError,UpdateAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAllowance>>, TError,UpdateAllowanceMutationVariables, TContext> => {
+
+const mutationKey = getUpdateAllowanceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAllowance>>, UpdateAllowanceMutationVariables> = (props) => {
+          const {childId,id,data} = props ?? {};
+
+          return  updateAllowance(childId,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAllowanceMutationResult = NonNullable<Awaited<ReturnType<typeof updateAllowance>>>
+    export type UpdateAllowanceMutationBody = BodyType<AllowanceInput>
+    export type UpdateAllowanceMutationError = ErrorType<unknown>
+    export type UpdateAllowanceMutationVariables = {childId: string;id: string;data: BodyType<AllowanceInput>}
+
+    export const useUpdateAllowance = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAllowance>>, TError,UpdateAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAllowance>>,
+        TError,
+        UpdateAllowanceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateAllowanceMutationOptions(options));
+    }
+
+export const getChangeAllowanceStatusUrl = (childId: string,
+    id: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}/allowances/${id}/status`
+}
+
+export const changeAllowanceStatus = async (childId: string,
+    id: string,
+    allowanceAction: AllowanceAction, options?: Parameters<typeof customFetch>[1]): Promise<Allowance> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Allowance>(getChangeAllowanceStatusUrl(childId,id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(allowanceAction)
+  }
+);}
+
+
+
+
+
+export const getChangeAllowanceStatusMutationKey = () => ['changeAllowanceStatus'] as const;
+
+export const getChangeAllowanceStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeAllowanceStatus>>, TError,ChangeAllowanceStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof changeAllowanceStatus>>, TError,ChangeAllowanceStatusMutationVariables, TContext> => {
+
+const mutationKey = getChangeAllowanceStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changeAllowanceStatus>>, ChangeAllowanceStatusMutationVariables> = (props) => {
+          const {childId,id,data} = props ?? {};
+
+          return  changeAllowanceStatus(childId,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ChangeAllowanceStatusMutationResult = NonNullable<Awaited<ReturnType<typeof changeAllowanceStatus>>>
+    export type ChangeAllowanceStatusMutationBody = BodyType<AllowanceAction>
+    export type ChangeAllowanceStatusMutationError = ErrorType<unknown>
+    export type ChangeAllowanceStatusMutationVariables = {childId: string;id: string;data: BodyType<AllowanceAction>}
+
+    export const useChangeAllowanceStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeAllowanceStatus>>, TError,ChangeAllowanceStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof changeAllowanceStatus>>,
+        TError,
+        ChangeAllowanceStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getChangeAllowanceStatusMutationOptions(options));
+    }
+
+export const getRetryAllowanceUrl = (childId: string,
+    id: string,) => {
+
+
+
+
+  return `/api/parent/children/${childId}/allowances/${id}/retry`
+}
+
+export const retryAllowance = async (childId: string,
+    id: string,
+    allowanceRetryInput: AllowanceRetryInput, options?: Parameters<typeof customFetch>[1]): Promise<Allowance> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Allowance>(getRetryAllowanceUrl(childId,id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(allowanceRetryInput)
+  }
+);}
+
+
+
+
+
+export const getRetryAllowanceMutationKey = () => ['retryAllowance'] as const;
+
+export const getRetryAllowanceMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAllowance>>, TError,RetryAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof retryAllowance>>, TError,RetryAllowanceMutationVariables, TContext> => {
+
+const mutationKey = getRetryAllowanceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retryAllowance>>, RetryAllowanceMutationVariables> = (props) => {
+          const {childId,id,data} = props ?? {};
+
+          return  retryAllowance(childId,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetryAllowanceMutationResult = NonNullable<Awaited<ReturnType<typeof retryAllowance>>>
+    export type RetryAllowanceMutationBody = BodyType<AllowanceRetryInput>
+    export type RetryAllowanceMutationError = ErrorType<unknown>
+    export type RetryAllowanceMutationVariables = {childId: string;id: string;data: BodyType<AllowanceRetryInput>}
+
+    export const useRetryAllowance = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retryAllowance>>, TError,RetryAllowanceMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof retryAllowance>>,
+        TError,
+        RetryAllowanceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRetryAllowanceMutationOptions(options));
+    }
 

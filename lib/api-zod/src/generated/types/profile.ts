@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AllowanceProjection } from './allowanceProjection';
 import type { Commute } from './commute';
 import type { Education } from './education';
 import type { Income } from './income';
@@ -13,6 +14,7 @@ import type { Residence } from './residence';
 import type { Scholarship } from './scholarship';
 
 export interface Profile {
+  allowanceProjection?: AllowanceProjection;
   name: string;
   email: string;
   role: ProfileRole;

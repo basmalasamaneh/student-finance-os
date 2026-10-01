@@ -5,6 +5,7 @@ import financeRouter from "./finance";
 import campusRouter from "./campus";
 import planningRouter from "./planning";
 import goalsRouter from "./goals";
+import familyRouter from "./family";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(financeRouter);
 router.use(campusRouter);
 router.use(planningRouter);
 router.use(goalsRouter);
+router.use(familyRouter);
 
 export default router;

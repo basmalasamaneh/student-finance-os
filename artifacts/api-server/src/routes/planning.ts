@@ -10,6 +10,7 @@ import {
 import { requireRole, type TrustedPrincipal } from "../lib/authorization";
 import { ApiError } from "../lib/http-errors";
 import { ownerGoals, GOAL_POLICY } from "../lib/goals";
+import { allowanceProjection, ALLOWANCE_POLICY, manualAllowanceUpcomingCovered } from "../lib/allowance-projection";
 import { canonicalCategory, halfUp, isBudgetDebit, monthlyNumerator, periodBounds, POLICY, resolveCosts, safeMinor, validDate, type Amount, type Currency } from "../lib/planning";
 
 const router: IRouter = Router();
@@ -79,6 +80,7 @@ router.get("/planning", async (req, res): Promise<void> => {
   ]);
   const now = new Date();
   const goalOverview = await ownerGoals(userId);
+  const allowancePlan = await allowanceProjection(userId);
   const today = now.toISOString().slice(0, 10);
   const setting = settingsRows[0];
   const commuteOverride = setting?.commuteOverrideEnabled ? {
@@ -120,11 +122,19 @@ router.get("/planning", async (req, res): Promise<void> => {
       income.push({ id: entry.id, source: entry.source, stability: entry.stability,
         monthlyEstimate: { currency: entry.amount.currency, minor: safeMinor(halfUp(numerator, 12n)) } });
     }
-    if (entry.expectedDate && entry.expectedDate >= today && validDate(entry.expectedDate)) upcoming.push({
+    if (entry.expectedDate && entry.expectedDate >= today && validDate(entry.expectedDate) &&
+        !manualAllowanceUpcomingCovered(entry, allowancePlan.dto.upcoming)) upcoming.push({
       id: entry.id, source: "income", description: entry.description || entry.source,
       date: entry.expectedDate, amount: entry.amount,
     });
   }
+  for (const [currency, adjustment] of allowancePlan.adjustments) {
+    incomeNumerators.set(currency as Currency, (incomeNumerators.get(currency as Currency) ?? 0n) + adjustment);
+  }
+  for (const entry of allowancePlan.dto.upcoming) upcoming.push({
+    id: entry.id, source: "income", description: "Scheduled parent allowance (simulated estimate)",
+    date: entry.date, amount: entry.amount as Amount,
+  });
   for (const entry of activeRecurring) if (entry.nextDate >= today) upcoming.push({
     id: entry.id, source: "recurring", description: entry.description || entry.category,
     date: entry.nextDate, amount: amount(entry.amountMinor, entry.currency),
@@ -154,7 +164,8 @@ router.get("/planning", async (req, res): Promise<void> => {
   });
   const budgets = await Promise.all(budgetRows.map(r => liveBudget(r, now)));
   res.json(GetFinancialPlanResponse.parse({
-    asOf: today, estimate: true, policy: POLICY + " " + GOAL_POLICY, totals, goalSavings, costs, income, irregularIncome,
+    asOf: today, estimate: true, policy: POLICY + " " + GOAL_POLICY + " " + ALLOWANCE_POLICY,
+    allowanceProjection: allowancePlan.dto, totals, goalSavings, costs, income, irregularIncome,
     irregularCount: irregularIncome.length,
     upcoming: upcoming.sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
     budgets, budgetCounts: { weekly: budgetRows.filter(r => r.period === "weekly").length,
