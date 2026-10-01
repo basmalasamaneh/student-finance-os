@@ -21,6 +21,8 @@ import type {
 
 import type {
   Account,
+  AffordabilityComparison,
+  AffordabilityRequest,
   Allowance,
   AllowanceAction,
   AllowanceInput,
@@ -136,6 +138,91 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCompareAffordabilityUrl = () => {
+
+
+
+
+  return `/api/planning/affordability`
+}
+
+/**
+ * Student-only, deterministic, read-only independent purchase scenarios from one repeatable-read snapshot. Trusted origin required. No persistence, AI, FX, money movement or recommendation.
+ */
+export const compareAffordability = async (affordabilityRequest: AffordabilityRequest, options?: Parameters<typeof customFetch>[1]): Promise<AffordabilityComparison> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AffordabilityComparison>(getCompareAffordabilityUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(affordabilityRequest)
+  }
+);}
+
+
+
+
+
+export const getCompareAffordabilityMutationKey = () => ['compareAffordability'] as const;
+
+export const getCompareAffordabilityMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof compareAffordability>>, TError,CompareAffordabilityMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof compareAffordability>>, TError,CompareAffordabilityMutationVariables, TContext> => {
+
+const mutationKey = getCompareAffordabilityMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof compareAffordability>>, CompareAffordabilityMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  compareAffordability(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompareAffordabilityMutationResult = NonNullable<Awaited<ReturnType<typeof compareAffordability>>>
+    export type CompareAffordabilityMutationBody = BodyType<AffordabilityRequest>
+    export type CompareAffordabilityMutationError = ErrorType<void>
+    export type CompareAffordabilityMutationVariables = {data: BodyType<AffordabilityRequest>}
+
+    export const useCompareAffordability = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof compareAffordability>>, TError,CompareAffordabilityMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof compareAffordability>>,
+        TError,
+        CompareAffordabilityMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCompareAffordabilityMutationOptions(options));
+    }
 
 export const getQueryAssistantUrl = () => {
 

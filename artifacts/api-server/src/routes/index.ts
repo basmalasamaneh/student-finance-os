@@ -10,6 +10,7 @@ import familyRequestsRouter from "./family-requests";
 import notificationsRouter from "./notifications";
 import scheduledRouter from "./scheduled";
 import assistantRouter from "./assistant";
+import affordabilityRouter from "./affordability";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(familyRequestsRouter);
 router.use(notificationsRouter);
 router.use(scheduledRouter);
 router.use(assistantRouter);
+router.use(affordabilityRouter);
 
 export default router;

@@ -27,6 +27,26 @@ tags:
   - name: notifications
     description: Owner-only durable in-app inbox with current consent checks
 paths:
+  /planning/affordability:
+    post:
+      operationId: compareAffordability
+      tags: [planning]
+      description: Student-only, deterministic, read-only independent purchase scenarios from one repeatable-read snapshot. Trusted origin required. No persistence, AI, FX, money movement or recommendation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AffordabilityRequest" }
+      responses:
+        "200":
+          description: Neutral signed projections; alternatives are independent, never cumulative.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AffordabilityComparison" }
+        "400": { description: "Invalid strict input, date range, account currency/type or unsafe arithmetic" }
+        "401": { description: Authentication required }
+        "403": { description: Student role and trusted origin required }
+        "404": { description: "Account not found, including foreign accounts" }
   /assistant/query:
     post:
       operationId: queryAssistant
@@ -1025,6 +1045,111 @@ components:
       required: true
       schema: { type: string, minLength: 8, maxLength: 128 }
   schemas:
+    AffordabilityRequest:
+      type: object
+      additionalProperties: false
+      required: [through, alternatives]
+      properties:
+        through: { type: string, format: date, description: "Inclusive UTC horizon from captured today, at most 366 days." }
+        alternatives:
+          type: array
+          minItems: 1
+          maxItems: 4
+          items: { $ref: "#/components/schemas/AffordabilityAlternative" }
+    AffordabilityAlternative:
+      type: object
+      additionalProperties: false
+      required: [item, price]
+      properties:
+        item: { type: string, minLength: 1, maxLength: 120 }
+        price: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        purchaseDate: { type: string, format: date, description: Defaults to captured UTC today. Must be today through horizon. Does not shift forecast opening. }
+        accountId: { type: string, format: uuid, description: Optional owned ordinary same-currency account; never replaces total opening. }
+    AffordabilityMessageCode:
+      type: string
+      enum: [today_dated_income_may_already_be_in_opening, utc_inclusive_horizon, recurrence_and_scholarship_policy, reconciled_expense_sources, constant_housing_commute_and_savings, exact_monthly_allocations_not_cash_dates, inclusive_allowance_envelope, inactive_occurrences_excluded, independent_additional_purchase, current_cash_not_purchase_date_cash, future_projection_not_guaranteed, reserves_protected_no_fx, budgets_comparison_only, goal_timeline_not_calculated, current_cash_shortfall, projected_shortfall, account_cash_shortfall, budget_category_not_provided, budget_not_configured, budget_outside_current_period, budget_comparison_available, goal_pressure_possible]
+    AffordabilityCashComparison:
+      type: object
+      required: [before, after, shortfall]
+      properties:
+        before: { $ref: "#/components/schemas/Amount" }
+        after: { $ref: "#/components/schemas/SignedAmount" }
+        shortfall: { $ref: "#/components/schemas/Amount" }
+    AffordabilityAccountComparison:
+      type: object
+      required: [accountId, cash]
+      properties:
+        accountId: { type: string, format: uuid }
+        cash: { $ref: "#/components/schemas/AffordabilityCashComparison" }
+    AffordabilityBudgetComparison:
+      type: object
+      required: [period, periodStart, periodEnd, category, limit, actualSpent, remainingBefore, remainingAfter, shortfallAfter, assessment]
+      properties:
+        period: { type: string, enum: [weekly, monthly] }
+        periodStart: { type: string, format: date }
+        periodEnd: { type: string, format: date }
+        category: { type: string }
+        limit: { $ref: "#/components/schemas/Amount" }
+        actualSpent: { $ref: "#/components/schemas/Amount" }
+        remainingBefore: { $ref: "#/components/schemas/SignedAmount" }
+        remainingAfter: { anyOf: [{ $ref: "#/components/schemas/SignedAmount" }, { type: "null" }] }
+        shortfallAfter: { anyOf: [{ $ref: "#/components/schemas/Amount" }, { type: "null" }] }
+        assessment: { type: string, enum: [compared, outside_current_period] }
+    AffordabilityGoal:
+      type: object
+      required: [id, name, target, current, remaining, targetDate, requiredContributionMonthly, baselineEstimatedCompletion]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        target: { $ref: "#/components/schemas/Amount" }
+        current: { $ref: "#/components/schemas/Amount" }
+        remaining: { $ref: "#/components/schemas/Amount" }
+        targetDate: { type: [string, "null"], format: date }
+        requiredContributionMonthly: { anyOf: [{ $ref: "#/components/schemas/Amount" }, { type: "null" }] }
+        baselineEstimatedCompletion: { type: [string, "null"], format: date }
+    AffordabilityGoalContext:
+      type: object
+      required: [goals, protectedReserves, requiredMonthly, effectiveMonthlySavings, plannedSavingsInHorizon, projectedHeadroomAfter, projectedShortfallAfter, potentialPressure, timelineImpact]
+      properties:
+        goals: { type: array, items: { $ref: "#/components/schemas/AffordabilityGoal" } }
+        protectedReserves: { $ref: "#/components/schemas/Amount" }
+        requiredMonthly: { $ref: "#/components/schemas/Amount" }
+        effectiveMonthlySavings: { $ref: "#/components/schemas/Amount" }
+        plannedSavingsInHorizon: { $ref: "#/components/schemas/Amount" }
+        projectedHeadroomAfter: { $ref: "#/components/schemas/SignedAmount" }
+        projectedShortfallAfter: { $ref: "#/components/schemas/Amount" }
+        potentialPressure: { type: boolean, description: Active same-currency goals and a negative after-purchase projection; not a recommendation or predicted delay. }
+        timelineImpact: { type: string, enum: [not_calculated] }
+    AffordabilityScenario:
+      type: object
+      required: [index, item, price, purchaseDate, baseline, currentCash, projectedAfterPurchase, projectedShortfall, accountComparison, budgetAssessment, budgets, goalContext, messageCodes]
+      properties:
+        index: { type: integer, minimum: 0, maximum: 3 }
+        item: { type: string }
+        price: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        category: { type: string }
+        purchaseDate: { type: string, format: date }
+        baseline: { $ref: "#/components/schemas/ForecastCurrency" }
+        currentCash: { $ref: "#/components/schemas/AffordabilityCashComparison" }
+        projectedAfterPurchase: { $ref: "#/components/schemas/SignedAmount" }
+        projectedShortfall: { $ref: "#/components/schemas/Amount" }
+        accountComparison: { anyOf: [{ $ref: "#/components/schemas/AffordabilityAccountComparison" }, { type: "null" }] }
+        budgetAssessment: { type: string, enum: [category_not_provided, not_configured, current_periods] }
+        budgets: { type: array, items: { $ref: "#/components/schemas/AffordabilityBudgetComparison" } }
+        goalContext: { $ref: "#/components/schemas/AffordabilityGoalContext" }
+        messageCodes: { type: array, items: { $ref: "#/components/schemas/AffordabilityMessageCode" } }
+    AffordabilityComparison:
+      type: object
+      required: [asOf, through, estimate, comparisonPolicy, assumptionCodes, sourceAssumptions, scenarios]
+      properties:
+        asOf: { type: string, format: date }
+        through: { type: string, format: date }
+        estimate: { type: boolean, enum: [true] }
+        comparisonPolicy: { type: string, enum: [independent_additional_purchase] }
+        assumptionCodes: { type: array, items: { $ref: "#/components/schemas/AffordabilityMessageCode" } }
+        sourceAssumptions: { type: array, items: { type: string }, description: Verbatim reused forecast assumptions for provenance; render localized assumptionCodes in UI. }
+        scenarios: { type: array, minItems: 1, maxItems: 4, items: { $ref: "#/components/schemas/AffordabilityScenario" } }
     AssistantQuery:
       type: object
       additionalProperties: false

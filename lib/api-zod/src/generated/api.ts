@@ -9,6 +9,292 @@ import * as zod from 'zod';
 
 
 /**
+ * Student-only, deterministic, read-only independent purchase scenarios from one repeatable-read snapshot. Trusted origin required. No persistence, AI, FX, money movement or recommendation.
+ */
+export const compareAffordabilityBodyAlternativesItemItemMax = 120;
+
+export const compareAffordabilityBodyAlternativesItemPriceMinorMax = 9007199254740991;
+
+export const compareAffordabilityBodyAlternativesMax = 4;
+
+
+
+export const CompareAffordabilityBody = zod.object({
+  "through": zod.string().date().describe('Inclusive UTC horizon from captured today, at most 366 days.'),
+  "alternatives": zod.array(zod.object({
+  "item": zod.string().min(1).max(compareAffordabilityBodyAlternativesItemItemMax),
+  "price": zod.object({
+  "minor": zod.number().int().min(1).max(compareAffordabilityBodyAlternativesItemPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']).optional(),
+  "purchaseDate": zod.string().date().optional().describe('Defaults to captured UTC today. Must be today through horizon. Does not shift forecast opening.'),
+  "accountId": zod.string().uuid().optional().describe('Optional owned ordinary same-currency account; never replaces total opening.')
+})).min(1).max(compareAffordabilityBodyAlternativesMax)
+})
+
+export const compareAffordabilityResponseScenariosItemIndexMin = 0;
+export const compareAffordabilityResponseScenariosItemIndexMax = 3;
+
+export const compareAffordabilityResponseScenariosItemPriceMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselineAvailableOpeningMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBaselineAvailableOpeningMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselineExpectedIncomeMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBaselineExpectedIncomeMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselineUpcomingExpensesMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBaselineUpcomingExpensesMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselineRecurringExpensesMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBaselineRecurringExpensesMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselinePlannedSavingsMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBaselinePlannedSavingsMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBaselineProjectedBalanceMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemBaselineProjectedBalanceMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemCurrentCashBeforeMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemCurrentCashBeforeMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemCurrentCashAfterMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemCurrentCashAfterMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemCurrentCashShortfallMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemCurrentCashShortfallMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemProjectedAfterPurchaseMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemProjectedAfterPurchaseMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemProjectedShortfallMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemProjectedShortfallMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashBeforeMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashBeforeMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashAfterMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashAfterMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashShortfallMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemAccountComparisonOneCashShortfallMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBudgetsItemLimitMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBudgetsItemLimitMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBudgetsItemActualSpentMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBudgetsItemActualSpentMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBudgetsItemRemainingBeforeMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemBudgetsItemRemainingBeforeMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBudgetsItemRemainingAfterOneMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemBudgetsItemRemainingAfterOneMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemBudgetsItemShortfallAfterOneMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemBudgetsItemShortfallAfterOneMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemTargetMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemTargetMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemCurrentMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemCurrentMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemRemainingMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemRemainingMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemRequiredContributionMonthlyOneMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextGoalsItemRequiredContributionMonthlyOneMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextProtectedReservesMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextProtectedReservesMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextRequiredMonthlyMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextRequiredMonthlyMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextEffectiveMonthlySavingsMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextEffectiveMonthlySavingsMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextPlannedSavingsInHorizonMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextPlannedSavingsInHorizonMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextProjectedHeadroomAfterMinorMin = -9007199254740991;
+export const compareAffordabilityResponseScenariosItemGoalContextProjectedHeadroomAfterMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosItemGoalContextProjectedShortfallAfterMinorMin = 0;
+export const compareAffordabilityResponseScenariosItemGoalContextProjectedShortfallAfterMinorMax = 9007199254740991;
+
+export const compareAffordabilityResponseScenariosMax = 4;
+
+
+
+export const CompareAffordabilityResponse = zod.object({
+  "asOf": zod.string().date(),
+  "through": zod.string().date(),
+  "estimate": zod.literal(true),
+  "comparisonPolicy": zod.enum(['independent_additional_purchase']),
+  "assumptionCodes": zod.array(zod.enum(['today_dated_income_may_already_be_in_opening', 'utc_inclusive_horizon', 'recurrence_and_scholarship_policy', 'reconciled_expense_sources', 'constant_housing_commute_and_savings', 'exact_monthly_allocations_not_cash_dates', 'inclusive_allowance_envelope', 'inactive_occurrences_excluded', 'independent_additional_purchase', 'current_cash_not_purchase_date_cash', 'future_projection_not_guaranteed', 'reserves_protected_no_fx', 'budgets_comparison_only', 'goal_timeline_not_calculated', 'current_cash_shortfall', 'projected_shortfall', 'account_cash_shortfall', 'budget_category_not_provided', 'budget_not_configured', 'budget_outside_current_period', 'budget_comparison_available', 'goal_pressure_possible'])),
+  "sourceAssumptions": zod.array(zod.string()).describe('Verbatim reused forecast assumptions for provenance; render localized assumptionCodes in UI.'),
+  "scenarios": zod.array(zod.object({
+  "index": zod.number().int().min(compareAffordabilityResponseScenariosItemIndexMin).max(compareAffordabilityResponseScenariosItemIndexMax),
+  "item": zod.string(),
+  "price": zod.object({
+  "minor": zod.number().int().min(1).max(compareAffordabilityResponseScenariosItemPriceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "category": zod.string().optional(),
+  "purchaseDate": zod.string().date(),
+  "baseline": zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "availableOpening": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselineAvailableOpeningMinorMin).max(compareAffordabilityResponseScenariosItemBaselineAvailableOpeningMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "expectedIncome": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselineExpectedIncomeMinorMin).max(compareAffordabilityResponseScenariosItemBaselineExpectedIncomeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "upcomingExpenses": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselineUpcomingExpensesMinorMin).max(compareAffordabilityResponseScenariosItemBaselineUpcomingExpensesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "recurringExpenses": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselineRecurringExpensesMinorMin).max(compareAffordabilityResponseScenariosItemBaselineRecurringExpensesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "plannedSavings": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselinePlannedSavingsMinorMin).max(compareAffordabilityResponseScenariosItemBaselinePlannedSavingsMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "projectedBalance": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBaselineProjectedBalanceMinorMin).max(compareAffordabilityResponseScenariosItemBaselineProjectedBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}),
+  "currentCash": zod.object({
+  "before": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemCurrentCashBeforeMinorMin).max(compareAffordabilityResponseScenariosItemCurrentCashBeforeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "after": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemCurrentCashAfterMinorMin).max(compareAffordabilityResponseScenariosItemCurrentCashAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "shortfall": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemCurrentCashShortfallMinorMin).max(compareAffordabilityResponseScenariosItemCurrentCashShortfallMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+}),
+  "projectedAfterPurchase": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemProjectedAfterPurchaseMinorMin).max(compareAffordabilityResponseScenariosItemProjectedAfterPurchaseMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "projectedShortfall": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemProjectedShortfallMinorMin).max(compareAffordabilityResponseScenariosItemProjectedShortfallMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "accountComparison": zod.union([zod.object({
+  "accountId": zod.string().uuid(),
+  "cash": zod.object({
+  "before": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemAccountComparisonOneCashBeforeMinorMin).max(compareAffordabilityResponseScenariosItemAccountComparisonOneCashBeforeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "after": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemAccountComparisonOneCashAfterMinorMin).max(compareAffordabilityResponseScenariosItemAccountComparisonOneCashAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "shortfall": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemAccountComparisonOneCashShortfallMinorMin).max(compareAffordabilityResponseScenariosItemAccountComparisonOneCashShortfallMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})
+}),zod.null()]),
+  "budgetAssessment": zod.enum(['category_not_provided', 'not_configured', 'current_periods']),
+  "budgets": zod.array(zod.object({
+  "period": zod.enum(['weekly', 'monthly']),
+  "periodStart": zod.string().date(),
+  "periodEnd": zod.string().date(),
+  "category": zod.string(),
+  "limit": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBudgetsItemLimitMinorMin).max(compareAffordabilityResponseScenariosItemBudgetsItemLimitMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "actualSpent": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBudgetsItemActualSpentMinorMin).max(compareAffordabilityResponseScenariosItemBudgetsItemActualSpentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remainingBefore": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBudgetsItemRemainingBeforeMinorMin).max(compareAffordabilityResponseScenariosItemBudgetsItemRemainingBeforeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remainingAfter": zod.union([zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBudgetsItemRemainingAfterOneMinorMin).max(compareAffordabilityResponseScenariosItemBudgetsItemRemainingAfterOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]),
+  "shortfallAfter": zod.union([zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemBudgetsItemShortfallAfterOneMinorMin).max(compareAffordabilityResponseScenariosItemBudgetsItemShortfallAfterOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]),
+  "assessment": zod.enum(['compared', 'outside_current_period'])
+})),
+  "goalContext": zod.object({
+  "goals": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "name": zod.string(),
+  "target": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextGoalsItemTargetMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextGoalsItemTargetMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "current": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextGoalsItemCurrentMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextGoalsItemCurrentMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "remaining": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextGoalsItemRemainingMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextGoalsItemRemainingMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "targetDate": zod.string().date().nullable(),
+  "requiredContributionMonthly": zod.union([zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextGoalsItemRequiredContributionMonthlyOneMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextGoalsItemRequiredContributionMonthlyOneMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),zod.null()]),
+  "baselineEstimatedCompletion": zod.string().date().nullable()
+})),
+  "protectedReserves": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextProtectedReservesMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextProtectedReservesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "requiredMonthly": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextRequiredMonthlyMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextRequiredMonthlyMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "effectiveMonthlySavings": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextEffectiveMonthlySavingsMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextEffectiveMonthlySavingsMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "plannedSavingsInHorizon": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextPlannedSavingsInHorizonMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextPlannedSavingsInHorizonMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "projectedHeadroomAfter": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextProjectedHeadroomAfterMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextProjectedHeadroomAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "projectedShortfallAfter": zod.object({
+  "minor": zod.number().int().min(compareAffordabilityResponseScenariosItemGoalContextProjectedShortfallAfterMinorMin).max(compareAffordabilityResponseScenariosItemGoalContextProjectedShortfallAfterMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "potentialPressure": zod.boolean().describe('Active same-currency goals and a negative after-purchase projection; not a recommendation or predicted delay.'),
+  "timelineImpact": zod.enum(['not_calculated'])
+}),
+  "messageCodes": zod.array(zod.enum(['today_dated_income_may_already_be_in_opening', 'utc_inclusive_horizon', 'recurrence_and_scholarship_policy', 'reconciled_expense_sources', 'constant_housing_commute_and_savings', 'exact_monthly_allocations_not_cash_dates', 'inclusive_allowance_envelope', 'inactive_occurrences_excluded', 'independent_additional_purchase', 'current_cash_not_purchase_date_cash', 'future_projection_not_guaranteed', 'reserves_protected_no_fx', 'budgets_comparison_only', 'goal_timeline_not_calculated', 'current_cash_shortfall', 'projected_shortfall', 'account_cash_shortfall', 'budget_category_not_provided', 'budget_not_configured', 'budget_outside_current_period', 'budget_comparison_available', 'goal_pressure_possible']))
+})).min(1).max(compareAffordabilityResponseScenariosMax)
+})
+
+
+/**
  * Student-only stateless read-only assistant. Requires session and trusted mutation origin. Only question, language and optional lastQuestion reach the intent planner; goalId remains server-local.
  */
 export const queryAssistantBodyQuestionMax = 1000;

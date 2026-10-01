@@ -5,6 +5,284 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
+
+
+export const GoalPositiveAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface GoalPositiveAmount {
+  /**
+     * @minimum 1
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: GoalPositiveAmountCurrency;
+}
+
+export type PlanningCategory = typeof PlanningCategory[keyof typeof PlanningCategory];
+
+
+export const PlanningCategory = {
+  tuition: 'tuition',
+  registration: 'registration',
+  university_fees: 'university_fees',
+  transportation: 'transportation',
+  food: 'food',
+  cafeteria: 'cafeteria',
+  housing: 'housing',
+  accommodation: 'accommodation',
+  rent: 'rent',
+  utilities: 'utilities',
+  internet: 'internet',
+  books: 'books',
+  bookstore: 'bookstore',
+  printing: 'printing',
+  academic_supplies: 'academic_supplies',
+  subscriptions: 'subscriptions',
+  personal: 'personal',
+  shopping: 'shopping',
+  savings: 'savings',
+  fees: 'fees',
+  campus_transportation: 'campus_transportation',
+  other: 'other',
+} as const;
+
+export interface AffordabilityAlternative {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  item: string;
+  price: GoalPositiveAmount;
+  category?: PlanningCategory;
+  /** Defaults to captured UTC today. Must be today through horizon. Does not shift forecast opening. */
+  purchaseDate?: string;
+  /** Optional owned ordinary same-currency account; never replaces total opening. */
+  accountId?: string;
+}
+
+export interface AffordabilityRequest {
+  /** Inclusive UTC horizon from captured today, at most 366 days. */
+  through: string;
+  /**
+     * @minItems 1
+     * @maxItems 4
+     */
+  alternatives: AffordabilityAlternative[];
+}
+
+export type AffordabilityMessageCode = typeof AffordabilityMessageCode[keyof typeof AffordabilityMessageCode];
+
+
+export const AffordabilityMessageCode = {
+  today_dated_income_may_already_be_in_opening: 'today_dated_income_may_already_be_in_opening',
+  utc_inclusive_horizon: 'utc_inclusive_horizon',
+  recurrence_and_scholarship_policy: 'recurrence_and_scholarship_policy',
+  reconciled_expense_sources: 'reconciled_expense_sources',
+  constant_housing_commute_and_savings: 'constant_housing_commute_and_savings',
+  exact_monthly_allocations_not_cash_dates: 'exact_monthly_allocations_not_cash_dates',
+  inclusive_allowance_envelope: 'inclusive_allowance_envelope',
+  inactive_occurrences_excluded: 'inactive_occurrences_excluded',
+  independent_additional_purchase: 'independent_additional_purchase',
+  current_cash_not_purchase_date_cash: 'current_cash_not_purchase_date_cash',
+  future_projection_not_guaranteed: 'future_projection_not_guaranteed',
+  reserves_protected_no_fx: 'reserves_protected_no_fx',
+  budgets_comparison_only: 'budgets_comparison_only',
+  goal_timeline_not_calculated: 'goal_timeline_not_calculated',
+  current_cash_shortfall: 'current_cash_shortfall',
+  projected_shortfall: 'projected_shortfall',
+  account_cash_shortfall: 'account_cash_shortfall',
+  budget_category_not_provided: 'budget_category_not_provided',
+  budget_not_configured: 'budget_not_configured',
+  budget_outside_current_period: 'budget_outside_current_period',
+  budget_comparison_available: 'budget_comparison_available',
+  goal_pressure_possible: 'goal_pressure_possible',
+} as const;
+
+export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
+
+
+export const AmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface Amount {
+  /**
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: AmountCurrency;
+}
+
+export type SignedAmountCurrency = typeof SignedAmountCurrency[keyof typeof SignedAmountCurrency];
+
+
+export const SignedAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface SignedAmount {
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: SignedAmountCurrency;
+}
+
+export interface AffordabilityCashComparison {
+  before: Amount;
+  after: SignedAmount;
+  shortfall: Amount;
+}
+
+export interface AffordabilityAccountComparison {
+  accountId: string;
+  cash: AffordabilityCashComparison;
+}
+
+export type AffordabilityBudgetComparisonPeriod = typeof AffordabilityBudgetComparisonPeriod[keyof typeof AffordabilityBudgetComparisonPeriod];
+
+
+export const AffordabilityBudgetComparisonPeriod = {
+  weekly: 'weekly',
+  monthly: 'monthly',
+} as const;
+
+export type AffordabilityBudgetComparisonAssessment = typeof AffordabilityBudgetComparisonAssessment[keyof typeof AffordabilityBudgetComparisonAssessment];
+
+
+export const AffordabilityBudgetComparisonAssessment = {
+  compared: 'compared',
+  outside_current_period: 'outside_current_period',
+} as const;
+
+export interface AffordabilityBudgetComparison {
+  period: AffordabilityBudgetComparisonPeriod;
+  periodStart: string;
+  periodEnd: string;
+  category: string;
+  limit: Amount;
+  actualSpent: Amount;
+  remainingBefore: SignedAmount;
+  remainingAfter: SignedAmount | null;
+  shortfallAfter: Amount | null;
+  assessment: AffordabilityBudgetComparisonAssessment;
+}
+
+export interface AffordabilityGoal {
+  id: string;
+  name: string;
+  target: Amount;
+  current: Amount;
+  remaining: Amount;
+  /** @nullable */
+  targetDate: string | null;
+  requiredContributionMonthly: Amount | null;
+  /** @nullable */
+  baselineEstimatedCompletion: string | null;
+}
+
+export type AffordabilityGoalContextTimelineImpact = typeof AffordabilityGoalContextTimelineImpact[keyof typeof AffordabilityGoalContextTimelineImpact];
+
+
+export const AffordabilityGoalContextTimelineImpact = {
+  not_calculated: 'not_calculated',
+} as const;
+
+export interface AffordabilityGoalContext {
+  goals: AffordabilityGoal[];
+  protectedReserves: Amount;
+  requiredMonthly: Amount;
+  effectiveMonthlySavings: Amount;
+  plannedSavingsInHorizon: Amount;
+  projectedHeadroomAfter: SignedAmount;
+  projectedShortfallAfter: Amount;
+  /** Active same-currency goals and a negative after-purchase projection; not a recommendation or predicted delay. */
+  potentialPressure: boolean;
+  timelineImpact: AffordabilityGoalContextTimelineImpact;
+}
+
+export type AffordabilityScenarioBudgetAssessment = typeof AffordabilityScenarioBudgetAssessment[keyof typeof AffordabilityScenarioBudgetAssessment];
+
+
+export const AffordabilityScenarioBudgetAssessment = {
+  category_not_provided: 'category_not_provided',
+  not_configured: 'not_configured',
+  current_periods: 'current_periods',
+} as const;
+
+export type ForecastCurrencyCurrency = typeof ForecastCurrencyCurrency[keyof typeof ForecastCurrencyCurrency];
+
+
+export const ForecastCurrencyCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface ForecastCurrency {
+  currency: ForecastCurrencyCurrency;
+  availableOpening: Amount;
+  expectedIncome: Amount;
+  upcomingExpenses: Amount;
+  recurringExpenses: Amount;
+  plannedSavings: Amount;
+  projectedBalance: SignedAmount;
+}
+
+export interface AffordabilityScenario {
+  /**
+     * @minimum 0
+     * @maximum 3
+     */
+  index: number;
+  item: string;
+  price: GoalPositiveAmount;
+  category?: string;
+  purchaseDate: string;
+  baseline: ForecastCurrency;
+  currentCash: AffordabilityCashComparison;
+  projectedAfterPurchase: SignedAmount;
+  projectedShortfall: Amount;
+  accountComparison: AffordabilityAccountComparison | null;
+  budgetAssessment: AffordabilityScenarioBudgetAssessment;
+  budgets: AffordabilityBudgetComparison[];
+  goalContext: AffordabilityGoalContext;
+  messageCodes: AffordabilityMessageCode[];
+}
+
+export type AffordabilityComparisonComparisonPolicy = typeof AffordabilityComparisonComparisonPolicy[keyof typeof AffordabilityComparisonComparisonPolicy];
+
+
+export const AffordabilityComparisonComparisonPolicy = {
+  independent_additional_purchase: 'independent_additional_purchase',
+} as const;
+
+export interface AffordabilityComparison {
+  asOf: string;
+  through: string;
+  estimate: true;
+  comparisonPolicy: AffordabilityComparisonComparisonPolicy;
+  assumptionCodes: AffordabilityMessageCode[];
+  /** Verbatim reused forecast assumptions for provenance; render localized assumptionCodes in UI. */
+  sourceAssumptions: string[];
+  /**
+     * @minItems 1
+     * @maxItems 4
+     */
+  scenarios: AffordabilityScenario[];
+}
+
 export type AssistantQueryLanguage = typeof AssistantQueryLanguage[keyof typeof AssistantQueryLanguage];
 
 
@@ -126,24 +404,6 @@ export interface AssistantAnswer {
   policy: string;
 }
 
-export type GoalPositiveAmountCurrency = typeof GoalPositiveAmountCurrency[keyof typeof GoalPositiveAmountCurrency];
-
-
-export const GoalPositiveAmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface GoalPositiveAmount {
-  /**
-     * @minimum 1
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: GoalPositiveAmountCurrency;
-}
-
 export interface FamilyMoneyRequestInput {
   familyLinkId: string;
   receivingAccountId: string;
@@ -195,24 +455,6 @@ export const FamilyMoneyRequestStatus = {
   declined: 'declined',
   cancelled: 'cancelled',
 } as const;
-
-export type AmountCurrency = typeof AmountCurrency[keyof typeof AmountCurrency];
-
-
-export const AmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface Amount {
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: AmountCurrency;
-}
 
 export interface FamilyMoneyRequest {
   id: string;
@@ -1061,34 +1303,6 @@ export interface ParentGoalContributionReceipt {
   createdAt: string;
 }
 
-export type PlanningCategory = typeof PlanningCategory[keyof typeof PlanningCategory];
-
-
-export const PlanningCategory = {
-  tuition: 'tuition',
-  registration: 'registration',
-  university_fees: 'university_fees',
-  transportation: 'transportation',
-  food: 'food',
-  cafeteria: 'cafeteria',
-  housing: 'housing',
-  accommodation: 'accommodation',
-  rent: 'rent',
-  utilities: 'utilities',
-  internet: 'internet',
-  books: 'books',
-  bookstore: 'bookstore',
-  printing: 'printing',
-  academic_supplies: 'academic_supplies',
-  subscriptions: 'subscriptions',
-  personal: 'personal',
-  shopping: 'shopping',
-  savings: 'savings',
-  fees: 'fees',
-  campus_transportation: 'campus_transportation',
-  other: 'other',
-} as const;
-
 export type ScheduledRecurrence = typeof ScheduledRecurrence[keyof typeof ScheduledRecurrence];
 
 
@@ -1244,43 +1458,6 @@ export interface PlanningCalendar {
   assumptionCodes: PlanningCalendarAssumptionCodesItem[];
   occurrences: PlanningOccurrence[];
   monthlyAllocations: PlanningMonthlyAllocation[];
-}
-
-export type ForecastCurrencyCurrency = typeof ForecastCurrencyCurrency[keyof typeof ForecastCurrencyCurrency];
-
-
-export const ForecastCurrencyCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export type SignedAmountCurrency = typeof SignedAmountCurrency[keyof typeof SignedAmountCurrency];
-
-
-export const SignedAmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface SignedAmount {
-  /**
-     * @minimum -9007199254740991
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: SignedAmountCurrency;
-}
-
-export interface ForecastCurrency {
-  currency: ForecastCurrencyCurrency;
-  availableOpening: Amount;
-  expectedIncome: Amount;
-  upcomingExpenses: Amount;
-  recurringExpenses: Amount;
-  plannedSavings: Amount;
-  projectedBalance: SignedAmount;
 }
 
 export type PlanningForecastLabel = typeof PlanningForecastLabel[keyof typeof PlanningForecastLabel];

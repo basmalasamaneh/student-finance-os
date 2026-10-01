@@ -165,9 +165,10 @@ export async function planningCalendar(userId: string, from: string, to: string)
 }
 // All reads, including the monthly plan's goals, reserve holdings, budgets and allowance
 // projection, use the caller's snapshot. Exposed internally for controlled concurrency tests.
-export async function forecastSnapshot(reader: Reader, userId: string, today: string, through: string): Promise<PlanningForecast> {
+export async function forecastSnapshot(reader: Reader, userId: string, today: string, through: string,
+  context?: { now?: Date; plan?: Plan }): Promise<PlanningForecast> {
   assertRange(today, through);
-  const plan = await financialPlanSnapshot(userId, reader);
+  const plan = context?.plan ?? await financialPlanSnapshot(userId, reader, context?.now);
   const calendar = await calendarSnapshot(reader, userId, today, through, plan);
   const accounts = await reader.select().from(financeAccounts).where(eq(financeAccounts.userId, userId));
   const opening = accounts.filter(a => a.type !== "goal_reserve").map(a => money(a.balanceMinor, a.currency));

@@ -66,7 +66,8 @@ async function liveBudget(row: typeof planningBudgets.$inferSelect, now = new Da
   ), 0n);
   return budgetDto(row, spent, now);
 }
-export async function financialPlanSnapshot(userId: string, snapshotReader?: Pick<typeof db, "select">) {
+export async function financialPlanSnapshot(userId: string, snapshotReader?: Pick<typeof db, "select">,
+  now = new Date(), suppliedGoals?: Awaited<ReturnType<typeof ownerGoals>>) {
   const reader = snapshotReader ?? db;
   const [user] = await reader.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user) throw new ApiError("UNAUTHENTICATED");
@@ -76,9 +77,8 @@ export async function financialPlanSnapshot(userId: string, snapshotReader?: Pic
   const incomeRows = await reader.select().from(incomes).where(eq(incomes.userId, userId));
   const scholarshipRows = await reader.select().from(scholarships).where(eq(scholarships.userId, userId));
   const settingsRows = await reader.select().from(planningSettings).where(eq(planningSettings.userId, userId));
-  const now = new Date();
-  const goalOverview = await ownerGoals(userId, snapshotReader);
-  const allowancePlan = await allowanceProjection(userId, undefined, reader);
+  const goalOverview = suppliedGoals ?? await ownerGoals(userId, snapshotReader, now);
+  const allowancePlan = await allowanceProjection(userId, now.toISOString().slice(0, 10), reader);
   const today = now.toISOString().slice(0, 10);
   const setting = settingsRows[0];
   const commuteOverride = setting?.commuteOverrideEnabled ? {

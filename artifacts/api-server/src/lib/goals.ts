@@ -49,7 +49,9 @@ export async function readGoal(tx: Tx, goal: SavingsGoalRow) {
   const history = await tx.select().from(goalHistory).where(eq(goalHistory.goalId, goal.id));
   return goalDto(goal, reserve, history);
 }
-export async function ownerGoals(userId: string, reader?: Pick<typeof db, "select">) {
+export async function ownerGoals(userId: string, reader?: Pick<typeof db, "select">, now = new Date(),
+  overflowCode: "CONFLICT" | "BAD_REQUEST" = "CONFLICT") {
+  const aggregate = (value: bigint) => checked(value, overflowCode);
   const snapshot = async (tx: Pick<typeof db, "select">) => {
     const rows = await tx.select().from(savingsGoals).where(eq(savingsGoals.userId, userId)).orderBy(desc(savingsGoals.createdAt), savingsGoals.id);
     const accounts = await tx.select().from(financeAccounts).where(eq(financeAccounts.userId, userId));
@@ -58,21 +60,21 @@ export async function ownerGoals(userId: string, reader?: Pick<typeof db, "selec
     const goals = rows.map(g => {
       const reserve = accountMap.get(g.reserveAccountId);
       if (!reserve) throw new ApiError("INTERNAL_ERROR");
-      return goalDto(g, reserve, history.filter(h => h.goalId === g.id));
+      return goalDto(g, reserve, history.filter(h => h.goalId === g.id), now);
     });
     const totals = new Map<string, { available: bigint; reserved: bigint; required: bigint }>();
     for (const account of accounts) {
       const bucket = totals.get(account.currency) ?? { available: 0n, reserved: 0n, required: 0n };
-      if (account.type === "goal_reserve") bucket.reserved = checked(bucket.reserved + account.balanceMinor);
-      else bucket.available = checked(bucket.available + account.balanceMinor);
+      if (account.type === "goal_reserve") bucket.reserved = aggregate(bucket.reserved + account.balanceMinor);
+      else bucket.available = aggregate(bucket.available + account.balanceMinor);
       totals.set(account.currency, bucket);
     }
     for (const goal of goals) {
       const bucket = totals.get(goal.currency)!;
-      bucket.required = checked(bucket.required + BigInt(goal.requiredContributionMonthly?.minor ?? 0));
+      bucket.required = aggregate(bucket.required + BigInt(goal.requiredContributionMonthly?.minor ?? 0));
     }
     return { goals, totals: [...totals].map(([currency, t]) => ({ currency, available: amount(t.available, currency),
-      reserved: amount(t.reserved, currency), netBalance: amount(checked(t.available + t.reserved), currency),
+      reserved: amount(t.reserved, currency), netBalance: amount(aggregate(t.available + t.reserved), currency),
       requiredContributionMonthly: amount(t.required, currency) })),
       activeCount: goals.filter(g => g.status === "active").length,
       completedCount: goals.filter(g => g.status === "completed").length, policy: GOAL_POLICY };
