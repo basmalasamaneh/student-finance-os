@@ -8,6 +8,361 @@
 import * as zod from 'zod';
 
 
+export const listScheduledItemsResponseOneNameMax = 160;
+
+export const listScheduledItemsResponseOneAmountMinorMax = 9007199254740991;
+
+export const listScheduledItemsResponseOneNotesMax = 2000;
+
+
+
+export const ListScheduledItemsResponseItem = zod.object({
+  "name": zod.string().min(1).max(listScheduledItemsResponseOneNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(listScheduledItemsResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(listScheduledItemsResponseOneNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "commitmentPolicy": zod.enum(['additional_commitment'])
+}))
+export const ListScheduledItemsResponse = zod.array(ListScheduledItemsResponseItem)
+
+
+export const createScheduledItemBodyNameMax = 160;
+
+export const createScheduledItemBodyAmountMinorMax = 9007199254740991;
+
+export const createScheduledItemBodyNotesMax = 2000;
+
+
+
+export const CreateScheduledItemBody = zod.object({
+  "name": zod.string().min(1).max(createScheduledItemBodyNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(createScheduledItemBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(createScheduledItemBodyNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+})
+
+export const createScheduledItemResponseOneNameMax = 160;
+
+export const createScheduledItemResponseOneAmountMinorMax = 9007199254740991;
+
+export const createScheduledItemResponseOneNotesMax = 2000;
+
+
+
+export const CreateScheduledItemResponse = zod.object({
+  "name": zod.string().min(1).max(createScheduledItemResponseOneNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(createScheduledItemResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(createScheduledItemResponseOneNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "commitmentPolicy": zod.enum(['additional_commitment'])
+}))
+
+
+export const GetScheduledItemParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getScheduledItemResponseOneNameMax = 160;
+
+export const getScheduledItemResponseOneAmountMinorMax = 9007199254740991;
+
+export const getScheduledItemResponseOneNotesMax = 2000;
+
+
+
+export const GetScheduledItemResponse = zod.object({
+  "name": zod.string().min(1).max(getScheduledItemResponseOneNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(getScheduledItemResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(getScheduledItemResponseOneNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "commitmentPolicy": zod.enum(['additional_commitment'])
+}))
+
+
+export const UpdateScheduledItemParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const updateScheduledItemBodyNameMax = 160;
+
+export const updateScheduledItemBodyAmountMinorMax = 9007199254740991;
+
+export const updateScheduledItemBodyNotesMax = 2000;
+
+
+
+export const UpdateScheduledItemBody = zod.object({
+  "name": zod.string().min(1).max(updateScheduledItemBodyNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(updateScheduledItemBodyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(updateScheduledItemBodyNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+})
+
+export const updateScheduledItemResponseOneNameMax = 160;
+
+export const updateScheduledItemResponseOneAmountMinorMax = 9007199254740991;
+
+export const updateScheduledItemResponseOneNotesMax = 2000;
+
+
+
+export const UpdateScheduledItemResponse = zod.object({
+  "name": zod.string().min(1).max(updateScheduledItemResponseOneNameMax),
+  "amount": zod.object({
+  "minor": zod.number().int().min(1).max(updateScheduledItemResponseOneAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "dueDate": zod.string().date(),
+  "category": zod.enum(['tuition', 'registration', 'university_fees', 'transportation', 'food', 'cafeteria', 'housing', 'accommodation', 'rent', 'utilities', 'internet', 'books', 'bookstore', 'printing', 'academic_supplies', 'subscriptions', 'personal', 'shopping', 'savings', 'fees', 'campus_transportation', 'other']),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "notes": zod.string().max(updateScheduledItemResponseOneNotesMax),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "endDate": zod.string().date().optional(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+}).and(zod.object({
+  "id": zod.string().uuid(),
+  "commitmentPolicy": zod.enum(['additional_commitment'])
+}))
+
+
+export const DeleteScheduledItemParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const DeleteScheduledItemResponse = zod.void()
+
+
+export const SetScheduledOccurrenceStatusParams = zod.object({
+  "id": zod.coerce.string().uuid(),
+  "date": zod.coerce.string().date()
+})
+
+export const SetScheduledOccurrenceStatusBody = zod.object({
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+})
+
+export const SetScheduledOccurrenceStatusResponse = zod.object({
+  "itemId": zod.string().uuid(),
+  "date": zod.string().date(),
+  "status": zod.enum(['planned', 'completed', 'cancelled'])
+})
+
+
+export const GetPlanningCalendarQueryParams = zod.object({
+  "from": zod.coerce.string().date(),
+  "to": zod.coerce.string().date()
+})
+
+export const getPlanningCalendarResponseOccurrencesItemAmountMinorMin = 0;
+export const getPlanningCalendarResponseOccurrencesItemAmountMinorMax = 9007199254740991;
+
+export const getPlanningCalendarResponseMonthlyAllocationsItemMonthlyAmountMinorMin = 0;
+export const getPlanningCalendarResponseMonthlyAllocationsItemMonthlyAmountMinorMax = 9007199254740991;
+
+export const getPlanningCalendarResponseMonthlyAllocationsItemAllocatedAmountMinorMin = 0;
+export const getPlanningCalendarResponseMonthlyAllocationsItemAllocatedAmountMinorMax = 9007199254740991;
+
+
+
+export const GetPlanningCalendarResponse = zod.object({
+  "from": zod.string().date(),
+  "to": zod.string().date(),
+  "estimate": zod.literal(true),
+  "policy": zod.string(),
+  "assumptions": zod.array(zod.string()),
+  "assumptionCodes": zod.array(zod.enum(['today_dated_income_may_already_be_in_opening'])),
+  "occurrences": zod.array(zod.object({
+  "id": zod.string(),
+  "sourceId": zod.string().uuid(),
+  "source": zod.enum(['scheduled_item', 'income', 'allowance', 'recurring', 'line']),
+  "name": zod.string(),
+  "date": zod.string().date(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getPlanningCalendarResponseOccurrencesItemAmountMinorMin).max(getPlanningCalendarResponseOccurrencesItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "category": zod.string(),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "status": zod.enum(['planned', 'completed', 'cancelled', 'posted']),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "includedInForecast": zod.boolean(),
+  "policy": zod.string()
+})),
+  "monthlyAllocations": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.enum(['Undated monthly allocation']),
+  "source": zod.enum(['manual', 'profile', 'override', 'income', 'goal_savings', 'allowance_envelope']),
+  "category": zod.string(),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "month": zod.string(),
+  "from": zod.string().date(),
+  "to": zod.string().date(),
+  "monthlyAmount": zod.object({
+  "minor": zod.number().int().min(getPlanningCalendarResponseMonthlyAllocationsItemMonthlyAmountMinorMin).max(getPlanningCalendarResponseMonthlyAllocationsItemMonthlyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "allocatedAmount": zod.object({
+  "minor": zod.number().int().min(getPlanningCalendarResponseMonthlyAllocationsItemAllocatedAmountMinorMin).max(getPlanningCalendarResponseMonthlyAllocationsItemAllocatedAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "policy": zod.string()
+}))
+})
+
+
+export const GetPlanningForecastQueryParams = zod.object({
+  "through": zod.coerce.string().date()
+})
+
+export const getPlanningForecastResponseCurrenciesItemAvailableOpeningMinorMin = 0;
+export const getPlanningForecastResponseCurrenciesItemAvailableOpeningMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseCurrenciesItemExpectedIncomeMinorMin = 0;
+export const getPlanningForecastResponseCurrenciesItemExpectedIncomeMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseCurrenciesItemUpcomingExpensesMinorMin = 0;
+export const getPlanningForecastResponseCurrenciesItemUpcomingExpensesMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseCurrenciesItemRecurringExpensesMinorMin = 0;
+export const getPlanningForecastResponseCurrenciesItemRecurringExpensesMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseCurrenciesItemPlannedSavingsMinorMin = 0;
+export const getPlanningForecastResponseCurrenciesItemPlannedSavingsMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseCurrenciesItemProjectedBalanceMinorMin = -9007199254740991;
+export const getPlanningForecastResponseCurrenciesItemProjectedBalanceMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseOccurrencesItemAmountMinorMin = 0;
+export const getPlanningForecastResponseOccurrencesItemAmountMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseMonthlyAllocationsItemMonthlyAmountMinorMin = 0;
+export const getPlanningForecastResponseMonthlyAllocationsItemMonthlyAmountMinorMax = 9007199254740991;
+
+export const getPlanningForecastResponseMonthlyAllocationsItemAllocatedAmountMinorMin = 0;
+export const getPlanningForecastResponseMonthlyAllocationsItemAllocatedAmountMinorMax = 9007199254740991;
+
+
+
+export const GetPlanningForecastResponse = zod.object({
+  "asOf": zod.string().date(),
+  "through": zod.string().date(),
+  "estimate": zod.literal(true),
+  "label": zod.enum(['Estimated / Projected']),
+  "policy": zod.string(),
+  "assumptions": zod.array(zod.string()),
+  "assumptionCodes": zod.array(zod.enum(['today_dated_income_may_already_be_in_opening'])),
+  "currencies": zod.array(zod.object({
+  "currency": zod.enum(['ILS', 'USD', 'JOD']),
+  "availableOpening": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemAvailableOpeningMinorMin).max(getPlanningForecastResponseCurrenciesItemAvailableOpeningMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "expectedIncome": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemExpectedIncomeMinorMin).max(getPlanningForecastResponseCurrenciesItemExpectedIncomeMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "upcomingExpenses": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemUpcomingExpensesMinorMin).max(getPlanningForecastResponseCurrenciesItemUpcomingExpensesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "recurringExpenses": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemRecurringExpensesMinorMin).max(getPlanningForecastResponseCurrenciesItemRecurringExpensesMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "plannedSavings": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemPlannedSavingsMinorMin).max(getPlanningForecastResponseCurrenciesItemPlannedSavingsMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "projectedBalance": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseCurrenciesItemProjectedBalanceMinorMin).max(getPlanningForecastResponseCurrenciesItemProjectedBalanceMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+})
+})),
+  "occurrences": zod.array(zod.object({
+  "id": zod.string(),
+  "sourceId": zod.string().uuid(),
+  "source": zod.enum(['scheduled_item', 'income', 'allowance', 'recurring', 'line']),
+  "name": zod.string(),
+  "date": zod.string().date(),
+  "amount": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseOccurrencesItemAmountMinorMin).max(getPlanningForecastResponseOccurrencesItemAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "category": zod.string(),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "status": zod.enum(['planned', 'completed', 'cancelled', 'posted']),
+  "recurrence": zod.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly']),
+  "includedInForecast": zod.boolean(),
+  "policy": zod.string()
+})),
+  "monthlyAllocations": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.enum(['Undated monthly allocation']),
+  "source": zod.enum(['manual', 'profile', 'override', 'income', 'goal_savings', 'allowance_envelope']),
+  "category": zod.string(),
+  "kind": zod.enum(['expense', 'income', 'savings']),
+  "month": zod.string(),
+  "from": zod.string().date(),
+  "to": zod.string().date(),
+  "monthlyAmount": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseMonthlyAllocationsItemMonthlyAmountMinorMin).max(getPlanningForecastResponseMonthlyAllocationsItemMonthlyAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "allocatedAmount": zod.object({
+  "minor": zod.number().int().min(getPlanningForecastResponseMonthlyAllocationsItemAllocatedAmountMinorMin).max(getPlanningForecastResponseMonthlyAllocationsItemAllocatedAmountMinorMax),
+  "currency": zod.enum(['ILS', 'USD', 'JOD'])
+}),
+  "policy": zod.string()
+}))
+})
+
+
 export const listStudentFamilyRequestsResponseAmountMinorMin = 0;
 export const listStudentFamilyRequestsResponseAmountMinorMax = 9007199254740991;
 

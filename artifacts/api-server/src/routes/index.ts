@@ -8,6 +8,7 @@ import goalsRouter from "./goals";
 import familyRouter from "./family";
 import familyRequestsRouter from "./family-requests";
 import notificationsRouter from "./notifications";
+import scheduledRouter from "./scheduled";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(goalsRouter);
 router.use(familyRouter);
 router.use(familyRequestsRouter);
 router.use(notificationsRouter);
+router.use(scheduledRouter);
 
 export default router;

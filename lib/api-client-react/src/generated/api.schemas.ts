@@ -968,6 +968,227 @@ export const PlanningCategory = {
   other: 'other',
 } as const;
 
+export type ScheduledRecurrence = typeof ScheduledRecurrence[keyof typeof ScheduledRecurrence];
+
+
+export const ScheduledRecurrence = {
+  none: 'none',
+  daily: 'daily',
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  monthly: 'monthly',
+  quarterly: 'quarterly',
+  yearly: 'yearly',
+} as const;
+
+export type ScheduledStatus = typeof ScheduledStatus[keyof typeof ScheduledStatus];
+
+
+export const ScheduledStatus = {
+  planned: 'planned',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export type ScheduledKind = typeof ScheduledKind[keyof typeof ScheduledKind];
+
+
+export const ScheduledKind = {
+  expense: 'expense',
+  income: 'income',
+  savings: 'savings',
+} as const;
+
+export interface ScheduledItemInput {
+  /**
+     * @minLength 1
+     * @maxLength 160
+     */
+  name: string;
+  amount: GoalPositiveAmount;
+  dueDate: string;
+  category: PlanningCategory;
+  kind: ScheduledKind;
+  /** @maxLength 2000 */
+  notes: string;
+  recurrence: ScheduledRecurrence;
+  endDate?: string;
+  status: ScheduledStatus;
+}
+
+export type ScheduledItemCommitmentPolicy = typeof ScheduledItemCommitmentPolicy[keyof typeof ScheduledItemCommitmentPolicy];
+
+
+export const ScheduledItemCommitmentPolicy = {
+  additional_commitment: 'additional_commitment',
+} as const;
+
+export type ScheduledItem = ScheduledItemInput & {
+  id: string;
+  commitmentPolicy: ScheduledItemCommitmentPolicy;
+};
+
+export interface ScheduledOccurrenceStatusInput {
+  status: ScheduledStatus;
+}
+
+export interface ScheduledOccurrenceOverride {
+  itemId: string;
+  date: string;
+  status: ScheduledStatus;
+}
+
+export type PlanningOccurrenceSource = typeof PlanningOccurrenceSource[keyof typeof PlanningOccurrenceSource];
+
+
+export const PlanningOccurrenceSource = {
+  scheduled_item: 'scheduled_item',
+  income: 'income',
+  allowance: 'allowance',
+  recurring: 'recurring',
+  line: 'line',
+} as const;
+
+export type PlanningOccurrenceStatus = typeof PlanningOccurrenceStatus[keyof typeof PlanningOccurrenceStatus];
+
+
+export const PlanningOccurrenceStatus = {
+  planned: 'planned',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  posted: 'posted',
+} as const;
+
+export interface PlanningOccurrence {
+  id: string;
+  sourceId: string;
+  source: PlanningOccurrenceSource;
+  name: string;
+  date: string;
+  amount: Amount;
+  category: string;
+  kind: ScheduledKind;
+  status: PlanningOccurrenceStatus;
+  recurrence: ScheduledRecurrence;
+  includedInForecast: boolean;
+  policy: string;
+}
+
+export type PlanningMonthlyAllocationLabel = typeof PlanningMonthlyAllocationLabel[keyof typeof PlanningMonthlyAllocationLabel];
+
+
+export const PlanningMonthlyAllocationLabel = {
+  Undated_monthly_allocation: 'Undated monthly allocation',
+} as const;
+
+export type PlanningMonthlyAllocationSource = typeof PlanningMonthlyAllocationSource[keyof typeof PlanningMonthlyAllocationSource];
+
+
+export const PlanningMonthlyAllocationSource = {
+  manual: 'manual',
+  profile: 'profile',
+  override: 'override',
+  income: 'income',
+  goal_savings: 'goal_savings',
+  allowance_envelope: 'allowance_envelope',
+} as const;
+
+export interface PlanningMonthlyAllocation {
+  id: string;
+  label: PlanningMonthlyAllocationLabel;
+  source: PlanningMonthlyAllocationSource;
+  category: string;
+  kind: ScheduledKind;
+  month: string;
+  from: string;
+  to: string;
+  monthlyAmount: Amount;
+  allocatedAmount: Amount;
+  policy: string;
+}
+
+export type PlanningCalendarAssumptionCodesItem = typeof PlanningCalendarAssumptionCodesItem[keyof typeof PlanningCalendarAssumptionCodesItem];
+
+
+export const PlanningCalendarAssumptionCodesItem = {
+  today_dated_income_may_already_be_in_opening: 'today_dated_income_may_already_be_in_opening',
+} as const;
+
+export interface PlanningCalendar {
+  from: string;
+  to: string;
+  estimate: true;
+  policy: string;
+  assumptions: string[];
+  assumptionCodes: PlanningCalendarAssumptionCodesItem[];
+  occurrences: PlanningOccurrence[];
+  monthlyAllocations: PlanningMonthlyAllocation[];
+}
+
+export type ForecastCurrencyCurrency = typeof ForecastCurrencyCurrency[keyof typeof ForecastCurrencyCurrency];
+
+
+export const ForecastCurrencyCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export type SignedAmountCurrency = typeof SignedAmountCurrency[keyof typeof SignedAmountCurrency];
+
+
+export const SignedAmountCurrency = {
+  ILS: 'ILS',
+  USD: 'USD',
+  JOD: 'JOD',
+} as const;
+
+export interface SignedAmount {
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  minor: number;
+  currency: SignedAmountCurrency;
+}
+
+export interface ForecastCurrency {
+  currency: ForecastCurrencyCurrency;
+  availableOpening: Amount;
+  expectedIncome: Amount;
+  upcomingExpenses: Amount;
+  recurringExpenses: Amount;
+  plannedSavings: Amount;
+  projectedBalance: SignedAmount;
+}
+
+export type PlanningForecastLabel = typeof PlanningForecastLabel[keyof typeof PlanningForecastLabel];
+
+
+export const PlanningForecastLabel = {
+  'Estimated_/_Projected': 'Estimated / Projected',
+} as const;
+
+export type PlanningForecastAssumptionCodesItem = typeof PlanningForecastAssumptionCodesItem[keyof typeof PlanningForecastAssumptionCodesItem];
+
+
+export const PlanningForecastAssumptionCodesItem = {
+  today_dated_income_may_already_be_in_opening: 'today_dated_income_may_already_be_in_opening',
+} as const;
+
+export interface PlanningForecast {
+  asOf: string;
+  through: string;
+  estimate: true;
+  label: PlanningForecastLabel;
+  policy: string;
+  assumptions: string[];
+  assumptionCodes: PlanningForecastAssumptionCodesItem[];
+  currencies: ForecastCurrency[];
+  occurrences: PlanningOccurrence[];
+  monthlyAllocations: PlanningMonthlyAllocation[];
+}
+
 export type BudgetInputPeriod = typeof BudgetInputPeriod[keyof typeof BudgetInputPeriod];
 
 
@@ -989,24 +1210,6 @@ export const BudgetPeriod = {
   weekly: 'weekly',
   monthly: 'monthly',
 } as const;
-
-export type SignedAmountCurrency = typeof SignedAmountCurrency[keyof typeof SignedAmountCurrency];
-
-
-export const SignedAmountCurrency = {
-  ILS: 'ILS',
-  USD: 'USD',
-  JOD: 'JOD',
-} as const;
-
-export interface SignedAmount {
-  /**
-     * @minimum -9007199254740991
-     * @maximum 9007199254740991
-     */
-  minor: number;
-  currency: SignedAmountCurrency;
-}
 
 export interface Budget {
   id: string;
@@ -1816,6 +2019,15 @@ export interface HealthStatus {
 }
 
 export type IdempotencyKeyParameter = string;
+
+export type GetPlanningCalendarParams = {
+from: string;
+to: string;
+};
+
+export type GetPlanningForecastParams = {
+through: string;
+};
 
 export type GetFinanceHistoryParams = {
 /**

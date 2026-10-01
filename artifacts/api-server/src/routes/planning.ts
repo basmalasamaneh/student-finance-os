@@ -51,9 +51,9 @@ function isUnique(error: unknown): boolean {
   return "cause" in error && error.cause !== error && isUnique(error.cause);
 }
 
-async function liveBudget(row: typeof planningBudgets.$inferSelect, now = new Date()) {
+async function liveBudget(row: typeof planningBudgets.$inferSelect, now = new Date(), reader: Pick<typeof db, "select"> = db) {
   const { start, end } = periodBounds(row.period as "weekly" | "monthly", now);
-  const transactions = await db.select({
+  const transactions = await reader.select({
     category: financeTransactions.category, direction: financeTransactions.direction,
     kind: financeTransactions.kind, serviceId: financeTransactions.serviceId,
     amountMinor: financeTransactions.amountMinor,
@@ -66,21 +66,19 @@ async function liveBudget(row: typeof planningBudgets.$inferSelect, now = new Da
   ), 0n);
   return budgetDto(row, spent, now);
 }
-router.get("/planning", async (req, res): Promise<void> => {
-  const userId = own(req);
-  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+export async function financialPlanSnapshot(userId: string, snapshotReader?: Pick<typeof db, "select">) {
+  const reader = snapshotReader ?? db;
+  const [user] = await reader.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user) throw new ApiError("UNAUTHENTICATED");
-  const [budgetRows, recurringRows, lineRows, incomeRows, scholarshipRows, settingsRows] = await Promise.all([
-    db.select().from(planningBudgets).where(eq(planningBudgets.userId, userId)),
-    db.select().from(planningRecurring).where(eq(planningRecurring.userId, userId)),
-    db.select().from(planningLines).where(eq(planningLines.userId, userId)),
-    db.select().from(incomes).where(eq(incomes.userId, userId)),
-    db.select().from(scholarships).where(eq(scholarships.userId, userId)),
-    db.select().from(planningSettings).where(eq(planningSettings.userId, userId)),
-  ]);
+  const budgetRows = await reader.select().from(planningBudgets).where(eq(planningBudgets.userId, userId));
+  const recurringRows = await reader.select().from(planningRecurring).where(eq(planningRecurring.userId, userId));
+  const lineRows = await reader.select().from(planningLines).where(eq(planningLines.userId, userId));
+  const incomeRows = await reader.select().from(incomes).where(eq(incomes.userId, userId));
+  const scholarshipRows = await reader.select().from(scholarships).where(eq(scholarships.userId, userId));
+  const settingsRows = await reader.select().from(planningSettings).where(eq(planningSettings.userId, userId));
   const now = new Date();
-  const goalOverview = await ownerGoals(userId);
-  const allowancePlan = await allowanceProjection(userId);
+  const goalOverview = await ownerGoals(userId, snapshotReader);
+  const allowancePlan = await allowanceProjection(userId, undefined, reader);
   const today = now.toISOString().slice(0, 10);
   const setting = settingsRows[0];
   const commuteOverride = setting?.commuteOverrideEnabled ? {
@@ -162,8 +160,9 @@ router.get("/planning", async (req, res): Promise<void> => {
     return { currency, expectedIncome: amount(expected, currency), plannedExpenses: amount(expenses, currency),
       plannedSavings: amount(savings, currency), projectedRemaining: amount(expected - expenses - savings, currency) };
   });
-  const budgets = await Promise.all(budgetRows.map(r => liveBudget(r, now)));
-  res.json(GetFinancialPlanResponse.parse({
+  const budgets = [];
+  for (const row of budgetRows) budgets.push(await liveBudget(row, now, reader));
+  return GetFinancialPlanResponse.parse({
     asOf: today, estimate: true, policy: POLICY + " " + GOAL_POLICY + " " + ALLOWANCE_POLICY,
     allowanceProjection: allowancePlan.dto, totals, goalSavings, costs, income, irregularIncome,
     irregularCount: irregularIncome.length,
@@ -173,7 +172,10 @@ router.get("/planning", async (req, res): Promise<void> => {
     recurringExpenses: recurringRows.map(recurringDto), lines: lineRows.map(lineDto),
     ...(user.residence ? { housing: user.residence } : {}), ...(user.commute ? { commute: user.commute } : {}),
     scholarships: scholarshipRows.map(r => ({ ...(r.data as object), id: r.id })), commuteOverride,
-  }));
+  });
+}
+router.get("/planning", async (req, res): Promise<void> => {
+  res.json(await financialPlanSnapshot(own(req)));
 });
 
 router.post("/planning/budgets", async (req, res): Promise<void> => {

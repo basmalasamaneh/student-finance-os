@@ -12,8 +12,9 @@ import { GoalsHomeBlock } from './goals-block';
 import { PlanTotalsBlock } from './plan-totals-block';
 import { UniversityContext } from './university-context';
 import { SchoolLinks } from './school-links';
-import { InsightText, SchoolPlanning, UniversityPlanning, UpcomingIncomeList } from './planning-panels';
-import { applyAllowanceAdjustment, deriveInsight, estimateMonthlyIncome, localToday, upcomingIncomes, type HomeIncome } from '@/features/home/student-home-model';
+import { InsightText, SchoolPlanning, UniversityPlanning } from './planning-panels';
+import { UpcomingHomeList } from './upcoming-block';
+import { applyAllowanceAdjustment, deriveInsight, estimateMonthlyIncome, localToday, type HomeIncome } from '@/features/home/student-home-model';
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -36,7 +37,6 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
   const projection = profile.allowanceProjection;
   const estimate = useMemo(() => applyAllowanceAdjustment(estimateMonthlyIncome(incomes), projection?.totals), [incomes, projection]);
   const adjusted = estimate.byCurrency.some((c) => c.allowanceAdjustment);
-  const upcoming = useMemo(() => upcomingIncomes(incomes, today), [incomes, today]);
   const insight = useMemo(() => deriveInsight({
     studentType: e?.studentType, incomes, commuteMonthly: profile.commute?.monthlyEstimate,
     housingShare: profile.residence?.studentShare, allowance: e?.typicalAllowance, allowanceFrequency: e?.allowanceFrequency,
@@ -92,17 +92,17 @@ export function StudentDashboard({ profile, name, t }: { profile: Profile; name:
       </div>
 
       {/* 6 Upcoming */}
-      <HomeBlock id="upcoming" title={t('Upcoming payments', 'المدفوعات القادمة')}>
+      <HomeBlock id="upcoming" title={t('Upcoming', 'القادم')}>
         <div className="grid grid-cols-1 gap-x-12 gap-y-5 md:grid-cols-2">
           <div><p className="type-caption pb-1 text-muted-foreground">{t('Pending money requests', 'طلبات مال معلّقة')}</p><RequestsBlock summary={summary} t={t} /></div>
-          <div><p className="type-caption pb-1 text-muted-foreground">{t('Expected income (from profile)', 'الدخل المتوقع (من الملف)')}</p><UpcomingIncomeList items={upcoming} t={t} /></div>
+          <div><p className="type-caption pb-1 text-muted-foreground">{t('Next 30 days · estimated', 'الأيام الثلاثون القادمة · تقديري')}</p><UpcomingHomeList t={t} hidden={hidden} /></div>
         </div>
       </HomeBlock>
 
       {/* Profile-specific planning */}
       {e ? isSchool
         ? <><SchoolLinks t={t} /><SchoolPlanning profile={profile} incomes={incomes} today={today} summary={summary} t={t} /></>
-        : <><UniversityPlanning profile={profile} upcoming={upcoming} t={t} /><UniversityContext profile={profile} t={t} /></>
+        : <><UniversityPlanning profile={profile} t={t} hidden={hidden} /><UniversityContext profile={profile} t={t} /></>
         : null}
 
       <PlanTotalsBlock t={t} />

@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
@@ -35,14 +35,36 @@ import ParentChildrenPage, { ParentChildDetailPage } from '@/pages/parent-childr
 import ParentAllowancesPage from '@/pages/parent-allowances';
 import ParentRequestsPage, { ParentRequestDetailPage } from '@/pages/parent-requests';
 import LearnPage from '@/pages/learn';
+import UpcomingPage from '@/pages/upcoming';
+import { invalidateUpcoming } from '@/features/upcoming/upcoming-model';
 import FamilyRequestsPage, { FamilyRequestDetailPage } from '@/pages/family-requests';
 
 // Design/reference surfaces stay out of the ordinary account startup bundle.
 const HomePage = lazy(() => import('@/pages/home'));
 const FoundationPage = lazy(() => import('@/pages/foundation'));
 
-const queryClient = new QueryClient({
+// Prompt 11: forecast/calendar depend on profile, planning, goals, finance and family data. Only the
+// generated mutation keys (operation names from Orval) that can change those inputs trigger a refresh;
+// notification read, auth and admin catalog mutations do not. Hooks also poll every 15s/focus/mount.
+const UPCOMING_SOURCE_MUTATIONS = new Set([
+  'createScheduledItem', 'updateScheduledItem', 'deleteScheduledItem', 'setScheduledOccurrenceStatus',
+  'createBudget', 'updateBudget', 'deleteBudget', 'createRecurringExpense', 'updateRecurringExpense', 'deleteRecurringExpense',
+  'createPlanLine', 'updatePlanLine', 'deletePlanLine', 'savePlanCommuteOverride',
+  'saveProfile', 'completeProfile', 'createIncome', 'updateIncome', 'deleteIncome', 'createScholarship', 'updateScholarship', 'deleteScholarship',
+  'createSavingsGoal', 'updateSavingsGoal', 'changeSavingsGoalStatus', 'contributeToSavingsGoal', 'fundSavingsGoalAsParent',
+  'createFinanceAccount', 'createFinanceMovement', 'createMoneyRequest', 'decideMoneyRequest', 'createCampusPayment',
+  'createFamilyMoneyRequest', 'cancelFamilyRequest', 'approveFamilyRequest',
+  'updateFamilyConsent', 'revokeFamilyLink', 'decideFamilyInvitation',
+  'topUpParentWallet', 'createAllowance', 'updateAllowance', 'changeAllowanceStatus', 'retryAllowance',
+]);
+const queryClient: QueryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+  mutationCache: new MutationCache({
+    onSuccess: (_d, _v, _c, mutation) => {
+      const key = mutation.options.mutationKey?.[0];
+      if (typeof key === 'string' && UPCOMING_SOURCE_MUTATIONS.has(key)) void invalidateUpcoming(queryClient);
+    },
+  }),
 });
 
 const FUTURE_ROUTES = NAV_ITEMS.filter((i) => !i.implemented);
@@ -63,6 +85,7 @@ function Router() {
           <Route path="/transactions/:id" component={TransactionDetailPage} />
           <Route path="/campus" component={CampusPage} />
           <Route path="/plan" component={PlanPage} />
+          <Route path="/upcoming" component={UpcomingPage} />
           <Route path="/goals" component={GoalsPage} />
           <Route path="/goals/fund" component={ParentFundPage} />
           <Route path="/goals/:id" component={GoalDetailPage} />

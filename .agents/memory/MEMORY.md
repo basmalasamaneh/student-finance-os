@@ -3,3 +3,4 @@
 - [Nested responsive layouts](nested-responsive.md) — use available container width, not viewport breakpoints, inside the shell and gallery.
 - [Onboarding completion navigation](completion-navigation.md) — update verified-session cache before navigating after completion.
 - [Native interaction verification](native-interaction-verification.md) — test complete browser event sequences; isolated pointer and scroll math miss navigation timing bugs.
+- [Additive migration drift](schema-drift.md) — full-schema proposals can include unrelated legacy drift; inspect SQL and scope additive migrations.

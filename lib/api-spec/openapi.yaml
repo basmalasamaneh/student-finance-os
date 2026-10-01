@@ -27,6 +27,63 @@ tags:
   - name: notifications
     description: Owner-only durable in-app inbox with current consent checks
 paths:
+  /scheduled-items:
+    get:
+      operationId: listScheduledItems
+      tags: [planning]
+      responses:
+        "200": { description: Owner student additional commitments, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/ScheduledItem" } } } } }
+    post:
+      operationId: createScheduledItem
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledItemInput" } } } }
+      responses:
+        "201": { description: Created without ledger posting, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledItem" } } } }
+  /scheduled-items/{id}:
+    parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+    get:
+      operationId: getScheduledItem
+      tags: [planning]
+      responses:
+        "200": { description: Owner item, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledItem" } } } }
+    put:
+      operationId: updateScheduledItem
+      tags: [planning]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledItemInput" } } } }
+      responses:
+        "200": { description: Full replacement preserving occurrence overrides; recurring completion requires occurrence endpoint, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledItem" } } } }
+    delete:
+      operationId: deleteScheduledItem
+      tags: [planning]
+      responses:
+        "204": { description: Deleted planning item and its overrides only }
+  /scheduled-items/{id}/occurrences/{date}:
+    put:
+      operationId: setScheduledOccurrenceStatus
+      tags: [planning]
+      parameters:
+        - { in: path, name: id, required: true, schema: { type: string, format: uuid } }
+        - { in: path, name: date, required: true, schema: { type: string, format: date } }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledOccurrenceStatusInput" } } } }
+      responses:
+        "200": { description: One date completed cancelled or reopened; no ledger posting, content: { application/json: { schema: { $ref: "#/components/schemas/ScheduledOccurrenceOverride" } } } }
+  /planning/calendar:
+    get:
+      operationId: getPlanningCalendar
+      tags: [planning]
+      parameters:
+        - { in: query, name: from, required: true, schema: { type: string, format: date } }
+        - { in: query, name: to, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: Inclusive UTC range of at most 366 days; concrete occurrences separate from undated monthly allocations, content: { application/json: { schema: { $ref: "#/components/schemas/PlanningCalendar" } } } }
+  /planning/forecast:
+    get:
+      operationId: getPlanningForecast
+      tags: [planning]
+      parameters:
+        - { in: query, name: through, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: Estimated owner cash forecast from server today inclusive at most 366 days; excludes reserves and past overdue, content: { application/json: { schema: { $ref: "#/components/schemas/PlanningForecast" } } } }
   /family/requests:
     get:
       operationId: listStudentFamilyRequests
@@ -1402,6 +1459,118 @@ components:
     PlanningCategory:
       type: string
       enum: [tuition, registration, university_fees, transportation, food, cafeteria, housing, accommodation, rent, utilities, internet, books, bookstore, printing, academic_supplies, subscriptions, personal, shopping, savings, fees, campus_transportation, other]
+    ScheduledRecurrence:
+      type: string
+      enum: [none, daily, weekly, biweekly, monthly, quarterly, yearly]
+    ScheduledStatus:
+      type: string
+      enum: [planned, completed, cancelled]
+    ScheduledKind:
+      type: string
+      enum: [expense, income, savings]
+    ScheduledItemInput:
+      type: object
+      additionalProperties: false
+      required: [name, amount, dueDate, category, kind, notes, recurrence, status]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 160 }
+        amount: { $ref: "#/components/schemas/GoalPositiveAmount" }
+        dueDate: { type: string, format: date }
+        category: { $ref: "#/components/schemas/PlanningCategory" }
+        kind: { $ref: "#/components/schemas/ScheduledKind" }
+        notes: { type: string, maxLength: 2000 }
+        recurrence: { $ref: "#/components/schemas/ScheduledRecurrence" }
+        endDate: { type: string, format: date }
+        status: { $ref: "#/components/schemas/ScheduledStatus" }
+    ScheduledItem:
+      allOf:
+        - { $ref: "#/components/schemas/ScheduledItemInput" }
+        - type: object
+          required: [id, commitmentPolicy]
+          properties:
+            id: { type: string, format: uuid }
+            commitmentPolicy: { type: string, enum: [additional_commitment] }
+    ScheduledOccurrenceStatusInput:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/ScheduledStatus" }
+    ScheduledOccurrenceOverride:
+      type: object
+      required: [itemId, date, status]
+      properties:
+        itemId: { type: string, format: uuid }
+        date: { type: string, format: date }
+        status: { $ref: "#/components/schemas/ScheduledStatus" }
+    PlanningOccurrence:
+      type: object
+      required: [id, sourceId, source, name, date, amount, category, kind, status, recurrence, includedInForecast, policy]
+      properties:
+        id: { type: string }
+        sourceId: { type: string, format: uuid }
+        source: { type: string, enum: [scheduled_item, income, allowance, recurring, line] }
+        name: { type: string }
+        date: { type: string, format: date }
+        amount: { $ref: "#/components/schemas/Amount" }
+        category: { type: string }
+        kind: { $ref: "#/components/schemas/ScheduledKind" }
+        status: { type: string, enum: [planned, completed, cancelled, posted] }
+        recurrence: { $ref: "#/components/schemas/ScheduledRecurrence" }
+        includedInForecast: { type: boolean }
+        policy: { type: string }
+    PlanningMonthlyAllocation:
+      type: object
+      required: [id, label, source, category, kind, month, from, to, monthlyAmount, allocatedAmount, policy]
+      properties:
+        id: { type: string }
+        label: { type: string, enum: [Undated monthly allocation] }
+        source: { type: string, enum: [manual, profile, override, income, goal_savings, allowance_envelope] }
+        category: { type: string }
+        kind: { $ref: "#/components/schemas/ScheduledKind" }
+        month: { type: string }
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        monthlyAmount: { $ref: "#/components/schemas/Amount" }
+        allocatedAmount: { $ref: "#/components/schemas/Amount" }
+        policy: { type: string }
+    PlanningCalendar:
+      type: object
+      required: [from, to, estimate, policy, assumptions, assumptionCodes, occurrences, monthlyAllocations]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        estimate: { type: boolean, enum: [true] }
+        policy: { type: string }
+        assumptions: { type: array, items: { type: string } }
+        assumptionCodes: { type: array, items: { type: string, enum: [today_dated_income_may_already_be_in_opening] } }
+        occurrences: { type: array, items: { $ref: "#/components/schemas/PlanningOccurrence" } }
+        monthlyAllocations: { type: array, items: { $ref: "#/components/schemas/PlanningMonthlyAllocation" } }
+    ForecastCurrency:
+      type: object
+      required: [currency, availableOpening, expectedIncome, upcomingExpenses, recurringExpenses, plannedSavings, projectedBalance]
+      properties:
+        currency: { type: string, enum: [ILS, USD, JOD] }
+        availableOpening: { $ref: "#/components/schemas/Amount" }
+        expectedIncome: { $ref: "#/components/schemas/Amount" }
+        upcomingExpenses: { $ref: "#/components/schemas/Amount" }
+        recurringExpenses: { $ref: "#/components/schemas/Amount" }
+        plannedSavings: { $ref: "#/components/schemas/Amount" }
+        projectedBalance: { $ref: "#/components/schemas/SignedAmount" }
+    PlanningForecast:
+      type: object
+      required: [asOf, through, estimate, label, policy, assumptions, assumptionCodes, currencies, occurrences, monthlyAllocations]
+      properties:
+        asOf: { type: string, format: date }
+        through: { type: string, format: date }
+        estimate: { type: boolean, enum: [true] }
+        label: { type: string, enum: [Estimated / Projected] }
+        policy: { type: string }
+        assumptions: { type: array, items: { type: string } }
+        assumptionCodes: { type: array, items: { type: string, enum: [today_dated_income_may_already_be_in_opening] } }
+        currencies: { type: array, items: { $ref: "#/components/schemas/ForecastCurrency" } }
+        occurrences: { type: array, items: { $ref: "#/components/schemas/PlanningOccurrence" } }
+        monthlyAllocations: { type: array, items: { $ref: "#/components/schemas/PlanningMonthlyAllocation" } }
     BudgetInput:
       type: object
       additionalProperties: false

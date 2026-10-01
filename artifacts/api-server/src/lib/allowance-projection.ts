@@ -20,13 +20,11 @@ export function allowanceUpcoming(schedules: readonly Allowance[], today = today
     .map(s => ({ id: s.id, date: s.nextPayment, amount: { minor: Number(s.amountMinor), currency: s.currency },
       source: "allowance" as const })).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
 }
-export async function allowanceProjection(userId: string, today = todayUtc()) {
-  const [manualRows, joined] = await Promise.all([
-    db.select().from(incomes).where(eq(incomes.userId, userId)),
-    db.select({ schedule: allowances, link: familyLinks }).from(allowances)
+export async function allowanceProjection(userId: string, today = todayUtc(), reader: Pick<typeof db, "select"> = db) {
+  const manualRows = await reader.select().from(incomes).where(eq(incomes.userId, userId));
+  const joined = await reader.select({ schedule: allowances, link: familyLinks }).from(allowances)
       .innerJoin(familyLinks, eq(allowances.familyLinkId, familyLinks.id))
-      .where(and(eq(allowances.studentId, userId), eq(allowances.status, "active"), eq(familyLinks.status, "accepted"))),
-  ]);
+      .where(and(eq(allowances.studentId, userId), eq(allowances.status, "active"), eq(familyLinks.status, "accepted")));
   const active = joined.filter(r => r.link.permissions.allowance && (!r.schedule.endDate || r.schedule.endDate >= today)).map(r => r.schedule);
   const manual = manualRows.map(r => r.data as ProjectionIncome).filter(i => i.active);
   const currencies = new Set([...manual.filter(i => i.source === "parent_allowance").map(i => i.amount.currency), ...active.map(s => s.currency as Currency)]);

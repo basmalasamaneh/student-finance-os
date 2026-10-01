@@ -49,8 +49,8 @@ export async function readGoal(tx: Tx, goal: SavingsGoalRow) {
   const history = await tx.select().from(goalHistory).where(eq(goalHistory.goalId, goal.id));
   return goalDto(goal, reserve, history);
 }
-export async function ownerGoals(userId: string) {
-  return db.transaction(async tx => {
+export async function ownerGoals(userId: string, reader?: Pick<typeof db, "select">) {
+  const snapshot = async (tx: Pick<typeof db, "select">) => {
     const rows = await tx.select().from(savingsGoals).where(eq(savingsGoals.userId, userId)).orderBy(desc(savingsGoals.createdAt), savingsGoals.id);
     const accounts = await tx.select().from(financeAccounts).where(eq(financeAccounts.userId, userId));
     const history = rows.length ? await tx.select().from(goalHistory).where(inArray(goalHistory.goalId, rows.map(r => r.id))) : [];
@@ -76,5 +76,6 @@ export async function ownerGoals(userId: string) {
       requiredContributionMonthly: amount(t.required, currency) })),
       activeCount: goals.filter(g => g.status === "active").length,
       completedCount: goals.filter(g => g.status === "completed").length, policy: GOAL_POLICY };
-  }, { isolationLevel: "repeatable read", accessMode: "read only" });
+  };
+  return reader ? snapshot(reader) : db.transaction(snapshot, { isolationLevel: "repeatable read", accessMode: "read only" });
 }

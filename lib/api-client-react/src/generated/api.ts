@@ -59,6 +59,8 @@ import type {
   FinancialPlan,
   GetCampusSpendingSummaryParams,
   GetFinanceHistoryParams,
+  GetPlanningCalendarParams,
+  GetPlanningForecastParams,
   GoalConsentInput,
   GoalContributionReceipt,
   GoalHistoryEntry,
@@ -85,6 +87,8 @@ import type {
   ParentWallet,
   PlanLine,
   PlanLineInput,
+  PlanningCalendar,
+  PlanningForecast,
   Profile,
   ProfileInput,
   RecurringExpense,
@@ -93,6 +97,10 @@ import type {
   SavingsGoalAction,
   SavingsGoalInput,
   SavingsGoalsOverview,
+  ScheduledItem,
+  ScheduledItemInput,
+  ScheduledOccurrenceOverride,
+  ScheduledOccurrenceStatusInput,
   Scholarship,
   ScholarshipInput,
   SignUpInput,
@@ -126,6 +134,622 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getListScheduledItemsUrl = () => {
+
+
+
+
+  return `/api/scheduled-items`
+}
+
+export const listScheduledItems = async ( options?: Parameters<typeof customFetch>[1]): Promise<ScheduledItem[]> => {
+
+  return customFetch<ScheduledItem[]>(getListScheduledItemsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListScheduledItemsQueryKey = () => {
+    return [
+    `/api/scheduled-items`
+    ] as const;
+    }
+
+
+export const getListScheduledItemsQueryOptions = <TData = Awaited<ReturnType<typeof listScheduledItems>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScheduledItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListScheduledItemsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listScheduledItems>>> = ({ signal }) => listScheduledItems({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listScheduledItems>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListScheduledItemsQueryResult = NonNullable<Awaited<ReturnType<typeof listScheduledItems>>>
+export type ListScheduledItemsQueryError = ErrorType<unknown>
+
+
+
+export function useListScheduledItems<TData = Awaited<ReturnType<typeof listScheduledItems>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listScheduledItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListScheduledItemsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateScheduledItemUrl = () => {
+
+
+
+
+  return `/api/scheduled-items`
+}
+
+export const createScheduledItem = async (scheduledItemInput: ScheduledItemInput, options?: Parameters<typeof customFetch>[1]): Promise<ScheduledItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ScheduledItem>(getCreateScheduledItemUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(scheduledItemInput)
+  }
+);}
+
+
+
+
+
+export const getCreateScheduledItemMutationKey = () => ['createScheduledItem'] as const;
+
+export const getCreateScheduledItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createScheduledItem>>, TError,CreateScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createScheduledItem>>, TError,CreateScheduledItemMutationVariables, TContext> => {
+
+const mutationKey = getCreateScheduledItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createScheduledItem>>, CreateScheduledItemMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createScheduledItem(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateScheduledItemMutationResult = NonNullable<Awaited<ReturnType<typeof createScheduledItem>>>
+    export type CreateScheduledItemMutationBody = BodyType<ScheduledItemInput>
+    export type CreateScheduledItemMutationError = ErrorType<unknown>
+    export type CreateScheduledItemMutationVariables = {data: BodyType<ScheduledItemInput>}
+
+    export const useCreateScheduledItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createScheduledItem>>, TError,CreateScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createScheduledItem>>,
+        TError,
+        CreateScheduledItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateScheduledItemMutationOptions(options));
+    }
+
+export const getGetScheduledItemUrl = (id: string,) => {
+
+
+
+
+  return `/api/scheduled-items/${id}`
+}
+
+export const getScheduledItem = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ScheduledItem> => {
+
+  return customFetch<ScheduledItem>(getGetScheduledItemUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetScheduledItemQueryKey = (id: string,) => {
+    return [
+    `/api/scheduled-items/${id}`
+    ] as const;
+    }
+
+
+export const getGetScheduledItemQueryOptions = <TData = Awaited<ReturnType<typeof getScheduledItem>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getScheduledItem>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetScheduledItemQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getScheduledItem>>> = ({ signal }) => getScheduledItem(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getScheduledItem>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetScheduledItemQueryResult = NonNullable<Awaited<ReturnType<typeof getScheduledItem>>>
+export type GetScheduledItemQueryError = ErrorType<unknown>
+
+
+
+export function useGetScheduledItem<TData = Awaited<ReturnType<typeof getScheduledItem>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getScheduledItem>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetScheduledItemQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateScheduledItemUrl = (id: string,) => {
+
+
+
+
+  return `/api/scheduled-items/${id}`
+}
+
+export const updateScheduledItem = async (id: string,
+    scheduledItemInput: ScheduledItemInput, options?: Parameters<typeof customFetch>[1]): Promise<ScheduledItem> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ScheduledItem>(getUpdateScheduledItemUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(scheduledItemInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateScheduledItemMutationKey = () => ['updateScheduledItem'] as const;
+
+export const getUpdateScheduledItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateScheduledItem>>, TError,UpdateScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateScheduledItem>>, TError,UpdateScheduledItemMutationVariables, TContext> => {
+
+const mutationKey = getUpdateScheduledItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateScheduledItem>>, UpdateScheduledItemMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateScheduledItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateScheduledItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateScheduledItem>>>
+    export type UpdateScheduledItemMutationBody = BodyType<ScheduledItemInput>
+    export type UpdateScheduledItemMutationError = ErrorType<unknown>
+    export type UpdateScheduledItemMutationVariables = {id: string;data: BodyType<ScheduledItemInput>}
+
+    export const useUpdateScheduledItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateScheduledItem>>, TError,UpdateScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateScheduledItem>>,
+        TError,
+        UpdateScheduledItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateScheduledItemMutationOptions(options));
+    }
+
+export const getDeleteScheduledItemUrl = (id: string,) => {
+
+
+
+
+  return `/api/scheduled-items/${id}`
+}
+
+export const deleteScheduledItem = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteScheduledItemUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteScheduledItemMutationKey = () => ['deleteScheduledItem'] as const;
+
+export const getDeleteScheduledItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteScheduledItem>>, TError,DeleteScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteScheduledItem>>, TError,DeleteScheduledItemMutationVariables, TContext> => {
+
+const mutationKey = getDeleteScheduledItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteScheduledItem>>, DeleteScheduledItemMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteScheduledItem(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteScheduledItemMutationResult = NonNullable<Awaited<ReturnType<typeof deleteScheduledItem>>>
+
+    export type DeleteScheduledItemMutationError = ErrorType<unknown>
+    export type DeleteScheduledItemMutationVariables = {id: string}
+
+    export const useDeleteScheduledItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteScheduledItem>>, TError,DeleteScheduledItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteScheduledItem>>,
+        TError,
+        DeleteScheduledItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteScheduledItemMutationOptions(options));
+    }
+
+export const getSetScheduledOccurrenceStatusUrl = (id: string,
+    date: string,) => {
+
+
+
+
+  return `/api/scheduled-items/${id}/occurrences/${date}`
+}
+
+export const setScheduledOccurrenceStatus = async (id: string,
+    date: string,
+    scheduledOccurrenceStatusInput: ScheduledOccurrenceStatusInput, options?: Parameters<typeof customFetch>[1]): Promise<ScheduledOccurrenceOverride> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ScheduledOccurrenceOverride>(getSetScheduledOccurrenceStatusUrl(id,date),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(scheduledOccurrenceStatusInput)
+  }
+);}
+
+
+
+
+
+export const getSetScheduledOccurrenceStatusMutationKey = () => ['setScheduledOccurrenceStatus'] as const;
+
+export const getSetScheduledOccurrenceStatusMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>, TError,SetScheduledOccurrenceStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>, TError,SetScheduledOccurrenceStatusMutationVariables, TContext> => {
+
+const mutationKey = getSetScheduledOccurrenceStatusMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>, SetScheduledOccurrenceStatusMutationVariables> = (props) => {
+          const {id,date,data} = props ?? {};
+
+          return  setScheduledOccurrenceStatus(id,date,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetScheduledOccurrenceStatusMutationResult = NonNullable<Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>>
+    export type SetScheduledOccurrenceStatusMutationBody = BodyType<ScheduledOccurrenceStatusInput>
+    export type SetScheduledOccurrenceStatusMutationError = ErrorType<unknown>
+    export type SetScheduledOccurrenceStatusMutationVariables = {id: string;date: string;data: BodyType<ScheduledOccurrenceStatusInput>}
+
+    export const useSetScheduledOccurrenceStatus = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>, TError,SetScheduledOccurrenceStatusMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setScheduledOccurrenceStatus>>,
+        TError,
+        SetScheduledOccurrenceStatusMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetScheduledOccurrenceStatusMutationOptions(options));
+    }
+
+export const getGetPlanningCalendarUrl = (params: GetPlanningCalendarParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/planning/calendar?${stringifiedParams}` : `/api/planning/calendar`
+}
+
+export const getPlanningCalendar = async (params: GetPlanningCalendarParams, options?: Parameters<typeof customFetch>[1]): Promise<PlanningCalendar> => {
+
+  return customFetch<PlanningCalendar>(getGetPlanningCalendarUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPlanningCalendarQueryKey = (params?: GetPlanningCalendarParams,) => {
+    return [
+    `/api/planning/calendar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPlanningCalendarQueryOptions = <TData = Awaited<ReturnType<typeof getPlanningCalendar>>, TError = ErrorType<unknown>>(params: GetPlanningCalendarParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlanningCalendar>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlanningCalendarQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlanningCalendar>>> = ({ signal }) => getPlanningCalendar(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlanningCalendar>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPlanningCalendarQueryResult = NonNullable<Awaited<ReturnType<typeof getPlanningCalendar>>>
+export type GetPlanningCalendarQueryError = ErrorType<unknown>
+
+
+
+export function useGetPlanningCalendar<TData = Awaited<ReturnType<typeof getPlanningCalendar>>, TError = ErrorType<unknown>>(
+ params: GetPlanningCalendarParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlanningCalendar>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPlanningCalendarQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPlanningForecastUrl = (params: GetPlanningForecastParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/planning/forecast?${stringifiedParams}` : `/api/planning/forecast`
+}
+
+export const getPlanningForecast = async (params: GetPlanningForecastParams, options?: Parameters<typeof customFetch>[1]): Promise<PlanningForecast> => {
+
+  return customFetch<PlanningForecast>(getGetPlanningForecastUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPlanningForecastQueryKey = (params?: GetPlanningForecastParams,) => {
+    return [
+    `/api/planning/forecast`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPlanningForecastQueryOptions = <TData = Awaited<ReturnType<typeof getPlanningForecast>>, TError = ErrorType<unknown>>(params: GetPlanningForecastParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlanningForecast>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlanningForecastQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlanningForecast>>> = ({ signal }) => getPlanningForecast(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlanningForecast>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPlanningForecastQueryResult = NonNullable<Awaited<ReturnType<typeof getPlanningForecast>>>
+export type GetPlanningForecastQueryError = ErrorType<unknown>
+
+
+
+export function useGetPlanningForecast<TData = Awaited<ReturnType<typeof getPlanningForecast>>, TError = ErrorType<unknown>>(
+ params: GetPlanningForecastParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPlanningForecast>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPlanningForecastQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListStudentFamilyRequestsUrl = () => {
 

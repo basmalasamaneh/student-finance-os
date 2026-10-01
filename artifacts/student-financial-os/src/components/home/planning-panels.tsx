@@ -1,3 +1,4 @@
+import { UNIVERSITY_CATEGORIES, UpcomingHomeList } from './upcoming-block';
 import { Link } from 'wouter';
 import { GoalsHomeBlock } from './goals-block';
 import type { FinanceSummary, Profile } from '@workspace/api-client-react';
@@ -6,7 +7,7 @@ import { ActualIncomeSpending } from './finance-blocks';
 import { formatDate } from '@workspace/finance-core';
 import { MoneyDisplay } from '@/components/finance/money-display';
 import { useI18n } from '@/features/i18n/i18n-provider';
-import { Fact, HomeBlock, Unavailable, type T } from './home-primitives';
+import { Fact, HomeBlock, type T } from './home-primitives';
 import {
   formatTenths, nextAllowance, weeklyAllowance, type HomeIncome, type Insight, type UpcomingIncome,
 } from '@/features/home/student-home-model';
@@ -55,13 +56,17 @@ const ProfileLink = ({ t, label }: { t: T; label?: string }) => (
   <Link href="/profile" className="type-label inline-flex min-h-11 items-center text-gold-ink underline-offset-4 hover:underline" data-testid="link-profile-planning">{label ?? t('Add in profile', 'أضف في الملف')}</Link>
 );
 
-export function UniversityPlanning({ profile, upcoming, t }: { profile: Profile; upcoming: UpcomingIncome[]; t: T }) {
+export function UniversityPlanning({ profile, t, hidden }: { profile: Profile; t: T; hidden?: boolean }) {
   const fmt = useDay();
   const { residence: r, commute: c, education: e } = profile;
   return (
     <HomeBlock id="university-planning" title={t('University planning', 'التخطيط الجامعي')} meta={t('From your saved profile', 'من ملفك المحفوظ')}>
       <div className="grid grid-cols-1 gap-x-10 gap-y-7 sm:grid-cols-2">
-        <Unavailable testId="status-university-payment" label={t('Upcoming university payment', 'دفعة الجامعة القادمة')} body={t('Tuition schedules arrive with the university payments module. No due date is assumed.', 'جداول الرسوم تأتي مع وحدة المدفوعات الجامعية. لا يُفترض أي موعد.')} />
+        <div data-testid="block-university-payments">
+          <p className="type-caption pb-1 text-muted-foreground">{t('Upcoming university payments · next 90 days', 'دفعات الجامعة القادمة · 90 يوماً')}</p>
+          <UpcomingHomeList t={t} hidden={hidden} days={90} kind="expense" categories={UNIVERSITY_CATEGORIES} testId="list-university-upcoming"
+            emptyText={t('No dated tuition, fee, book or housing payments in your plan. Add one in Upcoming — no due date is assumed.', 'لا توجد دفعات رسوم أو كتب أو سكن مؤرخة في خطتك. أضف واحدة في القادم — لا يُفترض أي موعد.')} />
+        </div>
         <div data-testid="block-commute">
           <p className="type-caption text-muted-foreground">{t('Transportation estimate / month', 'تقدير التنقل / شهرياً')}</p>
           {c ? <>
@@ -80,10 +85,6 @@ export function UniversityPlanning({ profile, upcoming, t }: { profile: Profile;
               {r.internet && <Fact label={t('Internet', 'الإنترنت')}><MoneyDisplay value={r.internet} size="sm" tone="planned" /></Fact>}
             </dl>
           </> : <><p className="type-label">{t('No housing saved', 'لا توجد بيانات سكن')}</p><ProfileLink t={t} /></>}
-        </div>
-        <div data-testid="block-expected-income">
-          <p className="type-caption pb-1 text-muted-foreground">{t('Expected income', 'الدخل المتوقع')}</p>
-          <UpcomingIncomeList items={upcoming} t={t} />
         </div>
         <div className="sm:col-span-2" data-testid="block-scholarships">
           <p className="type-caption pb-1 text-muted-foreground">{t('Scholarships & aid', 'المنح والمساعدات')}</p>

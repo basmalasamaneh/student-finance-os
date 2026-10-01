@@ -24,3 +24,4 @@ export * from "./goals";
 export * from "./family";
 export * from "./family-requests";
 export * from "./notifications";
+export * from "./scheduled";
